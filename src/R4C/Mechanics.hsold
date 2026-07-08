@@ -1,0 +1,239 @@
+-----------------------------------------------------------------------------
+--
+-- Module      :   the mechanics of computing stat values (esecially averages)
+-----------------------------------------------------------------------------
+
+module R4C.Mechanics
+     where
+import UniformBase (putIOwords)
+import qualified Data.Map.Strict as M
+
+
+import R4C.Countries  -- this is the data 
+
+
+newtype Year = Year Int
+    deriving (Eq, Ord, Show)
+
+-- data Indicator
+--     = Population
+--     | GDP
+--     | Area
+--     | LifeExpectancy
+--     | CO2
+--     | PopulationDensity
+--     deriving (Eq, Ord, Show)
+
+-- popx = Indicator
+--   { code = "POP"
+--   , name = "Population"
+--   , unit = "persons"
+--   }
+
+-- gdpx = Indicator
+--   { code = "GDP"
+--   , name = "Gross Domestic Product"
+--   , unit = "USD"
+--   }
+
+newtype IndicatorId =
+    IndicatorId Int
+    deriving (Eq, Ord, Show)
+
+data Aggregation
+    = Sum
+    | Mean
+    | WeightedBy Indicator
+    | NotAggregatable
+
+data IndicatorInfo = IndicatorInfo
+    { unit        :: String
+    -- , description :: String
+    , aggregation :: Aggregation
+    -- , decimals    :: Int
+    }
+
+indicatorInfo :: Indicator -> IndicatorInfo
+indicatorInfo Population =
+    IndicatorInfo
+        { aggregation = Sum
+        , unit = "million"
+        }
+
+indicatorInfo LifeExpectancy =
+    IndicatorInfo
+        { aggregation = WeightedBy Population
+        , unit = "years"
+        }
+
+indicatorInfo PopulationDensity =
+    IndicatorInfo
+        { aggregation = WeightedBy Area
+        , unit = "persons/km²"
+        }
+
+
+indicatorInfo GDP =
+    IndicatorInfo { aggregation = WeightedBy Population
+                    , unit = "billion USD"}
+
+-- indicatorInfo Area =
+--     IndicatorInfo Sum "km²"
+
+-- newtype IndicatorId = IndicatorId Int
+
+-- data Observation = Observation
+--   { obsCountry   :: Country
+--   , obsYear      :: Year
+--   , obsIndicator :: IndicatorId
+--   , obsValue     :: Double
+--   }
+
+
+-- data Region
+--     = EU
+--     | Europe
+--     | G7
+--     | OECD
+--     deriving (Eq, Ord, Show)
+
+type CountryTable = M.Map Country Double
+
+type YearTable = M.Map Year CountryTable
+
+type Database = M.Map Indicator YearTable
+
+db :: Database
+db = M.fromList
+  [ (Population,
+        M.fromList
+          [ (Year 2024,
+                M.fromList pop2024
+                --   [ (DEU,84.3)
+                --   , (FRA,68.4)
+                --   , (ITA,58.9)
+                --   ]
+                  )
+          ])
+  , (GDP,
+        M.fromList
+          [ (Year 2024,
+                M.fromList gdp2024
+                --   [ (DEU,4.7)
+                --   , (FRA,3.2)
+                --   , (ITA,2.4)
+                --   ]
+                  )
+          ])
+  ]
+
+-- members :: Region -> [Country]
+-- members EU =
+--     [DEU, FRA, ITA, ESP]
+-- members Europe =
+--     [DEU, FRA, ITA, ESP, GBR]
+-- members G7 =
+--     [DEU, FRA, ITA, GBR, USA, CAN, JPN]
+-- members OECD =
+--     [DEU, FRA, ITA, ESP, GBR, USA, CAN, JPN]
+
+countryTable
+    :: Indicator
+    -> Year
+    -> Database
+    -> Maybe CountryTable
+countryTable ind year db = do
+    years <- M.lookup ind db
+    M.lookup year years
+
+values
+    :: CountryTable
+    -> Region
+    -> [Double]
+values table region =
+    [ x
+    | c <- members region
+    , Just x <- [M.lookup c table]
+    ]
+
+lookupValue
+    :: Database
+    -> Indicator
+    -> Year
+    -> Country
+    -> Maybe Double
+lookupValue db ind yr c = do
+    years     <- M.lookup ind db
+    countries <- M.lookup yr years
+    M.lookup c countries
+
+lookupTable
+    :: Database
+    -> Indicator
+    -> Year
+    -> Maybe CountryTable
+lookupTable db ind yr = do
+    years <- M.lookup ind db
+    M.lookup yr years
+
+sumTable :: CountryTable -> Region -> Double
+sumTable table region =
+    sum (values table region)
+
+meanTable :: CountryTable -> Region -> Maybe Double
+meanTable table region =
+    case values table region of
+        [] -> Nothing
+        xs -> Just (sum xs / fromIntegral (length xs))
+
+weightedAverage
+    :: Database
+    -> Indicator      -- value indicator
+    -> Indicator      -- weight indicator
+    -> Year
+    -> Region
+    -> Maybe Double
+
+weightedAverage db valInd wtInd yr region =
+    let
+        pairs =
+            [ (x,w)
+            | c <- members region
+            , Just x <- [lookupValue db valInd yr c]
+            , Just w <- [lookupValue db wtInd yr c]
+            ]
+
+        sw = sum [w | (_,w) <- pairs]
+        sx = sum [x*w | (x,w) <- pairs]
+
+    in
+        if sw == 0
+            then Nothing
+            else Just (sx / sw)
+
+aggregate
+    :: Database
+    -> Indicator
+    -> Year
+    -> Region
+    -> Maybe Double
+
+aggregate db ind year region = do
+
+    table <- lookupTable db ind year
+
+    case aggregation (indicatorInfo ind) of
+
+        Sum ->
+            pure (sumTable table region)
+
+        Mean ->
+            meanTable table region
+
+        WeightedBy wt ->
+            weightedAverage db ind wt year region
+
+-- tests
+
+t1 = aggregate db Population (Year 2024) EU 
+t2 = aggregate db GDP (Year 2024) EU 

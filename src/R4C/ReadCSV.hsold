@@ -1,0 +1,112 @@
+-----------------------------------------------------------------------------
+--
+-- Module      :   using sql to read csv files downloaded from worldbank
+-----------------------------------------------------------------------------
+
+module R4C.ReadCSV
+     where
+import UniformBase (putIOwords)
+import qualified Data.Map.Strict as M
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.Csv as Csv
+import qualified Data.Vector as V
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
+import Text.Read (readMaybe)
+
+import R4C.Countries  -- this is the data 
+-- import R4C.Mechanics 
+
+decodeCell :: V.Vector BL.ByteString -> Int -> String
+decodeCell row i =
+    T.unpack $
+    T.decodeUtf8 $
+    BL.toStrict $
+    row V.! i
+
+importWorldBank
+    ::  FilePath  
+    -> IO [Observation]
+-- | reads a worldbank data file 
+-- the indicator code is in col 4 
+importWorldBank  file = do
+
+    bytes <- BL.readFile file
+
+    case Csv.decode Csv.NoHeader bytes of
+
+        Left err ->
+            fail err
+
+        Right rows ->
+            pure $
+                parseRows indicator (V.toList rows)
+
+parseRows
+    :: Indicator
+    -> [V.Vector BL.ByteString]
+    -> [Observation]
+
+parseRows indicator (_meta : header : rows) =
+    concatMap (parseRow indicator header) rows
+
+parseRows _ _ =
+    []
+
+yearColumns
+    :: V.Vector BL.ByteString
+    -> [(Int,Int)]
+
+yearColumns header =
+    [ (i,y)
+    | i <- [4 .. V.length header - 1]
+    , Just y <- [readMaybe (decodeCell header i)]
+    ]
+parseRow
+    :: Header
+    -> Row
+    -> [Observation]
+parseRows header (firstRow:rows) =
+    parseRow indicator header firstRow
+    ++ concatMap (parseRow indicator header) rows
+  where
+    indicator =
+        lookupIndicator (decodeCell firstRow 3)
+
+rowIndicator :: Row -> IndicatorId
+rowIndicator row =
+    lookupIndicator (decodeCell row 3)
+
+type WBCode = Text
+lookupIndicator
+    :: WBCode
+    -> IO IndicatorId
+
+-- parseRow header row =
+
+--     let
+--         code =
+--             Country (T.pack (decodeCell row 1))
+
+--     in
+
+--     [ Observation
+--         { obsCountry   = code
+--         , obsYear      = year
+--         , obsIndicator = indicator
+--         , obsValue     = value
+--         }
+
+--     | (col,year) <- yearColumns header
+
+--     , let txt = decodeCell row col
+
+--     , Just value <- [readMaybe txt]
+--     ]
+
+obs <- importWorldBank "WorldBankData/f27274b4-7384-4c6e-b81d-7ddf2ac9bb9a_Data.csv"
+-- "API_SP.POP.TOTL_DS2_en_csv_v2.csv"
+
+insertObservations conn obs
+
+obs <- importWorldBank GDP "GDP.csv"

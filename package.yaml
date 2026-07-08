@@ -1,0 +1,72 @@
+name:  Regions4Countries         
+version: 0.0.1
+license:      GPL
+license-file: LICENSE
+#github:       andrewufrank/u4blog.git/daino
+maintainer:   Andrew U. Frank <frank@geoinfo.tuwien.ac.at>
+author:       Andrew Frank
+copyright:    2024 Andrew U. Frank
+synopsis: produce statistics for world regions from country data
+category: model
+description: | 
+  Given national statistics data, produce statistics for a world with a dozen regions.
+
+dependencies:
+  - base == 4.*
+  - uniformBase
+  - containers
+  - cassava  #-- csv, sql to observations
+  - scientific
+  - bytestring
+  - vector 
+  - text 
+  - sqlite-simple
+
+  
+library:
+  source-dirs: src
+
+executables:
+  r4c:
+    main: TheMain.hs
+    source-dirs: app
+    dependencies: Regions4Countries 
+
+# tests:
+#   test1:
+#     main: Testing.hs
+#     source-dirs: tests
+#     dependencies: 
+#       # - CountryModel 
+#       # - HTF
+# #      - QuickCheck 
+# #      - test-framework 
+
+ghc-options: 
+    -Wall
+    -fno-warn-unused-binds 
+    -fno-warn-deprecations 
+    -fno-warn-unused-do-bind 
+    -fno-warn-unused-imports
+    -fno-warn-missing-signatures
+    -fno-warn-orphans
+    -fno-warn-type-defaults 
+    -fno-warn-unused-matches 
+    -fno-warn-warnings-deprecations   
+    -fno-warn-missing-methods 
+    -fno-warn-missing-home-modules
+    -fno-warn-duplicate-exports 
+    -fno-warn-incomplete-patterns 
+    -Wno-name-shadowing  
+    -Wno-incomplete-record-updates
+    # -Wunused-packages  # only useful for clean (after deleting dist)
+    
+default-extensions: 
+    - OverloadedStrings
+    - MultiParamTypeClasses 
+    - ScopedTypeVariables 
+    - DeriveGeneric
+    - DeriveAnyClass
+    - FlexibleInstances  
+    - FlexibleContexts
+    - InstanceSigs

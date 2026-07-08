@@ -1,0 +1,79 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.39.3.
+--
+-- see: https://github.com/sol/hpack
+
+name:           Regions4Countries
+version:        0.0.1
+synopsis:       produce statistics for world regions from country data
+description:    Given national statistics data, produce statistics for a world with a dozen regions.
+category:       model
+author:         Andrew Frank
+maintainer:     Andrew U. Frank <frank@geoinfo.tuwien.ac.at>
+copyright:      2024 Andrew U. Frank
+license:        GPL
+license-file:   LICENSE
+build-type:     Simple
+
+library
+  exposed-modules:
+      R4C.Database
+      R4C.Model
+      R4C.Orchestrator
+      R4C.Query
+      R4C.WorldBank
+  other-modules:
+      Paths_Regions4Countries
+  hs-source-dirs:
+      src
+  default-extensions:
+      OverloadedStrings
+      MultiParamTypeClasses
+      ScopedTypeVariables
+      DeriveGeneric
+      DeriveAnyClass
+      FlexibleInstances
+      FlexibleContexts
+      InstanceSigs
+  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-name-shadowing -Wno-incomplete-record-updates
+  build-depends:
+      base ==4.*
+    , bytestring
+    , cassava
+    , containers
+    , scientific
+    , sqlite-simple
+    , text
+    , uniformBase
+    , vector
+  default-language: Haskell2010
+
+executable r4c
+  main-is: TheMain.hs
+  other-modules:
+      Paths_Regions4Countries
+  hs-source-dirs:
+      app
+  default-extensions:
+      OverloadedStrings
+      MultiParamTypeClasses
+      ScopedTypeVariables
+      DeriveGeneric
+      DeriveAnyClass
+      FlexibleInstances
+      FlexibleContexts
+      InstanceSigs
+  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-name-shadowing -Wno-incomplete-record-updates
+  build-depends:
+      Regions4Countries
+    , base ==4.*
+    , bytestring
+    , cassava
+    , containers
+    , scientific
+    , sqlite-simple
+    , text
+    , uniformBase
+    , vector
+  default-language: Haskell2010
