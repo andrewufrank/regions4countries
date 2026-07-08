@@ -11,17 +11,30 @@ module R4C.Aggregate
 
 import Data.Maybe (mapMaybe)
 import Database.SQLite.Simple  
+import Data.List (nub)
+-- import qualified Data.Text as T
 
 import R4C.Model 
 import R4C.Database
 import R4C.Region 
 import R4C.Indicator
 
+regions2 :: [RegionId]
+regions2 = nub $ map fst regionMembers
+
+testPop = do 
+    conn <- open "test.sqlite"
+    pops <- mapM (showAggregate conn population (Year 2024)) regions2
+    mapM_ print $ zip regions2 pops 
+    close conn
+
 testa = do 
     conn <- open "test.sqlite"
    
-    showAggregate conn population (Year 2024) (RegionId "EU")
-    showAggregate conn population (Year 2024) (RegionId "G7")
+    -- showAggregate conn population (Year 2024) (RegionId "EU")
+    -- showAggregate conn population (Year 2024) (RegionId "G7")
+    showAggregate conn population (Year 2024) (RegionId "GULF")
+    showAggregate conn population (Year 2024) (RegionId "RUSSIA")
     
     close conn    
 
@@ -30,17 +43,18 @@ showAggregate
     -> Indicator
     -> Year
     -> RegionId
-    -> IO ()
+    -> IO (Maybe Double)
 showAggregate conn ind yr reg = do
     result <- aggregate conn ind yr reg
-    putStrLn $
-        show (indicatorName ind)
-        ++ " "
-        ++ show yr
-        ++ " "
-        ++ show reg
-        ++ " = "
-        ++ show result
+    return result 
+    -- putStrLn $
+    --     show (indicatorName ind)
+    --     ++ " "
+    --     ++ show yr
+    --     ++ " "
+    --     ++ show reg
+    --     ++ " = "
+    --     ++ show result
 
 valuesInRegion :: CountryTable -> RegionId -> [Double]
 valuesInRegion table region =
