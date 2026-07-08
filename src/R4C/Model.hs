@@ -57,12 +57,18 @@ newtype IndicatorId = IndicatorId Text
 --     | Years
 --     | SquareKm
 --     | Tonnes
-    
+
+data Aggregation
+    = Sum
+    | Mean
+    | WeightedBy IndicatorId
+    deriving (Eq, Ord, Show)
+
 data Indicator = Indicator
 -- What is observed 
     { indicatorId   :: IndicatorId
     , indicatorName :: Text
---     , indicatorUnit :: Unit  -- fill that separately
+    , aggregation   :: Aggregation 
     }
     deriving (Eq, Ord, Show)
 

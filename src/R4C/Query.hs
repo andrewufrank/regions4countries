@@ -9,29 +9,28 @@ module R4C.Query where
 import Database.SQLite.Simple
 import R4C.Model
 
-showObservations :: IO ()
-showObservations = do
-    conn <- open  "test.sqlite" -- "r4c.sqlite"
+testq = do 
+    conn <- open "test.sqlite"
+    obs <- showObservations conn
+    mapM_ print obs 
 
+    rows <- surfaceAreaAustria conn
+    mapM_ print rows
+
+    avg <- averageValue conn (CountryId "AUT") (IndicatorId "AG.SRF.TOTL.K2")
+    print avg 
+
+    close conn
+
+showObservations conn = do
     rows :: [Observation] <- query_ conn
         "SELECT country, indicator, year, value \
         \FROM observation \
         \LIMIT 10"
+    pure rows
 
-    mapM_ print rows
-
-    close conn
-
-surfaceAreaAustria :: IO ()
-surfaceAreaAustria = do
-    conn <- open  "test.sqlite"
-    -- rows :: [Observation] <- query conn
-    --     "SELECT year, value \
-    --     \FROM observation \
-    --     \WHERE country = ? \
-    --     \AND indicator = ? \
-    --     \ORDER BY year"
-    --     ("AUT", "AG.SRF.TOTL.K2")
+surfaceAreaAustria :: Connection -> IO [YearValue]
+surfaceAreaAustria conn = do
     rows :: [YearValue] <- query conn
         "SELECT year, value \
         \FROM observation \
@@ -39,10 +38,9 @@ surfaceAreaAustria = do
         \AND indicator = ? \
         \ORDER BY year"
         ("AUT", "AG.SRF.TOTL.K2") 
+    pure rows 
 
-    mapM_ print rows
-
-    close conn
+    
 
 averageValue
     :: Connection

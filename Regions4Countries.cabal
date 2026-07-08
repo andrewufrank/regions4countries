@@ -18,10 +18,13 @@ build-type:     Simple
 
 library
   exposed-modules:
+      R4C.Aggregate
       R4C.Database
+      R4C.Indicator
       R4C.Model
       R4C.Orchestrator
       R4C.Query
+      R4C.Region
       R4C.WorldBank
   other-modules:
       Paths_Regions4Countries

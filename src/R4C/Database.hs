@@ -13,6 +13,9 @@ module R4C.Database   ( openDB
   , observations
   , observationsForCountry
   , observationsForIndicator
+  , CountryTable
+  , CountryValue(..)
+  , lookupTable
   ) where
 
 import Database.SQLite.Simple
@@ -78,7 +81,27 @@ createSchema conn =
         --     "CREATE INDEX IF NOT EXISTS obs_year \
         --     \ON observation(year)"
 
+data CountryValue = CountryValue
+    { cvCountry :: CountryId
+    , cvValue   :: Double
+    }
 
+instance FromRow CountryValue where
+    fromRow = CountryValue <$> field <*> field
+
+type CountryTable = [CountryValue]
+
+lookupTable
+    :: Connection
+    -> IndicatorId
+    -> Year
+    -> IO CountryTable
+lookupTable conn ind yr =
+    query conn
+        "SELECT country, value \
+        \FROM observation \
+        \WHERE indicator = ? AND year = ?"
+        (ind, yr)
 
 
 insertObservation
