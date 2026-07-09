@@ -4,7 +4,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import R4C.Model
-import R4C.Region
+import BaseTest.Region
 
 tests :: TestTree
 tests =
@@ -20,3 +20,40 @@ tests =
         assertBool "AUT should not be in G7" $
           CountryId "AUT" `notElem` countriesInRegion (RegionId "G7")
     ]
+
+-- testRegions = do
+--   conn <- open "test.sqlite"
+
+--   rows <- query_ conn
+--     "SELECT region, country FROM country_region ORDER BY region, country LIMIT 50"
+--       :: IO [(RegionId, CountryId)]
+
+--   mapM_ print rows
+--   close conn
+
+-- now working, regions are not stored
+-- debugRegion :: Connection -> IndicatorId -> Year -> RegionId -> IO ()
+-- debugRegion conn ind yr reg = do
+--   rows <- query conn
+--     "SELECT cr.country, o.value \
+--     \FROM country_region cr \
+--     \LEFT JOIN observation o \
+--     \  ON o.country = cr.country \
+--     \ AND o.indicator = ? \
+--     \ AND o.year = ? \
+--     \WHERE cr.region = ? \
+--     \ORDER BY cr.country"
+--     (ind, yr, reg)
+--       :: IO [(CountryId, Maybe Value)]
+
+--   mapM_ print rows
+
+-- testdr = do   
+--     conn <- open "test.sqlite"
+--     debugRegion conn popid (Year 2024) (RegionId "USCAN")
+--     debugRegion conn popid (Year 2024) (RegionId "EUROPE")
+--     debugRegion conn popid (Year 2024) (RegionId "SAMERICA")
+--     close conn
+
+--   where 
+--         popid = indicatorId population -- IndicatorId "SP.POP.TOTL"

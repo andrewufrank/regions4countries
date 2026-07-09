@@ -57,11 +57,10 @@ For each study, a folder with the specific setup. BaseTest is 2 datasets for tes
 
 - Region: Definitions of the regions as lists of countries. Regions can overlap and are defined for a specific use of the library.
 
-For testing so far: 
 
-- Query
 
-For the *next* book I should have for each tableau a file which states, which dataset are used.
+
+For the *next* book (folder Study) I should have for each tableau a file which states, which dataset are used.
 
  (how to test if a dataset is alread present - to avoid duplication in storage and stop processing if not available)
 

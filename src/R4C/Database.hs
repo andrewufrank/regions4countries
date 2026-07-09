@@ -47,12 +47,12 @@ createSchema conn =
             \ name TEXT NOT NULL\
             \)"
 
-        execute_ conn
-            "CREATE TABLE IF NOT EXISTS country_region (\
-            \ country TEXT NOT NULL,\
-            \ region TEXT NOT NULL,\
-            \ PRIMARY KEY(country, region)\
-            \)"
+        -- execute_ conn
+        --     "CREATE TABLE IF NOT EXISTS country_region (\
+        --     \ country TEXT NOT NULL,\
+        --     \ region TEXT NOT NULL,\
+        --     \ PRIMARY KEY(country, region)\
+        --     \)"
 
         execute_ conn
             "CREATE TABLE IF NOT EXISTS indicator (\

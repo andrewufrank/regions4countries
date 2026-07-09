@@ -39,11 +39,12 @@ data Region = Region
     , regionName :: Text
     }
 
-data CountryRegion = CountryRegion
-    { crCountry :: CountryId
-    , crRegion  :: RegionId
-    }
-    deriving (Eq, Ord, Show)
+-- country - region not stored in db, but in Region.hs (regionMembers)
+-- data CountryRegion = CountryRegion
+--     { crCountry :: CountryId
+--     , crRegion  :: RegionId
+--     }
+--     deriving (Eq, Ord, Show)
 
 
 newtype IndicatorId = IndicatorId Text

@@ -16,8 +16,8 @@ import Data.List (nub)
 
 import R4C.Model 
 import R4C.Database
-import R4C.Region 
-import R4C.Indicator
+import BaseTest.Region 
+import BaseTest.Indicator
 
 regions2 :: [RegionId]
 regions2 = nub $ map fst regionMembers
@@ -85,6 +85,10 @@ meanTable table region =
         [] -> Nothing
         xs -> Just (sum xs / fromIntegral (length xs))
 
+countriesInRegion :: RegionId -> [CountryId]
+countriesInRegion r =
+  [ c | (r', c) <- regionMembers, r' == r ]
+  
 weightedAverage
     :: Connection
     -> IndicatorId

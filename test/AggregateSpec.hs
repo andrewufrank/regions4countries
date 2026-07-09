@@ -6,7 +6,7 @@ import Test.Tasty.HUnit
 
 import R4C.Aggregate
 import R4C.Database
-import R4C.Indicator
+import BaseTest.Indicator
 import R4C.Model
 
 tests :: TestTree

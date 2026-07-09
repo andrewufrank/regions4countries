@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           Regions4Countries
-version:        0.0.2
+version:        0.0.3
 synopsis:       produce statistics for world regions from country data
 description:    Given national statistics data, produce statistics for arbitrary defined regions of the world.
                 The region definitions and the statistics are separated from the base library.
@@ -20,13 +20,12 @@ build-type:     Simple
 
 library
   exposed-modules:
+      BaseTest.Indicator
+      BaseTest.Region
       R4C.Aggregate
       R4C.Database
-      R4C.Indicator
       R4C.Model
       R4C.Orchestrator
-      R4C.Query
-      R4C.Region
       R4C.WorldBank
   other-modules:
       Paths_Regions4Countries
