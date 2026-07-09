@@ -1,5 +1,5 @@
 name:  Regions4Countries         
-version: 0.0.1
+version: 0.0.2
 license:      GPL
 license-file: LICENSE
 #github:       andrewufrank/u4blog.git/daino
@@ -9,7 +9,9 @@ copyright:    2024 Andrew U. Frank
 synopsis: produce statistics for world regions from country data
 category: model
 description: | 
-  Given national statistics data, produce statistics for a world with a dozen regions.
+  Given national statistics data, produce statistics for arbitrary defined regions of the world.
+  The region definitions and the statistics are separated from the base library.
+   
 
 dependencies:
   - base == 4.*

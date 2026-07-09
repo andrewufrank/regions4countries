@@ -1,5 +1,11 @@
 # ChangeLog for EconomyDiffEq
 
+0.0.2 separate the R4C library from code specific for *next* book. 
+
+
 0.0.1 initial copy and changed package  
-    change Example3 to name set everywhere before cbuild  
+    reads population and surface area data for testing
+    produces aggregates not completely tested
+
+
     
