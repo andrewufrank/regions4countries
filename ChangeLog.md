@@ -1,5 +1,7 @@
 # ChangeLog for EconomyDiffEq
 
+0.0.3 separate folder for each study. (baseTest, pt)
+
 0.0.2 separate the R4C library from code specific for *next* book. 
 
 
