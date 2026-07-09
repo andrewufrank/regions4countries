@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------------
 
 module R4C.WorldBank ( importFile
+, parseWorldBank
   ) where 
 
 import UniformBase 
@@ -230,32 +231,3 @@ countryRows :: [Row] -> [Row]
 countryRows (_hdr : rows) = rows
 countryRows [] = []
 
----  tests
-
-test = do 
-    -- bytes <- BL.readFile  "/home/frank/Desktop/buecher/nextOrder/WorldBankData/population/f27274b4-7384-4c6e-b81d-7ddf2ac9bb9a_Data.csv"
-    bytes <- BL.readFile "/home/frank/Desktop/buecher/nextOrder/WorldBankData/surfaceArea/API_AG.SRF.TOTL.K2_DS2_en_csv_v2_4649.csv"
-    let rows = decodeCSV bytes
-    -- print (length rows)
-    -- print (headerRow rows)   
-    let hdr = headerRow rows 
-    print (V.toList hdr)
-    -- mapM_ print (zip [0 :: Int ..] (V.toList hdr))
-    
-    print (countryCodeColumn hdr)
-    print (indicatorNameColumn hdr)
-    print (indicatorCodeColumn hdr)
-    print (yearColumns hdr)
-
-    let row = head (countryRows rows)
-    print (V.toList row)
-
-    let ind = parseIndicator hdr row
-    let ys  = yearColumns hdr
-    let cc  = countryCodeColumn hdr
-
-    print (parseCountry cc ys ind row)
-
-dumpHeader :: Header -> IO ()
-dumpHeader hdr =
-    mapM_ print (zip [0 :: Int ..] (V.toList hdr))

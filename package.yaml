@@ -34,15 +34,16 @@ executables:
     source-dirs: app
     dependencies: Regions4Countries 
 
-# tests:
-#   test1:
-#     main: Testing.hs
-#     source-dirs: tests
-#     dependencies: 
-#       # - CountryModel 
-#       # - HTF
-# #      - QuickCheck 
-# #      - test-framework 
+tests:
+  r4c-test:
+    main: Spec.hs
+    source-dirs:
+      - test
+    dependencies:
+      - Regions4Countries
+      - tasty
+      - tasty-hunit
+      - temporary
 
 ghc-options: 
     -Wall

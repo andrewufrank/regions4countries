@@ -50,9 +50,3 @@ importOneFile conn file = do
         ++ show (length observations)
         ++ " observations"
 
-testorchestrator = do 
-     importWorldBankFiles
-        "test.sqlite"
-        [ "/home/frank/Desktop/buecher/nextOrder/WorldBankData/population/f27274b4-7384-4c6e-b81d-7ddf2ac9bb9a_Data.csv"
-        , "/home/frank/Desktop/buecher/nextOrder/WorldBankData/surfaceArea/API_AG.SRF.TOTL.K2_DS2_en_csv_v2_4649.csv"
-        ]

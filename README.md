@@ -42,17 +42,14 @@ The R4C code is separated from its use to produce the statistics for the *next* 
 
 - WorldBank: Parser to read the WorldBank CSV wide format files, which can be download and unpacked. The code is flexible to adapt to whatever version of the WorldBank format is provided. 
 
-    Currently includes test code to check the parser. TODO Move 
 
 - Database: Maps the model into the SQL tables, to store and retrieve data into Haskell lists.
 
 - Orchestrator: Connects the functions from WorldBank (reading data files) with Database (storing the data)
 
-    contains test code. TODO Move 
 
 - Aggregate: Retrieves data as CountryTable from the database and calculates sum, mean and weighted average (so far.)
 
-    contains test code. TODO move
 
 
 The following modules are specific for some use of the library. A minimal test case should be included.

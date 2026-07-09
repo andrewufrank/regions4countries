@@ -73,6 +73,13 @@ regionMembers = concat
 
   , mk "GULF"
       ["BHR","IRN","IRQ","KWT","OMN","QAT","SAU","ARE","YEM"]
+ , mk "G7"
+        ["CAN","FRA","DEU","ITA","JPN","GBR","USA"]
+
+  , mk "EU"
+        ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
+        ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
+        ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
   ]
   where
     -- mk :: Text -> [Text] -> [(RegionId, CountryId)]
@@ -118,40 +125,5 @@ testRegions = do
   mapM_ print rows
   close conn
 
-{-    
-regionMembers :: [(RegionId, [CountryId])]
-regionMembers =
-  [ (RegionId "EU",
-      [ CountryId "AUT"
-      , CountryId "BEL"
-      , CountryId "BGR"
-      , CountryId "HRV"
-      , CountryId "CYP"
-      , CountryId "CZE"
-      , CountryId "DNK"
-      , CountryId "EST"
-      , CountryId "FIN"
-      , CountryId "FRA"
-      , CountryId "DEU"
-      , CountryId "GRC"
-      , CountryId "HUN"
-      , CountryId "IRL"
-      , CountryId "ITA"
-      , CountryId "LVA"
-      , CountryId "LTU"
-      , CountryId "LUX"
-      , CountryId "MLT"
-      , CountryId "NLD"
-      , CountryId "POL"
-      , CountryId "PRT"
-      , CountryId "ROU"
-      , CountryId "SVK"
-      , CountryId "SVN"
-      , CountryId "ESP"
-      , CountryId "SWE"
-      ])
-  , (RegionId "G7",
-       map (RegionId "G7",CountryId) ["CAN","FRA", "DEU", "ITA", "JPN", "GBR", "USA" ])
-  ]
--}
+
 

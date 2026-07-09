@@ -22,21 +22,6 @@ import R4C.Indicator
 regions2 :: [RegionId]
 regions2 = nub $ map fst regionMembers
 
-testPop = do 
-    conn <- open "test.sqlite"
-    pops <- mapM (showAggregate conn population (Year 2024)) regions2
-    mapM_ print $ zip regions2 pops 
-    close conn
-
-testa = do 
-    conn <- open "test.sqlite"
-   
-    -- showAggregate conn population (Year 2024) (RegionId "EU")
-    -- showAggregate conn population (Year 2024) (RegionId "G7")
-    showAggregate conn population (Year 2024) (RegionId "GULF")
-    showAggregate conn population (Year 2024) (RegionId "RUSSIA")
-    
-    close conn    
 
 showAggregate
     :: Connection
