@@ -27,6 +27,7 @@ library
       R4C.Model
       R4C.Orchestrator
       R4C.Query
+      R4C.Table
       R4C.WorldBank
       Study.Indicator
       Study.Region2

@@ -17,20 +17,29 @@ import Study.Indicator
 import Study.Region2 
 import R4C.Aggregate 
 import R4C.Query
+import R4C.Table 
+import GHC.IO.Handle.Types (Handle__)
+import GHC.Generics (Generic1(to1))
 
-getData = do 
+getData :: IO ()
+getData = do
     conn <- open "test.sqlite"
+
     pops <- mapM (aggregate regionMembers conn population (Year 2024)) regionsList
-    let pops2 =  zip regionsList pops 
-    mapM_ print $ pops2
     surfs <- mapM (aggregate regionMembers conn surfaceArea (Year 2023)) regionsList
-    let surfs2 =  zip regionsList surfs 
-    mapM_ print $ surfs2
 
+    let pops2 = zip regionsList pops :: DTable
+    let surfs2 = zip regionsList surfs
     let surfPerCap = combineRegionTables (/) surfs2 pops2
-    mapM_ print $ surfPerCap
 
-    close conn    
+    close conn
+
+    let t1 = markdownTable regionsList
+            [ MdColumn "Population 2024 (M)" 1000000 1 ( pops2)
+            , MdColumn "Surface 2023 (M km²)" 1000000 2 ( surfs2)
+            , MdColumn "Surface per capita (ha/person)" 0.01 1 ( surfPerCap)
+            ]
+    putStrLn t1 
 
 -- spc <- surfacePerCapita surface population      -- km²/person
 
