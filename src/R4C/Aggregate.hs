@@ -29,15 +29,14 @@ import R4C.Database
 --     -> IO (Maybe Double)
 showAggregate memberships conn ind yr reg = do
     result <- aggregate memberships conn ind yr reg
-    return result 
-    -- putStrLn $
-    --     show (indicatorName ind)
-    --     ++ " "
-    --     ++ show yr
-    --     ++ " "
-    --     ++ show reg
-    --     ++ " = "
-    --     ++ show result
+    putStrLn $
+        show (indicatorName ind)
+        ++ " "
+        ++ show yr
+        ++ " "
+        ++ show reg
+        ++ " = "
+        ++ show result
 
 valuesInRegion :: [(RegionId, CountryId)] -> CountryTable -> RegionId -> [Double]
 valuesInRegion memberships table region =
@@ -115,3 +114,23 @@ weightedAverage memberships db valInd wtInd yr region = do
         if sw == 0
             then Nothing
             else Just (sx / sw)
+
+combineRegionTables
+    :: (a -> b -> c)
+    -> [(RegionId, Maybe a)]
+    -> [(RegionId, Maybe b)]
+    -> [(RegionId, Maybe c)]
+combineRegionTables f =
+    zipWith combine
+  where
+    combine (r1, mx) (r2, my)
+        | r1 /= r2 =
+            error $
+                "combineRegionTables: region mismatch: "
+                ++ show r1 ++ " /= " ++ show r2
+
+        | otherwise =
+            (r1, lift2 f mx my)
+
+    lift2 g (Just x) (Just y) = Just (g x y)
+    lift2 _ _ _               = Nothing
