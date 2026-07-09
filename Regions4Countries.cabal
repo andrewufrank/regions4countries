@@ -27,6 +27,9 @@ library
       R4C.Model
       R4C.Orchestrator
       R4C.WorldBank
+      Study.Indicator
+      Study.Region2
+      Study.Tab1
   other-modules:
       Paths_Regions4Countries
   hs-source-dirs:

@@ -8,7 +8,7 @@
 
 -----------------------------------------------------------------------------
 
-module R4C.Indicator
+module Study.Indicator
     ( population
     , surfaceArea
     , indicators

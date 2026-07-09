@@ -4,15 +4,19 @@
 -- the definitions of the regions 
 -----------------------------------------------------------------------------
 
-module R4C.Region
+module Study.Region2
   ( regionMembers
-  , countriesInRegion
+  , regionsList
   ) where
 
 import R4C.Model
 import qualified Data.Text as T
+import Data.List (nub)
 import Database.SQLite.Simple  -- for debug
-import R4C.Indicator
+import Study.Indicator
+
+regionsList :: [RegionId]
+regionsList = nub $ map fst regionMembers
 
 regionMembers :: [(RegionId, CountryId)]
 regionMembers = concat
@@ -73,57 +77,12 @@ regionMembers = concat
 
   , mk "GULF"
       ["BHR","IRN","IRQ","KWT","OMN","QAT","SAU","ARE","YEM"]
- , mk "G7"
-        ["CAN","FRA","DEU","ITA","JPN","GBR","USA"]
 
-  , mk "EU"
-        ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
-        ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
-        ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
   ]
   where
     -- mk :: Text -> [Text] -> [(RegionId, CountryId)]
     mk r = map (\c -> (RegionId r, CountryId c))
 
-countriesInRegion :: RegionId -> [CountryId]
-countriesInRegion r =
-  [ c | (r', c) <- regionMembers, r' == r ]
-
-debugRegion :: Connection -> IndicatorId -> Year -> RegionId -> IO ()
-debugRegion conn ind yr reg = do
-  rows <- query conn
-    "SELECT cr.country, o.value \
-    \FROM country_region cr \
-    \LEFT JOIN observation o \
-    \  ON o.country = cr.country \
-    \ AND o.indicator = ? \
-    \ AND o.year = ? \
-    \WHERE cr.region = ? \
-    \ORDER BY cr.country"
-    (ind, yr, reg)
-      :: IO [(CountryId, Maybe Value)]
-
-  mapM_ print rows
-
-testdr = do   
-    conn <- open "test.sqlite"
-    debugRegion conn popid (Year 2024) (RegionId "USCAN")
-    debugRegion conn popid (Year 2024) (RegionId "EUROPE")
-    debugRegion conn popid (Year 2024) (RegionId "SAMERICA")
-    close conn
-
-  where 
-        popid = indicatorId population -- IndicatorId "SP.POP.TOTL"
-
-testRegions = do
-  conn <- open "test.sqlite"
-
-  rows <- query_ conn
-    "SELECT region, country FROM country_region ORDER BY region, country LIMIT 50"
-      :: IO [(RegionId, CountryId)]
-
-  mapM_ print rows
-  close conn
 
 
 

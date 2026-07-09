@@ -211,3 +211,5 @@ instead of printing output.
 * Prefer real World Bank sample files in `test/data` over embedded CSV strings.
 * Use an SQLite test database for integration tests.
 * Avoid hard-coded paths in library code.
+* use indent 4 spaces
+* prefer 'where' instead of 'let' constructions 
