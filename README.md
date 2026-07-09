@@ -197,11 +197,9 @@ instead of printing output.
 
 ## Current development priorities
 
-1. from the three (multiple) region - value lists, produce a markdown table for printing.
-    requires scaling to values as integers and produce a table header with G or M units (eg M$) 
-    produce markdown layout with header row
-4. Later add a command-line application in `app/`.
+1. find error in usacan region population
 5. Continue implementing regional aggregation and indicator support.
+4. Later add a command-line application in `app/`.
 
 ## Design principles
 

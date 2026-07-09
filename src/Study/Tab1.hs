@@ -34,12 +34,16 @@ getData = do
 
     close conn
 
-    let t1 = markdownTable regionsList
+    let mdCols = 
             [ MdColumn "Population 2024 (M)" 1000000 1 ( pops2)
             , MdColumn "Surface 2023 (M km²)" 1000000 2 ( surfs2)
             , MdColumn "Surface per capita (ha/person)" 0.01 1 ( surfPerCap)
             ]
-    putStrLn t1 
+    let sortedRegions = sortRegionsByColumn Descending surfPerCap
+
+    let md = markdownTable sortedRegions mdCols
+    putStrLn md 
+
 
 -- spc <- surfacePerCapita surface population      -- km²/person
 
