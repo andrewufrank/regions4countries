@@ -29,6 +29,7 @@ library
       R4C.Query
       R4C.Table
       R4C.WorldBank
+      Study.Config
       Study.Indicator
       Study.Region2
       Study.Tab1
@@ -51,6 +52,8 @@ library
     , bytestring
     , cassava
     , containers
+    , directory
+    , filepath
     , scientific
     , sqlite-simple
     , text
@@ -58,12 +61,12 @@ library
     , vector
   default-language: Haskell2010
 
-executable r4c
-  main-is: TheMain.hs
+executable makedb
+  main-is: Main.hs
   other-modules:
       Paths_Regions4Countries
   hs-source-dirs:
-      app
+      app/makedb
   default-extensions:
       OverloadedStrings
       MultiParamTypeClasses
@@ -80,6 +83,8 @@ executable r4c
     , bytestring
     , cassava
     , containers
+    , directory
+    , filepath
     , scientific
     , sqlite-simple
     , text
@@ -114,6 +119,8 @@ test-suite r4c-test
     , bytestring
     , cassava
     , containers
+    , directory
+    , filepath
     , scientific
     , sqlite-simple
     , tasty

@@ -20,15 +20,16 @@ regionsList = nub $ map fst regionMembers
 
 regionMembers :: [(RegionId, CountryId)]
 regionMembers = concat
-  [ mk "USCAN"
-      ["CAN","USA"]
+  [
 
-  , mk "SAMERICA"
+  mk "SAMERICA"
       [ "ATG","ARG","ABW","BHS","BRB","BLZ","BOL","BRA","CHL","COL"
       , "CRI","CUB","DMA","DOM","ECU","SLV","GRD","GTM","GUY","HTI"
       , "HND","JAM","MEX","NIC","PAN","PRY","PER","KNA","LCA","VCT"
       , "SUR","TTO","URY","VEN"
       ]
+  ,  mk "USCAN"
+      ["USA", "CAN"]
 
   , mk "EUROPE"
       [ "ALB","AND","AUT","BLR","BEL","BIH","BGR","HRV","CYP","CZE"

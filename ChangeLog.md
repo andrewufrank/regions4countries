@@ -2,6 +2,7 @@
 
 0.0.3 separate folder for each study. (baseTest, pt)
     produce md table (which can be sorted)
+    add makedb to create a new db 
 
 a table 
 | Region | Population 2024 (M) | Surface 2023 (M km²) | Surface per capita (ha/person) |

@@ -23,15 +23,17 @@ dependencies:
   - vector 
   - text 
   - sqlite-simple
+  - filepath 
+  - directory
 
   
 library:
   source-dirs: src
 
 executables:
-  r4c:
-    main: TheMain.hs
-    source-dirs: app
+  makedb :
+    main: Main.hs
+    source-dirs: app/makedb
     dependencies: Regions4Countries 
 
 tests:

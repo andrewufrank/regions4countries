@@ -20,10 +20,11 @@ import R4C.Query
 import R4C.Table 
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
+import Study.Config 
 
 getData :: IO ()
 getData = do
-    conn <- open "test.sqlite"
+    conn <- open dbPath 
 
     pops <- mapM (aggregate regionMembers conn population (Year 2024)) regionsList
     surfs <- mapM (aggregate regionMembers conn surfaceArea (Year 2023)) regionsList
@@ -35,12 +36,13 @@ getData = do
     close conn
 
     let mdCols = 
-            [ MdColumn "Population 2024 (M)" 1000000 1 ( pops2)
+            [ MdColumn "Population 2024 (M)" 1000000 6 ( pops2)
             , MdColumn "Surface 2023 (M km²)" 1000000 2 ( surfs2)
             , MdColumn "Surface per capita (ha/person)" 0.01 1 ( surfPerCap)
             ]
     let sortedRegions = sortRegionsByColumn Descending surfPerCap
 
+    -- let md = markdownTable regionsList mdCols
     let md = markdownTable sortedRegions mdCols
     putStrLn md 
 

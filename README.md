@@ -211,3 +211,5 @@ instead of printing output.
 * Avoid hard-coded paths in library code.
 * use indent 4 spaces
 * prefer 'where' instead of 'let' constructions 
+* use package.yaml not .cabal 
+* package name is Regions4Countries and is stored in github as git@github.com:andrewufrank/regions4countries.git
