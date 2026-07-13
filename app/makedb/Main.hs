@@ -32,6 +32,7 @@ main = do
 
     mapM_ printInputFile csvPaths
 
+    putStrLn "start loading"
     importWorldBankFiles dbPath csvPaths
 
     putStrLn $ "Imported " ++ show (length csvPaths) ++ " file(s)"

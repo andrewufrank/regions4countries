@@ -10,10 +10,10 @@ module Study.Config (filesUsed, dbPath) where
 
 databaseFolder = "/home/frank/afWorldDB/"
 
-databaseNmae = "r4cdb1" 
+databaseNmae = "r4cdb2" 
 
 dbPath = databaseFolder ++ databaseNmae ++ ".sqlite"
 
 filesUsed :: FilePath
 filesUsed =
-    "/home/frank/Desktop/buecher/worldFundamentals/WorldBankData"
+    "/home/frank/Desktop/buecher/worldFundamentals/WorldBankData/filesUsed"
