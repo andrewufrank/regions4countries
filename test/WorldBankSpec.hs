@@ -65,6 +65,36 @@ testCountryMeta = do
     closeDB conn
 
 
+testIndicatorMeta :: Assertion
+testIndicatorMeta = do
+
+    conn <- open ":memory:"
+
+    createSchema conn
+
+    bytes <-
+        BL.readFile
+            "test/testdata/Metadata_Indicator_API_SM.POP.NETM_DS2_en_csv_v2_4998.csv"
+
+    let indicators =
+            readIndicatorMetadataFile bytes
+
+    insertIndicators conn indicators
+
+    stored <-
+        indicators4db conn
+
+    length stored @?= length indicators
+
+    assertBool
+        "Population indicator missing"
+        ( IndicatorId "SP.POP.TOTL"
+            `elem`
+                map indicatorId stored
+        )
+
+    closeDB conn
+
 
 
 {-

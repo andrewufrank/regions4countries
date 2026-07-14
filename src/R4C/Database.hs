@@ -59,10 +59,18 @@ createSchema conn =
         --     \ PRIMARY KEY(country, region)\
         --     \)"
 
+        -- execute_ conn
+        --     "CREATE TABLE IF NOT EXISTS indicator (\
+        --     \ indicator TEXT PRIMARY KEY,\
+        --     \ name TEXT NOT NULL\
+        --     \)"
         execute_ conn
             "CREATE TABLE IF NOT EXISTS indicator (\
             \ indicator TEXT PRIMARY KEY,\
-            \ name TEXT NOT NULL\
+            \ name TEXT NOT NULL,\
+            \ sourceNote TEXT NOT NULL,\
+            \ sourceOrganization TEXT NOT NULL,\
+            \ aggregation TEXT NOT NULL\
             \)"
 
         execute_ conn
@@ -144,6 +152,23 @@ countries4db conn =
         "SELECT country, name, region, incomeGroup, specialNotes \
         \FROM country"
 
+----------------------------------- indicators
+
+insertIndicator
+    :: Connection
+    -> Indicator
+    -> IO ()
+insertIndicator conn ind =
+    execute conn
+        "INSERT OR REPLACE INTO indicator \
+        \VALUES (?,?,?,?,?)"
+        ( indicatorId ind
+        , indicatorName ind
+        , sourceNote ind
+        , sourceOrganization ind
+        , show (aggregation ind)  -- fills with sum
+        )
+
 -----------------------------------observations
 insertObservation
     :: Connection
@@ -164,14 +189,14 @@ insertObservations conn =
         "INSERT OR REPLACE INTO observation \
         \VALUES (?,?,?,?)"
 
-insertIndicator
-    :: Connection
-    -> Indicator
-    -> IO ()
-insertIndicator conn ind =
-    execute conn
-        "INSERT OR REPLACE INTO indicator VALUES (?,?)"
-        (indicatorId ind, indicatorName ind)
+-- insertIndicator
+--     :: Connection
+--     -> Indicator
+--     -> IO ()
+-- insertIndicator conn ind =
+--     execute conn
+--         "INSERT OR REPLACE INTO indicator VALUES (?,?)"
+--         (indicatorId ind, indicatorName ind)
 
 observations
     :: Connection

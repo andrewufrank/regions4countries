@@ -26,27 +26,40 @@ importWorldBankFiles dbName files = do
     createSchema conn
 
     withTransaction conn $
-        forM_ files (importOneFile conn)
+        forM_ files (importOneIndicatorFile conn)
 
     close conn
 
 ------------------------------------------------------------
 
-importOneFile
+importOneIndicatorFile
     :: Connection
     -> FilePath
     -> IO ()
-importOneFile conn file = do
+importOneIndicatorFile conn file = do
 
     putStrLn ("Importing " ++ file)
 
-    (indicator, observations) <- importFile file
+    (observations) <- readIndicatorFile file
 
-    insertIndicator conn indicator
+    -- insertIndicator conn indicator
     insertObservations conn observations
 
     putStrLn $
         "  imported "
         ++ show (length observations)
         ++ " observations"
+    
+importIndicatorFile
+    :: Connection
+    -> FilePath
+    -> IO ()
+importIndicatorFile conn file = do
+
+    (_indicator, observations) <-
+        readIndicatorFile file
+
+    insertObservations conn observations
+    countries <- readCountryMetadataFile countryPath
+    return ()
 

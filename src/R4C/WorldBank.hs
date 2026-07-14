@@ -21,49 +21,34 @@ import Text.Read (readMaybe)
 import Data.Char (isDigit)
 import Data.Scientific (Scientific)
 
-importFile
+readIndicatorFile
     :: FilePath
-    -> IO (Indicator,[Observation])
+    -> IO ([Observation])
 
-importFile file = do
+readIndicatorFile file = do
     bytes <- BL.readFile file
-    pure (parseWorldBank bytes)
+    pure (parseWBindicator bytes)
 
--- parseWorldBank
---     :: BL.ByteString
---     -> (Indicator, [Observation])
--- parseWorldBank bytes =
---     (indicator, observations)
---   where
---     rows = decodeCSV bytes
+readIndicatorMetadataFile
+    :: FilePath
+    -> IO [Indicator]
+readIndicatorMetadataFile file = do
+    bytes <- BL.readFile file
+    pure (parseWBindicatorMetadata bytes)
 
---     header   = headerRow rows
---     dataRows = countryRows rows
+readCountryMetadataFile
+    :: FilePath
+    -> IO [Country]
+readCountryMetadataFile file = do
+    bytes <- BL.readFile file
+    pure (parseWBcountries bytes)
 
---     firstRow =
---         case dataRows of
---             []    -> error "No data rows in World Bank file"
---             r : _ -> r
 
---     indicator =
---         parseIndicator header firstRow
-
---     years =
---         yearColumns header
-
---     countryCol =
---         countryCodeColumn header
-
---     observations =
---         concatMap
---             (parseCountry countryCol years indicator)
---             dataRows
-
-parseWorldBank
+parseWBindicator
     :: BL.ByteString
-    -> (Indicator, [Observation])
+    -> ([Observation])
 -- | parse a WorldBank Indicator csv file 
-parseWorldBank bytes =
+parseWBindicator bytes =
     case decodeCSV . dropPreamble $ bytes of
         [] ->
             error "empty World Bank file"
@@ -72,7 +57,7 @@ parseWorldBank bytes =
                 [] ->
                     error "No data rows in World Bank file"
                 firstRow : _ ->
-                    (indicator, observations)
+                    (observations)
                   where
                     indicator =
                         parseIndicator header firstRow
@@ -86,7 +71,7 @@ parseWorldBank bytes =
                             dataRows
 
 
-parseWBCountries bytes =
+parseWBcountries bytes =
     map parseCountryRow dataRows
   where
     rows =
@@ -122,6 +107,43 @@ parseWBCountries bytes =
                 cell row incomeGroupCol
             , countrySpecialNotes =
                 cell row specialNotesCol
+            }
+
+parseWBindicatorMetadata
+    :: BL.ByteString
+    -> [Indicator]
+
+parseWBindicatorMetadata bytes =
+    map parse rows
+  where
+    header : rows =
+        decodeCSV (stripBom bytes)
+
+    codeCol =
+        findColumn header "INDICATOR_CODE"
+
+    nameCol =
+        findColumn header "INDICATOR_NAME"
+
+    noteCol =
+        findColumn header "SOURCE_NOTE"
+
+    orgCol =
+        findColumn header "SOURCE_ORGANIZATION"
+
+    parse row =
+        Indicator
+            { indicatorId =
+                IndicatorId (cell row codeCol)
+
+            , indicatorName =
+                cell row nameCol
+
+            , sourceNote =
+                cell row noteCol
+
+            , sourceOrganization =
+                cell row orgCol
             }
 
 type Row    = V.Vector Text

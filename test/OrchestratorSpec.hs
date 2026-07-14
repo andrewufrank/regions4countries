@@ -23,7 +23,7 @@ tests =
 
 testOrchestrator :: Assertion
 testOrchestrator = do
-    let db = ":memory"
+    let db = ":memory:"
 
 --   exists <- doesFileExist db
 --   if exists then removeFile db else pure ()

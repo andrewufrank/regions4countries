@@ -13,12 +13,16 @@
 module R4C.Model  
      where
 import UniformBase  
+
 import qualified Data.Scientific as Sc
 import Database.SQLite.Simple.FromField
 import Database.SQLite.Simple.ToField
 import Database.SQLite.Simple.FromRow
 import Database.SQLite.Simple.ToRow
 -- import Database.SQLite.Simple 
+import qualified Data.Text as Text
+import Text.Read (readMaybe)
+
 
 -- |  ISO 3166-1 alpha-3 country code
 newtype CountryId = CountryId Text
@@ -48,10 +52,12 @@ data Region = Region
 --     }
 --     deriving (Eq, Ord, Show)
 
-
-newtype IndicatorId = IndicatorId Text
 -- | world bank indicator code, eg SP.POP.TOTL
-    deriving (Eq, Ord, Show)
+newtype IndicatorId =
+    IndicatorId
+        { unIndicatorId :: Text
+        }
+    deriving (Eq, Ord, Show, Read)
 
 -- data Unit
 --     = Persons
@@ -65,13 +71,15 @@ data Aggregation
     = Sum
     | Mean
     | WeightedBy IndicatorId
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord, Show, Read)
 
 data Indicator = Indicator
 -- What is observed 
     { indicatorId   :: IndicatorId
     , indicatorName :: Text
-    , aggregation   :: Aggregation 
+    , sourceNote         :: Text
+    , sourceOrganization :: Text    
+    , aggregation   :: Aggregation  -- is not from WB and perhaps not belongs here?
     }
     deriving (Eq, Ord, Show)
 
@@ -180,3 +188,55 @@ instance FromRow Country where
             <*> field
             <*> field
             <*> field                       
+
+-- instance ToField Aggregation where
+--     toField =
+--         SQLText . pack . show
+
+-- instance FromField Aggregation where
+--     fromField f = do
+--         txt <- fromField f
+--         case readMaybe (unpack txt) of
+--             Just a  -> pure a
+--             Nothing ->
+--                 returnError
+--                     ConversionFailed
+--                     f
+--                     "invalid aggregation"
+aggregationToText
+    :: Aggregation
+    -> Text
+aggregationToText Sum =
+    "Sum"
+
+aggregationToText Mean =
+    "Mean"
+
+aggregationToText (WeightedBy ind) =
+    "WeightedBy:" <> unIndicatorId ind
+
+textToAggregation
+    :: Text
+    -> Aggregation
+textToAggregation "Sum" =
+    Sum
+
+textToAggregation "Mean" =
+    Mean
+
+textToAggregation txt
+    | "WeightedBy:" `Text.isPrefixOf` txt =
+        WeightedBy
+            (IndicatorId (Text.drop 11 txt))
+
+    | otherwise =
+        error ("Unknown aggregation: " ++ Text.unpack txt)
+
+instance ToField Aggregation where
+    toField =
+        toField . aggregationToText
+
+instance FromField Aggregation where
+    fromField f = do
+        txt <- fromField f
+        pure (textToAggregation txt)
