@@ -20,7 +20,69 @@ import Data.Maybe (mapMaybe)
 import Text.Read (readMaybe)
 import Data.Char (isDigit)
 import Data.Scientific (Scientific)
+import qualified Codec.Archive.Zip as Zip
+import qualified Data.ByteString.Lazy as BL
+import Data.List 
 
+data WorldBankArchive =
+    WorldBankArchive
+        { archiveIndicator    :: Indicator
+        , archiveCountries    :: [Country]
+        , archiveObservations :: [Observation]
+        }
+    deriving (Eq, Show)
+
+readArchive
+    :: FilePath
+    -> IO WorldBankArchive
+-- ^ read a zipped archive for a worldbank indicator
+readArchive file = do
+
+    archive <-
+        Zip.toArchive <$> BL.readFile file
+
+    indicatorBytes <-
+        findEntry "Metadata_Indicator" archive
+
+    countryBytes <-
+        findEntry "Metadata_Country" archive
+
+    observationBytes <-
+        findEntry "API_" archive
+
+    let indicator =
+            parseWBindicatorMetadata indicatorBytes
+
+        countries =
+            parseWBcountries countryBytes
+
+        (observations) =
+            parseWBindicator observationBytes
+
+    pure
+        WorldBankArchive
+            { archiveIndicator = indicator
+            , archiveCountries = countries
+            , archiveObservations = observations
+            }
+
+findEntry
+    :: String
+    -> Zip.Archive
+    -> IO BL.ByteString
+-- ^ find an archive by prefix of the file 
+findEntry prefix archive =
+    case find matches (Zip.zEntries archive) of
+        Nothing ->
+            error ("Archive does not contain " ++ prefix)
+
+        Just entry ->
+            pure (Zip.fromEntry entry)
+  where
+    matches entry =
+        prefix `isPrefixOf` Zip.eRelativePath entry
+
+-------------------------------------------------------------
 readIndicatorFile
     :: FilePath
     -> IO ([Observation])
@@ -31,7 +93,7 @@ readIndicatorFile file = do
 
 readIndicatorMetadataFile
     :: FilePath
-    -> IO [Indicator]
+    -> IO Indicator
 readIndicatorMetadataFile file = do
     bytes <- BL.readFile file
     pure (parseWBindicatorMetadata bytes)
@@ -111,40 +173,84 @@ parseWBcountries bytes =
 
 parseWBindicatorMetadata
     :: BL.ByteString
-    -> [Indicator]
-
+    -> Indicator
 parseWBindicatorMetadata bytes =
-    map parse rows
-  where
-    header : rows =
-        decodeCSV (stripBom bytes)
+    case decodeCSV (stripBom bytes) of
+        [] ->
+            error "Empty indicator metadata file"
 
+        [_] ->
+            error "Indicator metadata contains no data row"
+
+        header : row : _ ->
+            parseIndicatorMetadataRow header row
+
+parseIndicatorMetadataRow
+    :: Header
+    -> Row
+    -> Indicator
+parseIndicatorMetadataRow hdr row =
+    Indicator
+        { indicatorId =
+            IndicatorId (cell row codeCol)
+
+        , indicatorName =
+            cell row nameCol
+
+        , sourceNote =
+            cell row noteCol
+
+        , sourceOrganization =
+            cell row orgCol
+
+        , aggregation =
+            Sum
+        }
+  where
     codeCol =
-        findColumn header "INDICATOR_CODE"
+        findColumn hdr "INDICATOR_CODE"
 
     nameCol =
-        findColumn header "INDICATOR_NAME"
+        findColumn hdr "INDICATOR_NAME"
 
     noteCol =
-        findColumn header "SOURCE_NOTE"
+        findColumn hdr "SOURCE_NOTE"
 
     orgCol =
-        findColumn header "SOURCE_ORGANIZATION"
+        findColumn hdr "SOURCE_ORGANIZATION"
 
-    parse row =
-        Indicator
-            { indicatorId =
-                IndicatorId (cell row codeCol)
+-- parseWBindicatorMetadata bytes =
+--     map parse rows
+--   where
+--     header : rows =
+--         decodeCSV (stripBom bytes)
 
-            , indicatorName =
-                cell row nameCol
+--     codeCol =
+--         findColumn header "INDICATOR_CODE"
 
-            , sourceNote =
-                cell row noteCol
+--     nameCol =
+--         findColumn header "INDICATOR_NAME"
 
-            , sourceOrganization =
-                cell row orgCol
-            }
+--     noteCol =
+--         findColumn header "SOURCE_NOTE"
+
+--     orgCol =
+--         findColumn header "SOURCE_ORGANIZATION"
+
+--     parse row =
+--         Indicator
+--             { indicatorId =
+--                 IndicatorId (cell row codeCol)
+
+--             , indicatorName =
+--                 cell row nameCol
+
+--             , sourceNote =
+--                 cell row noteCol
+
+--             , sourceOrganization =
+--                 cell row orgCol
+--             }
 
 type Row    = V.Vector Text
 type Header = Row

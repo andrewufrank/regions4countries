@@ -12,7 +12,7 @@ module BaseTest.Region
 import R4C.Model
 import qualified Data.Text as T
 import Database.SQLite.Simple  -- for debug
-import BaseTest.Indicator
+-- import BaseTest.Indicator
 
 regionMembers :: [(RegionId, CountryId)]
 regionMembers = concat

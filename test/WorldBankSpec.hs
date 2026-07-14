@@ -29,9 +29,9 @@ sampleCSV = BL.pack $
 
 testParseWorldBank :: Assertion
 testParseWorldBank = do
-    let (indicator, observations) = parseWorldBank sampleCSV
+    let (observations) = parseWBindicator sampleCSV
 
-    indicatorId indicator @?= IndicatorId "SP.POP.TOTL"
+    -- indicatorId indicator @?= IndicatorId "SP.POP.TOTL"
 
     observations
         @?=
@@ -50,7 +50,7 @@ testCountryMeta = do
             "test/testdata/Metadata_Country_API_SM.POP.NETM_DS2_en_csv_v2_4998.csv"
     -- print (take 120 (BL.unpack bytes))
     let countries =
-            parseWBCountries bytes
+            parseWBcountries bytes
 
     insertCountries conn countries
 
@@ -72,29 +72,31 @@ testIndicatorMeta = do
 
     createSchema conn
 
-    bytes <-
-        BL.readFile
+    indicator <-
+        readIndicatorMetadataFile
             "test/testdata/Metadata_Indicator_API_SM.POP.NETM_DS2_en_csv_v2_4998.csv"
 
-    let indicators =
-            readIndicatorMetadataFile bytes
-
-    insertIndicators conn indicators
+    insertIndicator conn indicator
 
     stored <-
         indicators4db conn
 
-    length stored @?= length indicators
+    length stored @?= 1
+
+    let actual =
+            head stored
+
+    indicatorId actual @?= indicatorId indicator
+
+    indicatorName actual @?= indicatorName indicator
+
+    sourceOrganization actual @?= sourceOrganization indicator
 
     assertBool
-        "Population indicator missing"
-        ( IndicatorId "SP.POP.TOTL"
-            `elem`
-                map indicatorId stored
-        )
-
+        "indicator is net migration"
+        (indicatorName actual == "Net migration")
+        
     closeDB conn
-
 
 
 {-

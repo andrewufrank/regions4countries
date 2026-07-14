@@ -13,7 +13,7 @@ module Study.Tab1
 import R4C.Model
 import qualified Data.Text as T
 import Database.SQLite.Simple  -- for debug
-import Study.Indicator 
+-- import Study.Indicator 
 import Study.Region2 
 import R4C.Aggregate 
 import R4C.Query

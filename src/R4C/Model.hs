@@ -240,3 +240,12 @@ instance FromField Aggregation where
     fromField f = do
         txt <- fromField f
         pure (textToAggregation txt)
+
+instance FromRow Indicator where
+    fromRow =
+        Indicator
+            <$> field
+            <*> field
+            <*> field
+            <*> field
+            <*> (read <$> field)

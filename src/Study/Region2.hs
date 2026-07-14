@@ -13,7 +13,7 @@ import R4C.Model
 import qualified Data.Text as T
 import Data.List (nub)
 import Database.SQLite.Simple  -- for debug
-import Study.Indicator
+-- import Study.Indicator
 
 regionsList :: [RegionId]
 regionsList = nub $ map fst regionMembers

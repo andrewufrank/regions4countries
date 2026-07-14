@@ -25,7 +25,7 @@ dependencies:
   - sqlite-simple
   - filepath 
   - directory
-
+  - zip-archive
   
 library:
   source-dirs: src
@@ -62,8 +62,10 @@ ghc-options:
     -fno-warn-missing-home-modules
     -fno-warn-duplicate-exports 
     -fno-warn-incomplete-patterns 
+    -Wno-warn-missing-fields  
     -Wno-name-shadowing  
     -Wno-incomplete-record-updates
+    # no-warn-missing-fields perhpas not a good idea for always?
     # -Wunused-packages  # only useful for clean (after deleting dist)
     
 default-extensions: 

@@ -169,6 +169,19 @@ insertIndicator conn ind =
         , show (aggregation ind)  -- fills with sum
         )
 
+indicators4db
+    :: Connection
+    -> IO [Indicator]
+
+indicators4db conn =
+    query_ conn
+        "SELECT indicator,\
+        \       name,\
+        \       sourceNote,\
+        \       sourceOrganization,\
+        \       aggregation \
+        \FROM indicator"
+        
 -----------------------------------observations
 insertObservation
     :: Connection

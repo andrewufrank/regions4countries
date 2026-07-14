@@ -5,7 +5,7 @@
 -- and the database storing  
 -----------------------------------------------------------------------------
 module R4C.Orchestrator
-    ( importWorldBankFiles
+    ( importWorldBankArchives
     ) where
 
 import Database.SQLite.Simple
@@ -14,52 +14,74 @@ import Control.Monad (forM_)
 
 import R4C.WorldBank
 import R4C.Database
+import UniformBase
 
-importWorldBankFiles
+
+importWorldBankArchives
     :: FilePath      -- database
-    -> [FilePath]    -- World Bank CSV files
+    -> [FilePath]    -- World Bank CSV archives
     -> IO ()
-importWorldBankFiles dbName files = do
+importWorldBankArchives dbName files = do
 
     conn <- open dbName
 
     createSchema conn
 
     withTransaction conn $
-        forM_ files (importOneIndicatorFile conn)
+        forM_ files (importOneArchive conn)
 
     close conn
 
 ------------------------------------------------------------
-
-importOneIndicatorFile
+importOneArchive
     :: Connection
     -> FilePath
     -> IO ()
-importOneIndicatorFile conn file = do
+importOneArchive conn archiveFile = do
 
-    putStrLn ("Importing " ++ file)
+    archive <-
+        readArchive archiveFile
 
-    (observations) <- readIndicatorFile file
+    insertIndicator
+        conn
+        (archiveIndicator archive)
 
-    -- insertIndicator conn indicator
-    insertObservations conn observations
+    insertCountries
+        conn
+        (archiveCountries archive)
 
-    putStrLn $
-        "  imported "
-        ++ show (length observations)
-        ++ " observations"
+    insertObservations
+        conn
+        (archiveObservations archive)
+
+-- importOneIndicatorFile
+--     :: Connection
+--     -> FilePath
+--     -> IO ()
+-- importOneIndicatorFile conn file = do
+
+--     putStrLn ("Importing " ++ file)
+
+--     (observations) <- readIndicatorFile file
+
+--     -- insertIndicator conn indicator
+--     insertObservations conn observations
+
+--     putStrLn $
+--         "  imported "
+--         ++ show (length observations)
+--         ++ " observations"
     
-importIndicatorFile
-    :: Connection
-    -> FilePath
-    -> IO ()
-importIndicatorFile conn file = do
+-- importIndicatorFile
+--     :: Connection
+--     -> FilePath
+--     -> IO ()
+-- importIndicatorFile conn file = do
 
-    (_indicator, observations) <-
-        readIndicatorFile file
+--     (_indicator, observations) <-
+--         readIndicatorFile file
 
-    insertObservations conn observations
-    countries <- readCountryMetadataFile countryPath
-    return ()
+--     insertObservations conn observations
+--     countries <- readCountryMetadataFile countryPath
+--     return ()
 
