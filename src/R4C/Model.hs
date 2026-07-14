@@ -26,8 +26,10 @@ newtype CountryId = CountryId Text
 
 data Country = Country
     { countryId   :: CountryId
-    , countryName :: Text
-    -- , countryRegion    :: RegionId  -- country - region is many to many 
+    , countryName :: Text  -- ^ english, the WB tabble name
+    , countryRegion    :: Text -- ^ the WB region 
+    , countryIncomeGroup :: Text -- ^ the WB incomeGroup
+    , countrySpecialNotes :: Text -- ^ the WB specialNotes 
     }
     deriving (Eq, Ord, Show)
 
@@ -160,4 +162,21 @@ instance FromRow YearValue where
         YearValue
             <$> field
             <*> field
-                
+
+instance ToRow Country where
+    toRow c =
+        [ toField (countryId c)
+        , toField (countryName c)
+        , toField (countryRegion c)
+        , toField (countryIncomeGroup c)
+        , toField (countrySpecialNotes c)
+        ]
+
+instance FromRow Country where
+    fromRow =
+        Country
+            <$> field
+            <*> field
+            <*> field
+            <*> field
+            <*> field                       

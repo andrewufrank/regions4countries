@@ -1,11 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.39.3.
+-- This file has been generated from package.yaml by hpack version 0.39.6.
 --
 -- see: https://github.com/sol/hpack
 
 name:           Regions4Countries
-version:        0.0.3
+version:        0.0.4
 synopsis:       produce statistics for world regions from country data
 description:    Given national statistics data, produce statistics for arbitrary defined regions of the world.
                 The region definitions and the statistics are separated from the base library.
@@ -20,6 +20,7 @@ build-type:     Simple
 
 library
   exposed-modules:
+      BaseTest.Config
       BaseTest.Indicator
       BaseTest.Region
       R4C.Aggregate

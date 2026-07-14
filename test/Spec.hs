@@ -17,7 +17,7 @@ import qualified OrchestratorSpec
 main :: IO ()
 main =
   defaultMain $
-    testGroup "Regions4Countries"
+    testGroup "Spec"
       [ WorldBankSpec.tests
       , AggregateSpec.tests
       , RegionSpec.tests

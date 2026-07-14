@@ -9,7 +9,7 @@ import R4C.Aggregate
 
 tests :: TestTree
 tests =
-  testGroup "Region"
+  testGroup "RegionSpec"
     [ testCase "G7 has seven members" $
         length (countriesInRegion regionMembers (RegionId "G7")) @?= 7
 

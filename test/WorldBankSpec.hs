@@ -1,17 +1,21 @@
 module WorldBankSpec (tests) where
 
 import qualified Data.ByteString.Lazy.Char8 as BL
+import Database.SQLite.Simple
 
 import Test.Tasty
 import Test.Tasty.HUnit
 
 import R4C.Model
-import R4C.WorldBank
+import R4C.WorldBank 
+import R4C.Database
+import BaseTest.Config
 
 tests :: TestTree
 tests =
-  testGroup "WorldBank"
+  testGroup "WorldBankSpec"
     [ testCase "parseWorldBank reads multi-year CSV with Series headers" testParseWorldBank
+    , testCase "import country metadata" testCountryMeta
     ]
 
 sampleCSV :: BL.ByteString
@@ -25,15 +29,43 @@ sampleCSV = BL.pack $
 
 testParseWorldBank :: Assertion
 testParseWorldBank = do
-  let (indicator, observations) = parseWorldBank sampleCSV
+    let (indicator, observations) = parseWorldBank sampleCSV
 
-  indicatorId indicator @?= IndicatorId "SP.POP.TOTL"
+    indicatorId indicator @?= IndicatorId "SP.POP.TOTL"
 
-  observations
-    @?=
-      [ Observation (CountryId "AUT") (IndicatorId "SP.POP.TOTL") (Year 2020) (Value 8916864)
-      , Observation (CountryId "AUT") (IndicatorId "SP.POP.TOTL") (Year 2021) (Value 8955797)
-      ]
+    observations
+        @?=
+        [ Observation (CountryId "AUT") (IndicatorId "SP.POP.TOTL") (Year 2020) (Value 8916864)
+        , Observation (CountryId "AUT") (IndicatorId "SP.POP.TOTL") (Year 2021) (Value 8955797)
+        ]
+
+testCountryMeta :: Assertion
+testCountryMeta = do 
+    conn <- open ":memory:"
+
+    createSchema conn
+
+    bytes <-
+        BL.readFile
+            "test/testdata/Metadata_Country_API_SM.POP.NETM_DS2_en_csv_v2_4998.csv"
+    -- print (take 120 (BL.unpack bytes))
+    let countries =
+            parseWBCountries bytes
+
+    insertCountries conn countries
+
+    stored <- countries4db conn
+
+    length stored @?= length countries
+
+    assertBool
+        "Austria missing"
+        (CountryId "AUT" `elem` map countryId stored)
+
+    closeDB conn
+
+
+
 
 {-
 ---  old tests

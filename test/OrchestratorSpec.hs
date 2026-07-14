@@ -33,7 +33,7 @@ testOrchestrator = do
         [ 
             -- "/home/frank/Desktop/buecher/nextOrder/WorldBankData/population/f27274b4-7384-4c6e-b81d-7ddf2ac9bb9a_Data.csv"
             -- , 
-            "/home/frank/Desktop/buecher/nextOrder/WorldBankData/surfaceArea/API_AG.SRF.TOTL.K2_DS2_en_csv_v2_4649.csv"
+            "test/testdata/API_AG.SRF.TOTL.K2_DS2_en_csv_v2_4649.csv"
             ]
 
     conn <- open db
@@ -81,7 +81,7 @@ surfaceAreaAustria conn = do
         \WHERE country = ? \
         \AND indicator = ? \
         \ORDER BY year"
-        ("AUT", "AG.SRF.TOTL.K2") 
+        (CountryId "AUT", IndicatorId "AG.SRF.TOTL.K2") 
     pure rows 
 
     

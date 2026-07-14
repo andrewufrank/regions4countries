@@ -1,5 +1,8 @@
 # ChangeLog for EconomyDiffEq
 
+0.0.4 add the country name etc. to the database 
+
+
 0.0.3 separate folder for each study. (baseTest, pt)
     produce md table (which can be sorted)
     add makedb to create a new db 

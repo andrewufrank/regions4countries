@@ -4,9 +4,7 @@
 -- read a csv file from the world bank and convert 
 -----------------------------------------------------------------------------
 
-module R4C.WorldBank ( importFile
-, parseWorldBank
-  ) where 
+module R4C.WorldBank  where 
 
 import UniformBase 
 import R4C.Model 
@@ -31,46 +29,109 @@ importFile file = do
     bytes <- BL.readFile file
     pure (parseWorldBank bytes)
 
+-- parseWorldBank
+--     :: BL.ByteString
+--     -> (Indicator, [Observation])
+-- parseWorldBank bytes =
+--     (indicator, observations)
+--   where
+--     rows = decodeCSV bytes
+
+--     header   = headerRow rows
+--     dataRows = countryRows rows
+
+--     firstRow =
+--         case dataRows of
+--             []    -> error "No data rows in World Bank file"
+--             r : _ -> r
+
+--     indicator =
+--         parseIndicator header firstRow
+
+--     years =
+--         yearColumns header
+
+--     countryCol =
+--         countryCodeColumn header
+
+--     observations =
+--         concatMap
+--             (parseCountry countryCol years indicator)
+--             dataRows
+
 parseWorldBank
     :: BL.ByteString
     -> (Indicator, [Observation])
+-- | parse a WorldBank Indicator csv file 
 parseWorldBank bytes =
-    (indicator, observations)
+    case decodeCSV . dropPreamble $ bytes of
+        [] ->
+            error "empty World Bank file"
+        header : dataRows ->
+            case dataRows of
+                [] ->
+                    error "No data rows in World Bank file"
+                firstRow : _ ->
+                    (indicator, observations)
+                  where
+                    indicator =
+                        parseIndicator header firstRow
+                    years =
+                        yearColumns header
+                    countryCol =
+                        countryCodeColumn header
+                    observations =
+                        concatMap
+                            (parseCountry countryCol years indicator)
+                            dataRows
+
+
+parseWBCountries bytes =
+    map parseCountryRow dataRows
   where
-    rows = decodeCSV bytes
+    rows =
+        decodeCSV bytes
 
-    header   = headerRow rows
-    dataRows = countryRows rows
+    header : dataRows =
+        rows
 
-    firstRow =
-        case dataRows of
-            []    -> error "No data rows in World Bank file"
-            r : _ -> r
-
-    indicator =
-        parseIndicator header firstRow
-
-    years =
-        yearColumns header
-
-    countryCol =
+    countryCodeCol =
         countryCodeColumn header
 
-    observations =
-        concatMap
-            (parseCountry countryCol years indicator)
-            dataRows
+    tableNameCol =
+        tableNameColumn header
 
+    regionCol =
+        regionColumn header
+
+    incomeGroupCol =
+        incomeGroupColumn header
+
+    specialNotesCol =
+        specialNotesColumn header
+
+    parseCountryRow row =
+        Country
+            { countryId =
+                CountryId (cell row countryCodeCol)
+            , countryName =
+                cell row tableNameCol
+            , countryRegion =
+                cell row regionCol
+            , countryIncomeGroup =
+                cell row incomeGroupCol
+            , countrySpecialNotes =
+                cell row specialNotesCol
+            }
 
 type Row    = V.Vector Text
 type Header = Row
 
 decodeCSV :: BL.ByteString -> [Row]
 decodeCSV bytes =
-    case Csv.decode Csv.NoHeader (dropPreamble bytes) of
+    case Csv.decode Csv.NoHeader (stripBom bytes) of
         Left err ->
             error err
-
         Right rows ->
             map (V.map decode) (V.toList rows)
   where
@@ -87,29 +148,6 @@ dropPreamble =
         let txt = TextEncoding.decodeUtf8 (BL.toStrict line)
         in  "Country Name" `Text.isInfixOf` txt
          && "Country Code" `Text.isInfixOf` txt
-
--- dropUntilHeader :: [Row] -> [Row]
--- dropUntilHeader =
---     dropWhile (not . isHeader)
-
--- dropPreamble :: BL.ByteString -> BL.ByteString
--- dropPreamble =
---     BC.unlines
---     . dropWhile (not . isHeader)
---     . BC.lines
---   where
--- isHeader line =
---        "\"Country Name\"" `BC.isInfixOf` line
---     || "\"Country Code\"" `BC.isInfixOf` line
--- isHeader line =
---     "\"Country Name\",\"Country Code\"" `BC.isPrefixOf` line
--- isHeader line =
---         "\"Country Name\"" `BC.isPrefixOf` line
-
--- isHeader :: Row -> Bool
--- isHeader row =
---     not (V.null row)
---         && row V.! 0 == "Country Name" -- "Country Name"  
 
 parseIndicator :: Header -> Row -> Indicator
 parseIndicator hdr row =
@@ -147,13 +185,29 @@ countryCodeColumn :: Header -> Int
 countryCodeColumn hdr =
     findColumn hdr "Country Code"
 
--- countryCol = countryCodeColumn header
+tableNameColumn :: Header -> Int
+tableNameColumn hdr =
+    findColumn hdr "TableName"
+
+regionColumn :: Header -> Int
+regionColumn hdr =
+    findColumn hdr "Region"
+
+incomeGroupColumn :: Header -> Int
+incomeGroupColumn hdr =
+    findColumn hdr "IncomeGroup"
+
+specialNotesColumn :: Header -> Int
+specialNotesColumn hdr =
+    findColumn hdr "SpecialNotes"
 
 findColumn :: Header -> Text -> Int
 findColumn hdr name =
     case V.findIndex (== name) hdr of
         Just i  -> i
         Nothing -> error ("Column not found: " ++ Text.unpack name)
+
+---- end of find column header
 
 yearColumns
     :: Header
@@ -206,14 +260,6 @@ parseValue t
     | Text.null t  = Nothing
     | otherwise = Value <$> readMaybe (Text.unpack t)
 
--- saveIndicator db ind
--- saveObservations db obs
-
--- readFile :: FilePath -> IO ByteString
---         ↓
--- parseWorldBank :: ByteString -> Either Error (Indicator, [Observation])
-
-
 -- HELPER
 
 cell :: Row
@@ -222,12 +268,19 @@ cell :: Row
 -- get a cell from a row 
 cell row i = row V.! i
 
-headerRow :: [Row] -> Header
-headerRow (hdr : _) = hdr
-headerRow [] =
-    error "empty World Bank file"
+stripBom :: BL.ByteString -> BL.ByteString
+stripBom bs
+    | BL.isPrefixOf bom bs = BL.drop 3 bs
+    | otherwise            = bs
+  where
+    bom = BL.pack [0xEF,0xBB,0xBF]
 
-countryRows :: [Row] -> [Row]
-countryRows (_hdr : rows) = rows
-countryRows [] = []
+-- headerRow :: [Row] -> Header
+-- headerRow (hdr : _) = hdr
+-- headerRow [] =
+--     error "empty World Bank file"
+
+-- countryRows :: [Row] -> [Row]
+-- countryRows (_hdr : rows) = rows
+-- countryRows [] = []
 

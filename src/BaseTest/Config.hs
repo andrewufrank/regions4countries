@@ -6,14 +6,15 @@
 
 -----------------------------------------------------------------------------
 
-module Study.Config (filesUsed, dbPath) where
+module BaseTest.Config (filesUsed, dbPath) where
 
 databaseFolder = "/home/frank/afWorldDB/"
 
-databaseNmae = "r4cdb4" 
+databaseNmae = "r4ctestdb4" 
 
 dbPath = databaseFolder ++ databaseNmae ++ ".sqlite"
 
 filesUsed :: FilePath
 filesUsed =
     "/home/frank/Desktop/buecher/WorldBankData/filesUsed"
+    

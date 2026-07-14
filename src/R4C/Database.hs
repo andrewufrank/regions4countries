@@ -4,19 +4,21 @@
 -- store (bulk load) the observations from the read CSV file 
 -----------------------------------------------------------------------------
 
-module R4C.Database   ( openDB
-  , closeDB
-  , createSchema
-  , insertObservation
-  , insertObservations
-  , insertIndicator
-  , observations
-  , observationsForCountry
-  , observationsForIndicator
-  , CountryTable
-  , CountryValue(..)
-  , lookupTable
-  ) where
+module R4C.Database   
+-- ( openDB
+--   , closeDB
+--   , createSchema
+--   , insertObservation
+--   , insertObservations
+--   , insertIndicator
+--   , observations
+--   , observationsForCountry
+--   , observationsForIndicator
+--   , CountryTable
+--   , CountryValue(..)
+--   , lookupTable
+--   ) 
+  where
 
 import Database.SQLite.Simple
 
@@ -38,7 +40,10 @@ createSchema conn =
         execute_ conn
             "CREATE TABLE IF NOT EXISTS country (\
             \ country TEXT PRIMARY KEY,\
-            \ name TEXT NOT NULL\
+            \ name TEXT NOT NULL,\
+            \ region TEXT NOT NULL,\
+            \ incomeGroup TEXT NOT NULL,\
+            \ specialNotes TEXT NOT NULL\
             \)"
 
         execute_ conn
@@ -103,7 +108,43 @@ lookupTable conn ind yr =
         \WHERE indicator = ? AND year = ?"
         (ind, yr)
 
+------------------------------------------------------Country record 
+insertCountry
+    :: Connection
+    -> Country
+    -> IO ()
 
+insertCountry conn country =
+    execute conn
+        "INSERT OR REPLACE INTO country \
+        \VALUES (?,?,?,?,?)"
+        ( countryId country
+        , countryName country
+        , countryRegion country
+        , countryIncomeGroup country
+        , countrySpecialNotes country
+        )
+
+insertCountries
+    :: Connection
+    -> [Country]
+    -> IO ()
+
+insertCountries conn =
+    executeMany conn
+        "INSERT OR REPLACE INTO country \
+        \VALUES (?,?,?,?,?)"
+
+countries4db
+    :: Connection
+    -> IO [Country]
+
+countries4db conn =
+    query_ conn
+        "SELECT country, name, region, incomeGroup, specialNotes \
+        \FROM country"
+
+-----------------------------------observations
 insertObservation
     :: Connection
     -> Observation

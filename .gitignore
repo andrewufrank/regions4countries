@@ -4,6 +4,7 @@ dist-newstyle
 .HTF
 *.sqlite
 */*.sqlite
+test/testdata/*
 \#*#
 *~
 *.lkshs
