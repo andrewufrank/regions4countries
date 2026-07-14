@@ -195,11 +195,7 @@ assertBool "message" condition
 
 instead of printing output.
 
-## Current development priorities
-
-1. find error in usacan region population
-5. Continue implementing regional aggregation and indicator support.
-4. Later add a command-line application in `app/`.
+ 
 
 ## Design principles
 

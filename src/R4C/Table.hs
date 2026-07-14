@@ -35,7 +35,7 @@ markdownTable regions cols =
         "| Region | " ++ intercalate " | " (map colTitle cols) ++ " |"
 
     separator =
-        "|---|" ++ concat (replicate (length cols) "---|")
+        "|:---|" ++ concat (replicate (length cols) "---:|")  -- the colon controls alignement
 
     row r =
         "| " ++ showRegion r ++ " | "
