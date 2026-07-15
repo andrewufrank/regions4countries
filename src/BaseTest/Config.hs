@@ -16,5 +16,5 @@ dbPath = databaseFolder ++ databaseNmae ++ ".sqlite"
 
 filesUsed :: FilePath
 filesUsed =
-    "/home/frank/Desktop/buecher/WorldBankData/filesUsed"
+    "/home/frank/Desktop/buecher/WorldBankData/archivesUsed"
     

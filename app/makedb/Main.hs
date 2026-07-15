@@ -21,26 +21,29 @@ import R4C.Orchestrator
 
 main :: IO ()
 main = do
-    csvPaths <- findCsvFiles filesUsed
+    csvPaths <- findZipFiles filesUsed
     when (null csvPaths) $
-        die $ "makedb: no CSV files found in " ++ filesUsed
+        die $ "makedb: no Zip archives found in " ++ filesUsed
 
     removeOldDatabase dbPath
 
     putStrLn $ "Creating database: " ++ dbPath
-    putStrLn $ "Loading CSV files from: " ++ "/home/frank/Desktop/buecher/nextOrder/WorldBankData/filesUsed"
+    -- is implied in importWorldArchives
+    
+    putStrLn $ " and Loading WorldBank archives from: " 
+        ++ filesUsed
 
     mapM_ printInputFile csvPaths
 
     putStrLn "start loading"
-    importWorldBankFiles dbPath csvPaths
+    importWorldBankArchives dbPath csvPaths
 
     putStrLn $ "Imported " ++ show (length csvPaths) ++ " file(s)"
     putStrLn "Database creation complete."
 
 
-findCsvFiles :: FilePath -> IO [FilePath]
-findCsvFiles directory = do
+-- findCsvFiles :: FilePath -> IO [FilePath]
+findZipFiles directory = do
     exists <- doesDirectoryExist directory
 
     when (not exists) $
@@ -51,7 +54,7 @@ findCsvFiles directory = do
     pure
         [ directory </> name
         | name <- sort names
-        , takeExtension name == ".csv"
+        , takeExtension name == ".zip"
         ]
 
 

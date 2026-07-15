@@ -21,6 +21,7 @@ import R4C.Table
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import Study.Config 
+import Study.Dataset 
 
 popsSurf :: p -> IO ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
 popsSurf conn =  do 
@@ -99,7 +100,7 @@ getData12 = do
 testlatest :: IO () 
 testlatest = do 
     conn <- open "test.sqlite" 
-    mObs <- latestObservation conn (CountryId "AUT") (indicatorId surfaceArea)
+    mObs <- latestObservation conn (CountryId "AUT") (dsIndicator surfaceArea)
     case mObs of
         Nothing ->
             print "nothing found" 
