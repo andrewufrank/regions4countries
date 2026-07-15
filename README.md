@@ -67,59 +67,194 @@ For the *next* book (folder Study) I should have for each tableau a file which s
 then produce each column with the aggregate function and other processing (e.g. scaling) and then combine them into a markdown table for inclusion in book.
 
 # Chat summary -  Regions4Countries (R4C) – Project Summary
+# Regions4Countries – Project Summary
 
-## Goal
+## Purpose
 
-A Haskell library for importing World Bank indicator data, storing it in SQLite, and computing regional aggregates (sum, weighted average, etc.). The library should be reusable; test code and applications should be kept separate.
+Regions4Countries is a Haskell library for working with country-level indicator data, primarily from the World Bank. It provides facilities to import, store, query and aggregate observations while keeping the library independent from any particular application.
 
-## Current module structure
+---
 
-* `R4C.Model`
+## Project structure
 
-  * Core data types:
+### `R4C.Model`
 
-    * `CountryId`
-    * `RegionId`
-    * `IndicatorId`
-    * `Year`
-    * `Value`
-    * `Observation`
-    * `YearValue`
-* `R4C.WorldBank`
+Core domain types.
 
-  * Parse World Bank CSV files.
-  * Support both:
+Main entities:
 
-    * `Indicator Name` / `Indicator Code`
-    * `Series Name` / `Series Code`
-  * Skip metadata rows automatically.
-* `R4C.Database`
+* `Country`
+* `Region`
+* `Indicator`
+* `Observation`
 
-  * SQLite schema creation.
-  * Insert observations.
-* `R4C.Query`
+Identifiers are lightweight wrappers around `Text`:
 
-  * Query functions returning observations and year/value series.
-* `R4C.Aggregate`
+```haskell
+CountryId
+RegionId
+IndicatorId
+```
 
-  * Aggregation functions:
+### Indicators
 
-    * `aggregate`
-    * `weightedAverage`
-* `R4C.Region`
+```haskell
+Indicator
+    { indicatorId         :: IndicatorId
+    , indicatorName       :: Text
+    , sourceNote          :: Text
+    , sourceOrganization  :: Text
+    , aggregation         :: Aggregation
+    }
+```
 
-  * Region definitions.
-* `R4C.Indicator`
+Current aggregation model:
 
-  * Indicator definitions.
-* `R4C.Orchestrator`
+```haskell
+data Aggregation
+    = Sum
+    | Mean
+    | WeightedBy IndicatorId
+```
 
-  * Imports one or more World Bank files into a database.
-  * Keep this module for now.
+Indicators are imported from the World Bank metadata file with
 
-## Region model
+```haskell
+aggregation = Sum
+```
 
-Regions are data, not constructors.
+The aggregation value represents application semantics rather than World Bank metadata.
+
+---
+
+## `R4C.WorldBank`
+
+Responsible only for reading World Bank data.
+
+Supports parsing of:
+
+### Observation files
+
+```
+API_....csv
+```
+
+Returns
+
+```haskell
+[Observation]
+```
+
+### Country metadata
+
+```
+Metadata_Country_....csv
+```
+
+Returns
+
+```haskell
+[Country]
+```
+
+### Indicator metadata
+
+```
+Metadata_Indicator_....csv
+```
+
+Returns
+
+```haskell
+Indicator
+```
+
+### World Bank archive
+
+A World Bank download ZIP archive contains
+
+* one observation CSV
+* one country metadata CSV
+* one indicator metadata CSV
+
+The module provides
+
+```haskell
+readArchive
+    :: FilePath
+    -> IO WorldBankArchive
+```
+
+where
+
+```haskell
+WorldBankArchive
+    { archiveIndicator
+    , archiveCountries
+    , archiveObservations
+    }
+```
+
+`readArchive` is implemented by extracting the three CSV files and reusing the individual parsers.
+
+The individual parsers remain public so that World Bank CSV files can also be used independently of ZIP archives.
+
+---
+
+## `R4C.Database`
+
+Responsible only for persistence.
+
+Creates the SQLite schema.
+
+Stores
+
+* countries
+* indicators
+* observations
+
+Provides functions such as
+
+```haskell
+insertCountry
+insertCountries
+
+insertIndicator
+
+insertObservation
+insertObservations
+
+countries4db
+indicators4db
+observations
+```
+
+The database is viewed as the application's data store rather than a direct mirror of the World Bank files.
+
+Country information may later be enriched (for example German names) without changing the World Bank importer.
+
+---
+
+## `R4C.Query`
+
+Provides query functions returning observations and year/value series.
+
+---
+
+## `R4C.Aggregate`
+
+Provides aggregation functions including
+
+```haskell
+aggregate
+weightedAverage
+```
+
+---
+
+## `R4C.Region`
+
+Defines regions as data rather than constructors.
 
 Example:
 
@@ -135,53 +270,77 @@ Membership is represented as
 [(RegionId, CountryId)]
 ```
 
-using a helper
+using
 
 ```haskell
-mk :: Text -> [Text] -> [(RegionId, CountryId)]
+mk
+    :: Text
+    -> [Text]
+    -> [(RegionId, CountryId)]
 ```
 
 Overlapping regions are allowed.
 
-## Indicators
+---
 
-Indicators are identified by World Bank codes, for example
+## `R4C.Orchestrator`
+
+Coordinates imports but contains as little logic as possible.
+
+Primary function:
 
 ```haskell
-IndicatorId "SP.POP.TOTL"
-IndicatorId "AG.SRF.TOTL.K2"
+importArchive
+    :: Connection
+    -> FilePath
+    -> IO ()
 ```
 
-`R4C.Indicator` provides named constants such as `population`.
+Workflow:
+
+1. read a World Bank ZIP archive
+2. insert indicator metadata
+3. insert country metadata
+4. insert observations
+
+The orchestrator delegates parsing to `R4C.WorldBank` and persistence to `R4C.Database`.
+
+Higher-level convenience functions (for importing directories of archives) may be added later.
+
+---
 
 ## Testing
 
-Using **tasty** + **tasty-hunit**.
+Framework:
 
-Directory:
+* tasty
+* tasty-hunit
 
-```text
+Directory layout:
+
+```
 test/
     Spec.hs
     WorldBankSpec.hs
+    DatabaseSpec.hs
     AggregateSpec.hs
-    OrchestratorSpec.hs
     RegionSpec.hs
     IndicatorSpec.hs
-    DatabaseSpec.hs
+    OrchestratorSpec.hs
 
-test/data/
+test/testdata/
 ```
 
-`Spec.hs` imports each test module qualified and combines them into one `TestTree`.
+Tests use real World Bank sample files rather than embedded CSV strings.
 
-Current integration test:
+SQLite integration tests use
 
-* import population and surface-area World Bank CSV files
-* query Austria's surface area
-* verify expected values with assertions rather than `print`
+```haskell
+open ":memory:"
+createSchema conn
+```
 
-Tests should use
+Assertions use
 
 ```haskell
 actual @?= expected
@@ -190,22 +349,32 @@ actual @?= expected
 or
 
 ```haskell
-assertBool "message" condition
+assertBool
 ```
 
-instead of printing output.
+rather than printing values.
 
- 
+---
 
 ## Design principles
 
-* Keep the library independent of the application.
+* Keep the library independent of applications.
+* Separate parsing, persistence and orchestration.
+* Prefer small, composable functions.
+* Keep parsers usable independently of archive imports.
 * Test pure functions first.
-* Use integration tests only where necessary.
-* Prefer real World Bank sample files in `test/data` over embedded CSV strings.
-* Use an SQLite test database for integration tests.
-* Avoid hard-coded paths in library code.
-* use indent 4 spaces
-* prefer 'where' instead of 'let' constructions 
-* use package.yaml not .cabal 
-* package name is Regions4Countries and is stored in github as git@github.com:andrewufrank/regions4countries.git
+* Use integration tests only where appropriate.
+* Use real World Bank sample files.
+* Use SQLite for persistence.
+* Use `package.yaml`.
+* Package name: `Regions4Countries`.
+* Repository:
+
+```
+git@github.com:andrewufrank/regions4countries.git
+```
+
+* Prefer four-space indentation.
+* Prefer `where` over `let`.
+
+

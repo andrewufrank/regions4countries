@@ -9,6 +9,7 @@ import R4C.Database
 -- import BaseTest.Indicator
 import BaseTest.Region
 import R4C.Model
+import BaseTest.Dataset
 
 tests :: TestTree
 tests =
@@ -22,10 +23,10 @@ testAggregateG7 = do
     createSchema conn
 
     insertObservations conn
-        [ Observation (CountryId "USA") (indicatorId population) (Year 2024) (Value 100)
-        , Observation (CountryId "CAN") (indicatorId population) (Year 2024) (Value 10)
-        , Observation (CountryId "DEU") (indicatorId population) (Year 2024) (Value 20)
-        , Observation (CountryId "AUT") (indicatorId population) (Year 2024) (Value 999)
+        [ Observation (CountryId "USA") (dsIndicator population) (Year 2024) (Value 100)
+        , Observation (CountryId "CAN") (dsIndicator population) (Year 2024) (Value 10)
+        , Observation (CountryId "DEU") (dsIndicator population) (Year 2024) (Value 20)
+        , Observation (CountryId "AUT") (dsIndicator population) (Year 2024) (Value 999)
         ]
 
     result <- aggregate regionMembers conn population (Year 2024) (RegionId "G7")

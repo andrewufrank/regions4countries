@@ -69,9 +69,9 @@ createSchema conn =
             \ indicator TEXT PRIMARY KEY,\
             \ name TEXT NOT NULL,\
             \ sourceNote TEXT NOT NULL,\
-            \ sourceOrganization TEXT NOT NULL,\
-            \ aggregation TEXT NOT NULL\
+            \ sourceOrganization TEXT NOT NULL\
             \)"
+            -- \ aggregation TEXT NOT NULL\
 
         execute_ conn
             "CREATE TABLE IF NOT EXISTS observation (\
@@ -161,12 +161,12 @@ insertIndicator
 insertIndicator conn ind =
     execute conn
         "INSERT OR REPLACE INTO indicator \
-        \VALUES (?,?,?,?,?)"
+        \VALUES (?,?,?,?)"
         ( indicatorId ind
         , indicatorName ind
         , sourceNote ind
         , sourceOrganization ind
-        , show (aggregation ind)  -- fills with sum
+        -- , show (aggregation ind)  -- fills with sum
         )
 
 indicators4db
@@ -179,9 +179,9 @@ indicators4db conn =
         \       name,\
         \       sourceNote,\
         \       sourceOrganization,\
-        \       aggregation \
         \FROM indicator"
         
+        -- \       aggregation \
 -----------------------------------observations
 insertObservation
     :: Connection

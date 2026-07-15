@@ -203,8 +203,8 @@ parseIndicatorMetadataRow hdr row =
         , sourceOrganization =
             cell row orgCol
 
-        , aggregation =
-            Sum
+        -- , aggregation =
+            -- Sum
         }
   where
     codeCol =

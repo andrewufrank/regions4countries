@@ -79,9 +79,16 @@ data Indicator = Indicator
     , indicatorName :: Text
     , sourceNote         :: Text
     , sourceOrganization :: Text    
-    , aggregation   :: Aggregation  -- is not from WB and perhaps not belongs here?
+    -- , aggregation   :: Aggregation  -- is not from WB and perhaps not belongs here?
     }
     deriving (Eq, Ord, Show)
+
+-- | Dataset is my description (indicaor is the WorldBank description)
+data Dataset = Dataset
+    { dsName :: Text 
+    , dsIndicator :: IndicatorId 
+    , aggregation:: Aggregation
+    }
 
 newtype Year = Year Int
     deriving (Eq, Ord, Show)
@@ -248,4 +255,4 @@ instance FromRow Indicator where
             <*> field
             <*> field
             <*> field
-            <*> (read <$> field)
+            -- <*> (read <$> field)

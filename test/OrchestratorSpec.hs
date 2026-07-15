@@ -5,7 +5,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Database.SQLite.Simple
-
+import System.Directory
 import Control.Monad (forM_)
 
 import R4C.Orchestrator
@@ -25,8 +25,8 @@ testOrchestrator :: Assertion
 testOrchestrator = do
     let db = "test4.sqlite"
 
---   exists <- doesFileExist db
---   if exists then removeFile db else pure ()
+    exists <- doesFileExist db
+    if exists then removeFile db else pure ()
 
     importWorldBankArchives
         db

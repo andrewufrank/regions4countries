@@ -21,6 +21,7 @@ build-type:     Simple
 library
   exposed-modules:
       BaseTest.Config
+      BaseTest.Dataset
       BaseTest.Region
       R4C.Aggregate
       R4C.Database
@@ -96,6 +97,7 @@ test-suite r4c-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      AggregateSpec
       OrchestratorSpec
       RegionSpec
       WorldBankSpec

@@ -21,16 +21,11 @@ import R4C.Database
 -- regionsList = nub $ map fst regionMembers
 
 
--- showAggregate
---     :: Connection
---     -> Indicator
---     -> Year
---     -> RegionId
---     -> IO (Maybe Double)
-showAggregate memberships conn ind yr reg = do
-    result <- aggregate memberships conn ind yr reg
+showAggregate :: [(RegionId, CountryId)] -> Connection -> Dataset -> Year -> RegionId -> IO ()
+showAggregate memberships conn ds yr reg = do
+    result <- aggregate memberships conn ds yr reg
     putStrLn $
-        show (indicatorName ind)
+        show (dsName ds)
         ++ " "
         ++ show yr
         ++ " "
@@ -51,14 +46,10 @@ lookupCountryValue c table =
         []    -> Nothing
         v : _ -> Just v
 
--- aggregate
---     :: Connection
---     -> Indicator
---     -> Year
---     -> RegionId
---     -> IO (Maybe Double)
+
+aggregate :: [(RegionId, CountryId)] -> Connection -> Dataset -> Year -> RegionId -> IO (Maybe Double)
 aggregate memberships conn ind year region = do
-    table <- lookupTable conn (indicatorId ind) year
+    table <- lookupTable conn (dsIndicator ind) year
 
     case aggregation ind of
         Sum ->
@@ -68,7 +59,7 @@ aggregate memberships conn ind year region = do
             pure (meanTable memberships table region)
 
         WeightedBy weightInd ->
-            weightedAverage memberships conn (indicatorId ind) weightInd year region
+            weightedAverage memberships conn (dsIndicator ind) weightInd year region
 
 -- sumTable :: CountryTable -> RegionId -> Maybe Double
 sumTable memberships table region =
