@@ -133,43 +133,43 @@ parseWBindicator bytes =
                             dataRows
 
 
+parseWBcountries :: BL.ByteString -> [Country]
 parseWBcountries bytes =
-    map parseCountryRow dataRows
-  where
-    rows =
-        decodeCSV bytes
+    case decodeCSV bytes of
+        [] ->
+            error "CSV file is empty"
 
-    header : dataRows =
-        rows
+        header : dataRows ->
+            map parseCountryRow dataRows
+          where
+            countryCodeCol =
+                countryCodeColumn header
 
-    countryCodeCol =
-        countryCodeColumn header
+            tableNameCol =
+                tableNameColumn header
 
-    tableNameCol =
-        tableNameColumn header
+            regionCol =
+                regionColumn header
 
-    regionCol =
-        regionColumn header
+            incomeGroupCol =
+                incomeGroupColumn header
 
-    incomeGroupCol =
-        incomeGroupColumn header
+            specialNotesCol =
+                specialNotesColumn header
 
-    specialNotesCol =
-        specialNotesColumn header
-
-    parseCountryRow row =
-        Country
-            { countryId =
-                CountryId (cell row countryCodeCol)
-            , countryName =
-                cell row tableNameCol
-            , countryRegion =
-                cell row regionCol
-            , countryIncomeGroup =
-                cell row incomeGroupCol
-            , countrySpecialNotes =
-                cell row specialNotesCol
-            }
+            parseCountryRow row =
+                Country
+                    { countryId =
+                        CountryId (cell row countryCodeCol)
+                    , countryName =
+                        cell row tableNameCol
+                    , countryRegion =
+                        cell row regionCol
+                    , countryIncomeGroup =
+                        cell row incomeGroupCol
+                    , countrySpecialNotes =
+                        cell row specialNotesCol
+                    }
 
 parseWBindicatorMetadata
     :: BL.ByteString

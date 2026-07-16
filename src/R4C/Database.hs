@@ -26,7 +26,8 @@ import Database.SQLite.Simple.ToField
 import Database.SQLite.Simple.FromField
 
 import R4C.Model
-  
+import R4C.Database.Instances
+
 openDB :: FilePath -> IO Connection
 openDB = open
 

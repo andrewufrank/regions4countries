@@ -62,7 +62,7 @@ ghc-options:
     -fno-warn-missing-home-modules
     -fno-warn-duplicate-exports 
     -fno-warn-incomplete-patterns 
-    -Wno-warn-missing-fields  
+    -Wno-missing-fields
     -Wno-name-shadowing  
     -Wno-incomplete-record-updates
     # no-warn-missing-fields perhpas not a good idea for always?

@@ -62,6 +62,7 @@ aggregate memberships conn ind year region = do
             weightedAverage memberships conn (dsIndicator ind) weightInd year region
 
 -- sumTable :: CountryTable -> RegionId -> Maybe Double
+sumTable :: [(RegionId, CountryId)] -> CountryTable -> RegionId -> Maybe Double
 sumTable memberships table region =
     case valuesInRegion memberships table region of
         [] -> Nothing
@@ -87,6 +88,7 @@ countriesInRegion memberships rid =
 --     -> Year
 --     -> RegionId
 --     -> IO (Maybe Double)
+weightedAverage :: [(RegionId, CountryId)] -> Connection -> IndicatorId -> IndicatorId -> Year -> RegionId -> IO (Maybe Double)
 weightedAverage memberships db valInd wtInd yr region = do
     valTable <- lookupTable db valInd yr
     wtTable  <- lookupTable db wtInd yr

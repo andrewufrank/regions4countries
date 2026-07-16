@@ -12,6 +12,7 @@ module R4C.Query where
 
 import Database.SQLite.Simple
 import R4C.Model
+import R4C.Database.Instances
 
 latestObservation
     :: Connection

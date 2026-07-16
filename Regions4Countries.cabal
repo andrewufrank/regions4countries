@@ -25,6 +25,7 @@ library
       BaseTest.Region
       R4C.Aggregate
       R4C.Database
+      R4C.Database.Instances
       R4C.Model
       R4C.Orchestrator
       R4C.Query
@@ -47,7 +48,7 @@ library
       FlexibleInstances
       FlexibleContexts
       InstanceSigs
-  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-warn-missing-fields -Wno-name-shadowing -Wno-incomplete-record-updates
+  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-missing-fields -Wno-name-shadowing -Wno-incomplete-record-updates
   build-depends:
       base ==4.*
     , bytestring
@@ -78,7 +79,7 @@ executable makedb
       FlexibleInstances
       FlexibleContexts
       InstanceSigs
-  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-warn-missing-fields -Wno-name-shadowing -Wno-incomplete-record-updates
+  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-missing-fields -Wno-name-shadowing -Wno-incomplete-record-updates
   build-depends:
       Regions4Countries
     , base ==4.*
@@ -115,7 +116,7 @@ test-suite r4c-test
       FlexibleInstances
       FlexibleContexts
       InstanceSigs
-  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-warn-missing-fields -Wno-name-shadowing -Wno-incomplete-record-updates
+  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-missing-fields -Wno-name-shadowing -Wno-incomplete-record-updates
   build-depends:
       Regions4Countries
     , base ==4.*
