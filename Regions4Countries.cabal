@@ -29,6 +29,7 @@ library
       R4C.Model
       R4C.Orchestrator
       R4C.Query
+      R4C.Statistics
       R4C.Table
       R4C.WorldBank
       Study.Config
@@ -58,6 +59,7 @@ library
     , filepath
     , scientific
     , sqlite-simple
+    , statistics
     , text
     , uniformBase
     , vector
@@ -90,6 +92,7 @@ executable makedb
     , filepath
     , scientific
     , sqlite-simple
+    , statistics
     , text
     , uniformBase
     , vector
@@ -127,6 +130,7 @@ test-suite r4c-test
     , filepath
     , scientific
     , sqlite-simple
+    , statistics
     , tasty
     , tasty-hunit
     , temporary

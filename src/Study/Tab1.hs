@@ -22,6 +22,7 @@ import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import Study.Config 
 import Study.Dataset 
+import R4C.Statistics
 
 popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
 popsSurf conn =  do 
@@ -64,6 +65,8 @@ getData11 = do
     let md = markdownTable sortedRegions mdCols
     putStrLn md 
 
+    -- compute correlation 
+
 getData12 :: IO ()
 -- fig11 
 getData12 = do
@@ -76,7 +79,7 @@ getData12 = do
     -- let surfs2 = zip regionsList surfs
     let surfPerCap = combineRegionTables (/) surfs3 pops3
     -- let netmig2 = zip regionsList netmigration 
-    let netmigPC = combineRegionTables (/) netmigration pops3 
+    let netmigPC = combineRegionTables (/) netmigration pops3 :: RegionTable 
     -- let fertility2 = zip regionsList fertility 
     close conn
 
@@ -94,8 +97,14 @@ getData12 = do
     let md = markdownTable sortedRegions mdCols
     putStrLn md 
 
+    -- compute correlation fertiity and netmigPC 
+    let fertNetmig = regionCorrelation fertility netmigPC
 
+    putStrLn $ "correlation between fertility and net migration per capita" ++ show fertNetmig 
 
+    return ()
+
+ 
 
 -- move later somewhere 
 testlatest :: IO () 

@@ -209,6 +209,7 @@ combineRegionTables f xs ys =
 --             ]
 
 
+
 ---------------OLD 
 -- lookupCountryValue :: CountryId -> CountryTable -> Maybe Double
 -- -- get the value for the county (nothing if counry not existing)

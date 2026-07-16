@@ -26,6 +26,7 @@ dependencies:
   - filepath 
   - directory
   - zip-archive
+  - statistics
   
 library:
   source-dirs: src
