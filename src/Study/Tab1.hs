@@ -23,16 +23,16 @@ import GHC.Generics (Generic1(to1))
 import Study.Config 
 import Study.Dataset 
 
-popsSurf :: p -> IO ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
+popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
 popsSurf conn =  do 
     conn <- open dbPath 
-    pops <- mapM (aggregate regionMembers conn population (Year 2024)) regionsList
-    surfs <- mapM (aggregate regionMembers conn surfaceArea (Year 2023)) regionsList
+    pops <-  (aggregate regionMembers conn population (Year 2024)) 
+    surfs <-  (aggregate regionMembers conn surfaceArea (Year 2023)) 
 
-    let 
-            p =  zip regionsList pops  
-            s =  zip regionsList surfs 
-    return (p,s)
+    -- let 
+    --         p =  zip regionsList pops  
+    --         s =  zip regionsList surfs 
+    return (pops,surfs)
 
 
 
@@ -43,14 +43,14 @@ getData11 = do
     conn <- open dbPath 
     (pops3, surfs3) <- popsSurf conn
 
-    netmigration <- mapM (aggregate regionMembers conn migrationNet (Year 2024)) regionsList 
-    fertility <- mapM (aggregate regionMembers conn fertilityRate (Year 2024)) regionsList 
+    netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
+    fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
 
     -- let surfs2 = zip regionsList surfs
     let surfPerCap = combineRegionTables (/) surfs3 pops3
-    let netmig2 = zip regionsList netmigration 
-    let netmigPC = combineRegionTables (/) netmig2 pops3 
-    let fertility2 = zip regionsList fertility 
+    -- let netmig2 = zip regionsList netmigration 
+    let netmigPC = combineRegionTables (/) netmigration pops3 
+    -- let fertility2 = zip regionsList fertility 
     close conn
 
     let mdCols = 
@@ -70,24 +70,25 @@ getData12 = do
     conn <- open dbPath 
     (pops3, surfs3) <- popsSurf conn
 
-    netmigration <- mapM (aggregate regionMembers conn migrationNet (Year 2024)) regionsList 
-    fertility <- mapM (aggregate regionMembers conn fertilityRate (Year 2024)) regionsList 
+    netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
+    fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
 
     -- let surfs2 = zip regionsList surfs
     let surfPerCap = combineRegionTables (/) surfs3 pops3
-    let netmig2 = zip regionsList netmigration 
-    let netmigPC = combineRegionTables (/) netmig2 pops3 
-    let fertility2 = zip regionsList fertility 
+    -- let netmig2 = zip regionsList netmigration 
+    let netmigPC = combineRegionTables (/) netmigration pops3 
+    -- let fertility2 = zip regionsList fertility 
     close conn
 
     let mdCols = 
             [
             MdColumn "Fertilitaetsrate" 1 2
-                 fertility2,
+                 fertility,
             MdColumn "Netto Migration (per M)" 0.000001 0
                 netmigPC
             ]
-    let sortedRegions = sortRegionsByColumn Descending fertility2 -- surfPerCap
+    let sortedRegions = sortRegionsByColumn Descending fertility
+     -- surfPerCap
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable sortedRegions mdCols

@@ -1,0 +1,24 @@
+pearson :: [(Double, Double)] -> Maybe Double
+pearson xs
+    | n < 2     = Nothing
+    | den == 0  = Nothing
+    | otherwise = Just (num / den)
+  where
+    n = fromIntegral (length xs)
+
+    sx  = sum [x | (x, _) <- xs]
+    sy  = sum [y | (_, y) <- xs]
+
+    mx = sx / n
+    my = sy / n
+
+    dx = [x - mx | (x, _) <- xs]
+    dy = [y - my | (_, y) <- xs]
+
+    num =
+        sum (zipWith (*) dx dy)
+
+    den =
+        sqrt
+            (sum (map (^ (2 :: Int)) dx)
+            * sum (map (^ (2 :: Int)) dy))

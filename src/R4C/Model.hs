@@ -45,12 +45,14 @@ data Region = Region
     , regionName :: Text
     }
 
--- country - region not stored in db, but in Region.hs (regionMembers)
--- data CountryRegion = CountryRegion
---     { crCountry :: CountryId
---     , crRegion  :: RegionId
---     }
---     deriving (Eq, Ord, Show)
+type RegionMembers = [(RegionId, [CountryId])]
+
+countriesInRegion :: RegionMembers -> RegionId -> [CountryId]
+-- get all countries in a region (could be a map but list is short)
+countriesInRegion memberships region =
+    case lookup region memberships of
+        Just cs -> cs
+        Nothing -> []
 
 -- | world bank indicator code, eg SP.POP.TOTL
 newtype IndicatorId =
@@ -87,7 +89,7 @@ data Indicator = Indicator
 data Dataset = Dataset
     { dsName :: Text 
     , dsIndicator :: IndicatorId 
-    , aggregation:: Aggregation
+    , dsAggregation:: Aggregation
     }
 
 newtype Year = Year Int
@@ -104,5 +106,21 @@ data Observation = Observation
     , obsIndicator :: IndicatorId
     , obsYear      :: Year
     , obsValue     :: Value
+    }
+    deriving (Eq, Ord, Show)
+
+type CountryTable = [CountryValue]
+
+data CountryValue = CountryValue
+    { cvCountry :: CountryId
+    , cvValue   :: Double
+    }
+    deriving (Eq, Ord, Show)
+
+type RegionTable = [RegionValue]
+
+data RegionValue = RegionValue
+    { rvRegion :: RegionId
+    , rvValue  :: Maybe Double
     }
     deriving (Eq, Ord, Show)

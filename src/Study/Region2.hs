@@ -10,7 +10,7 @@ module Study.Region2
   ) where
 
 import R4C.Model
-import qualified Data.Text as T
+import UniformBase
 import Data.List (nub)
 import Database.SQLite.Simple  -- for debug
 -- import Study.Indicator
@@ -18,8 +18,8 @@ import Database.SQLite.Simple  -- for debug
 regionsList :: [RegionId]
 regionsList = nub $ map fst regionMembers
 
-regionMembers :: [(RegionId, CountryId)]
-regionMembers = concat
+regionMembers :: RegionMembers  -- [(RegionId, CountryId)]
+regionMembers = 
   [
 
   mk "SAMERICA"
@@ -81,8 +81,10 @@ regionMembers = concat
 
   ]
   where
-    -- mk :: Text -> [Text] -> [(RegionId, CountryId)]
-    mk r = map (\c -> (RegionId r, CountryId c))
+    mk :: Text -> [Text] -> (RegionId, [CountryId])
+    mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
+        -- mk :: Text -> [Text] -> [(RegionId, CountryId)]
+    -- mk r = map (\c -> (RegionId r, CountryId c))
 
 
 

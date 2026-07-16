@@ -23,7 +23,7 @@ population =
     Dataset
         { dsName = "Population"
         , dsIndicator   = IndicatorId   "SP.POP.TOTL"  
-        , aggregation   = Sum
+        , dsAggregation   = Sum
         }
 
 surfaceArea :: Dataset
@@ -31,7 +31,7 @@ surfaceArea =
     Dataset
         { dsIndicator   = IndicatorId "AG.SRF.TOTL.K2"
         , dsName = "Surface area"
-        , aggregation   = Sum
+        , dsAggregation   = Sum
         }
 
 datasets :: [Dataset]

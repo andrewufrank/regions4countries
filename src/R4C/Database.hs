@@ -95,15 +95,15 @@ createSchema conn =
         --     "CREATE INDEX IF NOT EXISTS obs_year \
         --     \ON observation(year)"
 
-data CountryValue = CountryValue
-    { cvCountry :: CountryId
-    , cvValue   :: Double
-    }
+-- data CountryValue = CountryValue
+--     { cvCountry :: CountryId
+--     , cvValue   :: Double
+--     }
 
-instance FromRow CountryValue where
-    fromRow = CountryValue <$> field <*> field
+-- instance FromRow CountryValue where
+--     fromRow = CountryValue <$> field <*> field
 
-type CountryTable = [CountryValue]
+-- type CountryTable = [CountryValue]
 
 lookupTable
     :: Connection

@@ -7,7 +7,7 @@
 
 module R4C.Table where
 
-import Data.List (intercalate, sortOn)
+import Data.List  
 import Data.Ord (Down(..))
 import qualified Data.Text as T
 import Numeric (showFFloat)
@@ -17,13 +17,13 @@ import R4C.Model
 
 type Column a = [(RegionId, Maybe a)]
 
-type DTable = Column Double
+-- type DTable = Column Double -- replace with regionTable
 
 data MdColumn = MdColumn
     { colTitle    :: String
     , colScale    :: Double
     , colDecimals :: Int
-    , colValues   :: DTable
+    , colValues   :: RegionTable
     } 
     deriving (Eq, Ord, Show)
 
@@ -43,17 +43,27 @@ markdownTable regions cols =
         ++ " |"
 
     cell r col =
-        case lookup r (colValues col) of
-            Nothing        -> ""
-            Just Nothing   -> ""
-            Just (Just x)  ->
-                showFFloat
-                    (Just (colDecimals col))
-                    (x / colScale col)
-                    ""
+        case lookupRegion r (colValues col) of
+            Nothing -> ""
+
+            Just rv ->
+                case rvValue rv of
+                    Nothing -> ""
+
+                    Just x -> showFFloat
+                            (Just (colDecimals col))
+                            (x / colScale col)
+                            ""
 
     showRegion (RegionId t) =
         T.unpack t
+
+lookupRegion
+    :: RegionId
+    -> RegionTable
+    -> Maybe RegionValue
+lookupRegion r =
+    find (\rv -> rvRegion rv == r)
 
 data SortOrder
     = Ascending
@@ -61,24 +71,24 @@ data SortOrder
 
 sortRegionsByColumn
     :: SortOrder
-    -> DTable
+    -> RegionTable
     -> [RegionId]
 sortRegionsByColumn order table =
     case order of
         Ascending ->
-            map fst $ sortOn snd rows
+            map rvRegion $
+                sortOn rvValue table
 
         Descending ->
-            map fst $ sortOn (Down . snd) rows
-  where
-    rows = table
+            map rvRegion $
+                sortOn (Down . rvValue) table
     
 valueToDouble :: Value -> Double
 valueToDouble (Value v) =
     Sc.toRealFloat v
 
-toDTable :: [(RegionId, Maybe Value)] -> DTable
-toDTable = map convert
-  where
-    convert (r, mv) =
-        (r, fmap valueToDouble mv)
+-- toDTable :: [(RegionId, Maybe Value)] -> RegionTable
+-- toDTable = map convert
+--   where
+--     convert (r, mv) =
+--         (r, fmap valueToDouble mv)

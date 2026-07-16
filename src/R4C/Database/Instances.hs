@@ -63,6 +63,9 @@ instance FromField Value where
         pure (Value (Sc.fromFloatDigits (d :: Double)))
 
 --------
+instance FromRow CountryValue where
+    fromRow = CountryValue <$> field <*> field
+    
 instance FromRow Observation where
     fromRow =
         Observation

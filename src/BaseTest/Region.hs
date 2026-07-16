@@ -10,12 +10,13 @@ module BaseTest.Region
   ) where
 
 import R4C.Model
-import qualified Data.Text as T
 import Database.SQLite.Simple  -- for debug
+import UniformBase
 -- import BaseTest.Indicator
 
-regionMembers :: [(RegionId, CountryId)]
-regionMembers = concat
+
+regionMembers :: RegionMembers  -- [(RegionId, [CountryId])]  -- [(RegionId, CountryId)]
+regionMembers =  
   [ mk "G7"
         ["CAN","FRA","DEU","ITA","JPN","GBR","USA"]
 
@@ -26,7 +27,11 @@ regionMembers = concat
   ]
   where
     -- mk :: Text -> [Text] -> [(RegionId, CountryId)]
-    mk r = map (\c -> (RegionId r, CountryId c))
+    -- mk r = map (\c -> (RegionId r, CountryId c))
+    mk :: Text -> [Text] -> (RegionId, [CountryId])
+    mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
+
+
 
 
 
