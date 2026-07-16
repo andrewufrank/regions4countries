@@ -77,13 +77,24 @@ aggregate
     -> Year
     -> IO RegionTable
 -- | produce a table with for each region the value for the dataset 
-aggregate memberships conn dataset year = do
-    table <- lookupTable conn (dsIndicator dataset) year
-    pure $
-        aggregateTable
-            (aggregationFunction (dsAggregation dataset))
-            memberships
-            table
+aggregate memberships conn dataset year =
+    case dsAggregation dataset of
+
+        WeightedBy wt ->
+            weightedAverage
+                memberships
+                conn
+                (dsIndicator dataset)
+                wt
+                year
+
+        agg -> do
+            table <- lookupTable conn (dsIndicator dataset) year
+            pure $
+                aggregateTable
+                    (aggregationFunction agg)
+                    memberships
+                    table
 
 aggregateTable
     :: ([Double] -> Double)
@@ -142,13 +153,13 @@ weightedMean pairs
 weightedAverage
     :: RegionMembers
     -> Connection
-    -> Dataset
-    -> Dataset
+    -> IndicatorId
+    -> IndicatorId
     -> Year
     -> IO RegionTable
-weightedAverage memberships conn valueDs weightDs year = do
-    valueTable  <- lookupTable conn (dsIndicator valueDs) year
-    weightTable <- lookupTable conn (dsIndicator weightDs) year
+weightedAverage memberships conn valueInd weightInd year = do
+    valueTable  <- lookupTable conn (  valueInd) year
+    weightTable <- lookupTable conn (  weightInd) year
 
     pure
         [ RegionValue region

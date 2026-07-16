@@ -73,6 +73,7 @@ sortRegionsByColumn
     :: SortOrder
     -> RegionTable
     -> [RegionId]
+-- sorts (attention: Nothing is lowest!)
 sortRegionsByColumn order table =
     case order of
         Ascending ->
@@ -92,3 +93,17 @@ valueToDouble (Value v) =
 --   where
 --     convert (r, mv) =
 --         (r, fmap valueToDouble mv)
+
+-- better sort - nothing last 
+-- Ascending ->
+--     map rvRegion $
+--         sortOn (sortKey . rvValue) table
+
+-- Descending ->
+--     map rvRegion $
+--         sortOn (Down . sortKey . rvValue) table
+-- sortKey
+--     :: Maybe Double
+--     -> (Bool, Double)
+-- sortKey Nothing  = (True, 0)
+-- sortKey (Just x) = (False, x)
