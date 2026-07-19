@@ -26,6 +26,7 @@ library
       R4C.Aggregate
       R4C.Database
       R4C.Database.Instances
+      R4C.Markdown
       R4C.Model
       R4C.Orchestrator
       R4C.Query
@@ -38,6 +39,7 @@ library
       Study.Tab1
       Study.Tab2
   other-modules:
+      BaseTest.Tab99
       Paths_Regions4Countries
   hs-source-dirs:
       src
@@ -137,11 +139,7 @@ test-suite r4c-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      AggregateSpec
-      OrchestratorSpec
-      RegionSpec
-      WorldBankSpec
-      Paths_Regions4Countries
+      MarkdownSpec
   hs-source-dirs:
       test
   default-extensions:

@@ -8,6 +8,7 @@ module Main where
 import Test.Tasty
 
 import qualified AggregateSpec
+import qualified MarkdownSpec
 -- import qualified DatabaseSpec
 -- import qualified IndicatorSpec
 import qualified RegionSpec
@@ -22,6 +23,7 @@ main =
       , RegionSpec.tests
       , OrchestratorSpec.tests
       , AggregateSpec.tests
+      , MarkdownSpec.tests
     --   , IndicatorSpec.tests
     --   , DatabaseSpec.tests
       ]

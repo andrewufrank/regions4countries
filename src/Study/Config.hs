@@ -6,7 +6,7 @@
 
 -----------------------------------------------------------------------------
 
-module Study.Config (filesUsed, dbPath) where
+module Study.Config (filesUsed, dbPath, buch) where
 
 databaseFolder = "/home/frank/afWorldDB/"
 
@@ -17,3 +17,6 @@ dbPath = databaseFolder ++ databaseNmae ++ ".sqlite"
 filesUsed :: FilePath
 filesUsed =
     "/home/frank/Desktop/buecher/WorldBankData/archivesUsed"
+
+buch:: FilePath
+buch = "/home/frank/Desktop/buecher/worldFundamentals"

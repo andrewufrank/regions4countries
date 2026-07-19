@@ -30,6 +30,25 @@ dependencies:
   
 library:
   source-dirs: src
+  exposed-modules:
+    - BaseTest.Config
+    - BaseTest.Dataset
+    - BaseTest.Region
+    - R4C.Aggregate
+    - R4C.Database
+    - R4C.Database.Instances
+    - R4C.Markdown
+    - R4C.Model
+    - R4C.Orchestrator
+    - R4C.Query
+    - R4C.Statistics
+    - R4C.Table
+    - R4C.WorldBank
+    - Study.Config
+    - Study.Dataset
+    - Study.Region2
+    - Study.Tab1
+    - Study.Tab2
 
 executables:
   makedb :
@@ -50,6 +69,8 @@ tests:
     main: Spec.hs
     source-dirs:
       - test
+    other-modules:
+      - MarkdownSpec
     dependencies:
       - Regions4Countries
       - tasty

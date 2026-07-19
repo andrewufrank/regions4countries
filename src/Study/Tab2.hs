@@ -23,6 +23,18 @@ import GHC.Generics (Generic1(to1))
 import Study.Config 
 import Study.Dataset 
 import R4C.Statistics
+import R4C.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
+import System.Directory (createDirectoryIfMissing)
+import System.FilePath ((</>))
+
+tableOutputDirectory :: FilePath
+tableOutputDirectory =
+    "/home/frank/Desktop/buecher/worldFundamentals/figures"
+
+writeTab2Table :: FilePath -> String -> IO ()
+writeTab2Table filename contents = do
+    createDirectoryIfMissing True tableOutputDirectory
+    writeFile (tableOutputDirectory </> filename) contents
 
 popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
 popsSurf conn =  do 
@@ -53,7 +65,8 @@ getData21 = do
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable sortedRegions mdCols
-    putStrLn md 
+    putStrLn md
+    writeTab2Table "tab21" md
 
 getData22 :: IO ()
 -- | Ernaehrungssituation 1980 (ohne Russland, noch nicht existent)
@@ -81,7 +94,8 @@ getData22 = do
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable sortedRegions mdCols
-    putStrLn md 
+    putStrLn md
+    writeTab2Table "tab22" md
 
 -- duengerverbrauch und produktion 
 getData23 = do
@@ -110,6 +124,13 @@ getData23 = do
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable sortedRegions mdCols
-    putStrLn md 
+    putStrLn md
 
-
+storeTab2Tables :: IO ()
+storeTab2Tables = do
+    getData21
+    getData22
+    getData23
+    writeMarkdownBlock (buch </> "002ernaehrung.md") (buch </> "002ernaehrung.md") "tab21" (tableOutputDirectory </> "tab21")
+    writeMarkdownBlock (buch </> "002ernaehrung.md") (buch </> "002ernaehrung.md") "tab22" (tableOutputDirectory </> "tab22")
+    writeMarkdownBlock (buch </> "002ernaehrung.md") (buch </> "002ernaehrung.md") "tab23" (tableOutputDirectory </> "tab23")
