@@ -38,4 +38,16 @@ tests =
           writeMarkdownIncludes sourcePath outputPath
           secondRun <- readFile outputPath
           secondRun @?= "Before\n<!-- include:start:table.md -->\n| B |\n|---|\n| 2 |\n<!-- include:end -->\nAfter\n"
+    , testCase "appends a marked block at the end without overwriting existing prose" $ do
+        withSystemTempDirectory "r4c-markdown" $ \tmpDir -> do
+          let sourcePath = tmpDir </> "book.md"
+              outputPath = tmpDir </> "book.out.md"
+              contentPath = tmpDir </> "table.md"
+          writeFile sourcePath "Existing prose"
+          writeFile contentPath "| A |\n|---|\n| 1 |\n"
+
+          writeMarkdownBlock sourcePath outputPath "tab1" contentPath
+
+          actual <- readFile outputPath
+          actual @?= "Existing prose\n<!-- include:start:tab1 -->\n| A |\n|---|\n| 1 |\n<!-- include:end -->\n"
     ]

@@ -44,29 +44,29 @@ popsSurf conn =  do
 
     return (pops,surfs)
 
-getData21 :: IO ()
--- fig21 cereal production and veg. consumption 
-getData21 = do
-    conn <- open dbPath 
-    (pops3, surfs3) <- popsSurf conn
+-- getData21 :: IO ()
+-- -- fig21 cereal production and veg. consumption 
+-- getData21 = do
+--     conn <- open dbPath 
+--     (pops3, surfs3) <- popsSurf conn
 
-    cerealProd <- aggregate regionMembers conn cerealProduction (Year 2023) -- 2024 not all values 
-    let cerealFood = scaleRegionTable 0.1 pops3   -- 100 kg per head   
+--     cerealProd <- aggregate regionMembers conn cerealProduction (Year 2023) -- 2024 not all values 
+--     let cerealFood = scaleRegionTable 0.1 pops3   -- 100 kg per head   
     
-    close conn
+--     close conn
 
-    let mdCols = 
-            [ MdColumn "Getreideproduktion (T kg)" 1000000 2  cerealProd
-            -- value is t
-            , MdColumn "menschliche Ernaehrung (M kg)" 1000000 2  cerealFood
-            -- value is 10**11 kg 
-            ]
-    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+--     let mdCols = 
+--             [ MdColumn "Getreideproduktion (T kg)" 1000000 2  cerealProd
+--             -- value is t
+--             , MdColumn "menschliche Ernaehrung (M kg)" 1000000 2  cerealFood
+--             -- value is 10**11 kg 
+--             ]
+--     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
 
-    -- let md = markdownTable regionsList mdCols
-    let md = markdownTable sortedRegions mdCols
-    putStrLn md
-    writeTab2Table "tab21" md
+--     -- let md = markdownTable regionsList mdCols
+--     let md = markdownTable sortedRegions mdCols
+--     putStrLn md
+--     writeTab2Table "tab21" md
 
 getData22 :: IO ()
 -- | Ernaehrungssituation 1980 (ohne Russland, noch nicht existent)
@@ -82,12 +82,12 @@ getData22 = do
     close conn
 
     let mdCols = 
-            [ MdColumn "Getreideproduktion (T kg)" 1000000 2  cerealProd
+            [ MdColumn "Getreideproduktion (T kg)" 1000000 0  cerealProd
             -- value is t
-            , MdColumn "menschliche Ernaehrung (M kg)" 1000000 2  cerealFood
+            , MdColumn "menschliche Ernaehrung (M kg)" 1000000 0  cerealFood
             -- value is 10**11 kg 
-            , MdColumn "total Verbrauch (M kg)" 1000000 2 cerealDomUse 
-            , MdColumn "potential fuer Export (M kg)" 1000000 2 potExport
+            , MdColumn "total Verbrauch (M kg)" 1000000 0 cerealDomUse 
+            , MdColumn "potential fuer Export (M kg)" 1000000 0 potExport
 
             ]
     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
@@ -112,11 +112,11 @@ getData23 = do
 
     let mdCols = 
             [ 
-            MdColumn "arablHA (M ha)" 1000000 2  arablHA
-            , MdColumn "fertConsum (kg/ha)" 1 2  fertConsumpha
-            , MdColumn "fertilizerConsum Tot(G kg)" 1000000000 2  fertilizerConsumTot
-            , MdColumn "Duengerverbrauch (% der Produktion)" 1 2  fertConsumpc
-            , MdColumn "Duengerproduktio (M kg)" 1000000 2  fertilizerProd
+            MdColumn "arablHA (M ha)" 1000000 0  arablHA
+            , MdColumn "fertConsum (kg/ha)" 1 0  fertConsumpha
+            , MdColumn "fertilizerConsum Tot(G kg)" 1000000000 0  fertilizerConsumTot
+            , MdColumn "Duengerverbrauch (% der Produktion)" 1 0  fertConsumpc
+            , MdColumn "Duengerproduktion (M kg)" 1000000 0  fertilizerProd
             -- value is t
             -- value is 10**11 kg 
             ]
@@ -125,12 +125,13 @@ getData23 = do
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable sortedRegions mdCols
     putStrLn md
+    writeTab2Table "tab23" md
 
 storeTab2Tables :: IO ()
 storeTab2Tables = do
-    getData21
+    -- getData21
     getData22
     getData23
-    writeMarkdownBlock (buch </> "002ernaehrung.md") (buch </> "002ernaehrung.md") "tab21" (tableOutputDirectory </> "tab21")
-    writeMarkdownBlock (buch </> "002ernaehrung.md") (buch </> "002ernaehrung.md") "tab22" (tableOutputDirectory </> "tab22")
-    writeMarkdownBlock (buch </> "002ernaehrung.md") (buch </> "002ernaehrung.md") "tab23" (tableOutputDirectory </> "tab23")
+    let filename = buch </> "p30Tableaux" </> "020ernaehung.md"
+    let tables = ["tab22", "tab23"]
+    mapM_ (\tab -> writeMarkdownBlock filename filename tab (tableOutputDirectory </> tab)) tables

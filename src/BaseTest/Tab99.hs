@@ -7,7 +7,7 @@
 
 -----------------------------------------------------------------------------
 
-module BaseTest.Tab99 
+module BaseTest.Tab99
     where
 
 import R4C.Model
@@ -72,14 +72,37 @@ getData11 = do
     putStrLn md 
     writeTab1Table "tab11" md
 
-    -- compute correlation 
+getData12 :: IO ()
+-- fig12 
+getData12 = do
+    conn <- open dbPath 
+    (pops3, surfs3) <- popsSurf conn
+
+  
+    
+    close conn
+
+    let mdCols = 
+            [ MdColumn "fig 12  2024 (M)" 1000000 0  pops3
+            , MdColumn "fig 12  2023 (M km²)" 1000000 0 surfs3
+             
+            ]
+    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+
+    -- let md = markdownTable regionsList mdCols
+    let md = markdownTable sortedRegions mdCols
+    putStrLn md 
+    writeTab1Table "tab12" md
 
 
 storeTables :: IO ()
 -- | Regenerate all Tab1 output files and update the book markdown files.
 storeTables = do
     getData11
-    writeMarkdownBlock (buch </> "001.Natur.md") (buch </> "001.Natur.md") "tab11" (tableOutputDirectory </> "tab11")
+    getData12
+    let filename = buch </> "p99Tableaux" </> "099test.md"
+    let tables = ["tab11", "tab12" ]
+    mapM_ (\tab -> writeMarkdownBlock filename filename tab (tableOutputDirectory </> tab)) tables
 
  
 

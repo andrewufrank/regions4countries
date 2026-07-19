@@ -4,16 +4,17 @@ module R4C.Markdown
   , writeMarkdownBlock
   ) where
 
+import Control.Monad (when)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import System.Directory (createDirectoryIfMissing, doesFileExist, renameFile)
+import System.Directory (createDirectoryIfMissing, doesFileExist, removeFile, renameFile)
 import System.FilePath (isAbsolute, takeDirectory, (</>))
 
 startMarker :: T.Text
-startMarker = "<!-- include:start:"
+startMarker = T.pack "<!-- include:start:"
 
 endMarker :: T.Text
-endMarker = "<!-- include:end -->"
+endMarker = T.pack "<!-- include:end -->"
 
 expandMarkdownIncludes :: FilePath -> String -> IO String
 expandMarkdownIncludes sourcePath content = do
@@ -76,6 +77,8 @@ writeMarkdownIncludes sourcePath outputPath = do
   pure ()
 
 writeMarkdownBlock :: FilePath -> FilePath -> String -> FilePath -> IO ()
+-- | Reads an md file and updates or appends a marked block without overwriting
+--   the rest of the document.
 writeMarkdownBlock sourcePath outputPath marker contentPath = do
   createDirectoryIfMissing True (takeDirectory outputPath)
   exists <- doesFileExist sourcePath
@@ -84,12 +87,24 @@ writeMarkdownBlock sourcePath outputPath marker contentPath = do
   content <- if contentExists then readFile contentPath else pure ""
   let startMarker = "<!-- include:start:" ++ marker ++ " -->"
       endMarker = "<!-- include:end -->"
-      updated = if exists && containsMarkerBlock source startMarker endMarker
-        then replaceBetweenMarkers source startMarker endMarker content
-        else source ++ "\n" ++ startMarker ++ "\n" ++ content ++ "\n" ++ endMarker ++ "\n"
+      normalizedContent = trimTrailingNewlines content
+      block = startMarker ++ "\n" ++ normalizedContent ++ "\n" ++ endMarker
+      updated = case replaceBetweenMarkers source startMarker endMarker content of
+        Just replaced -> replaced
+        Nothing -> appendMarkdownBlock source block
   let tempPath = outputPath ++ ".tmp"
+  tempExists <- doesFileExist tempPath
+  when tempExists (removeFile tempPath)
   writeFile tempPath updated
   renameFile tempPath outputPath
+
+appendMarkdownBlock :: String -> String -> String
+appendMarkdownBlock source block =
+  let separator = if null source then "" else if last source == '\n' then "" else "\n"
+  in source ++ separator ++ block ++ "\n"
+
+trimTrailingNewlines :: String -> String
+trimTrailingNewlines = reverse . dropWhile (== '\n') . reverse
 
 containsMarkerBlock :: String -> String -> String -> Bool
 containsMarkerBlock source startMarker endMarker =
@@ -98,14 +113,14 @@ containsMarkerBlock source startMarker endMarker =
 isInfixOf :: String -> String -> Bool
 isInfixOf needle haystack = T.isInfixOf (T.pack needle) (T.pack haystack)
 
-replaceBetweenMarkers :: String -> String -> String -> String -> String
+replaceBetweenMarkers :: String -> String -> String -> String -> Maybe String
 replaceBetweenMarkers source startMarker endMarker replacement =
   case breakOn startMarker source of
-    Nothing -> source
+    Nothing -> Nothing
     Just (prefix, rest) ->
       case breakOn endMarker rest of
-        Nothing -> source
-        Just (_, suffix) -> prefix ++ startMarker ++ "\n" ++ replacement ++ "\n" ++ endMarker ++ suffix
+        Nothing -> Nothing
+        Just (_, suffix) -> Just (prefix ++ startMarker ++ "\n" ++ replacement ++ "\n" ++ endMarker ++ suffix)
 
 breakOn :: String -> String -> Maybe (String, String)
 breakOn needle haystack =

@@ -148,11 +148,14 @@ storeTab1Tables = do
     getData11
     getData12
     getData13
-    writeMarkdownBlock (buch </> "001.Natur.md") (buch </> "001.Natur.md") "tab11" (tableOutputDirectory </> "tab11")
-    writeMarkdownBlock (buch </> "001.Natur.md") (buch </> "001.Natur.md") "tab12" (tableOutputDirectory </> "tab12")
-    writeMarkdownBlock (buch </> "001.Natur.md") (buch </> "001.Natur.md") "tab13" (tableOutputDirectory </> "tab13")
+    let filename = buch </> "p30Tableaux" </> "010.Natur.md"
+    let tables = ["tab11", "tab12", "tab13"]
+    mapM_ (\tab -> writeMarkdownBlock filename filename tab (tableOutputDirectory </> tab)) tables
 
- 
+--     writeMarkdownBlock (buch </> "001.Natur.md") (buch </> "001.Natur.md") "tab12" (tableOutputDirectory </> "tab12")
+--     writeMarkdownBlock (buch </> "001.Natur.md") (buch </> "001.Natur.md") "tab13" (tableOutputDirectory </> "tab13")
+
+--  /home/frank/Desktop/buecher/worldFundamentals/p30Tabeleaux/010.Natur.md
 
 -- move later somewhere 
 testlatest :: IO () 
