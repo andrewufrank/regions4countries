@@ -124,3 +124,9 @@ data RegionValue = RegionValue
     , rvValue  :: Maybe Double
     }
     deriving (Eq, Ord, Show)
+
+data YearValue = YearValue
+    { yvYear  :: Year
+    , yvValue :: Value
+    }
+    deriving (Eq, Ord, Show)

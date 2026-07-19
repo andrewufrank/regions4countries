@@ -29,7 +29,7 @@ testAggregateG7 = do
         , Observation (CountryId "AUT") (dsIndicator population) (Year 2024) (Value 999)
         ]
 
-    result <- aggregate regionMembers conn population (Year 2024) (RegionId "G7")
+    result <- aggregateSingleRegion regionMembers conn population (Year 2024) (RegionId "G7")
 
     close conn
 

@@ -1,0 +1,115 @@
+-----------------------------------------------------------------------------
+--
+-- Module      :   Tab2 ernaehrung 
+-- for each region: 
+-- the population, the surface, surface per person, 
+-- within the region: standard dev. for surface per person
+
+-----------------------------------------------------------------------------
+
+module Study.Tab2
+    where
+
+import R4C.Model
+import qualified Data.Text as T
+import Database.SQLite.Simple  -- for debug
+-- import Study.Indicator 
+import Study.Region2 
+import R4C.Aggregate 
+import R4C.Query
+import R4C.Table 
+import GHC.IO.Handle.Types (Handle__)
+import GHC.Generics (Generic1(to1))
+import Study.Config 
+import Study.Dataset 
+import R4C.Statistics
+
+popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
+popsSurf conn =  do 
+    conn <- open dbPath 
+    pops :: RegionTable <-  (aggregate regionMembers conn population (Year 2024))  
+    surfs <-  (aggregate regionMembers conn surfaceArea (Year 2023)) 
+
+    return (pops,surfs)
+
+getData21 :: IO ()
+-- fig21 cereal production and veg. consumption 
+getData21 = do
+    conn <- open dbPath 
+    (pops3, surfs3) <- popsSurf conn
+
+    cerealProd <- aggregate regionMembers conn cerealProduction (Year 2023) -- 2024 not all values 
+    let cerealFood = scaleRegionTable 0.1 pops3   -- 100 kg per head   
+    
+    close conn
+
+    let mdCols = 
+            [ MdColumn "Getreideproduktion (T kg)" 1000000 2  cerealProd
+            -- value is t
+            , MdColumn "menschliche Ernaehrung (M kg)" 1000000 2  cerealFood
+            -- value is 10**11 kg 
+            ]
+    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+
+    -- let md = markdownTable regionsList mdCols
+    let md = markdownTable sortedRegions mdCols
+    putStrLn md 
+
+getData22 :: IO ()
+-- | Ernaehrungssituation 1980 (ohne Russland, noch nicht existent)
+getData22 = do
+    conn <- open dbPath 
+    (pops3, surfs3) <- popsSurf conn
+    pops1980 :: RegionTable <-  (aggregate regionMembers conn population (Year 1980)) 
+    cerealProd <- aggregate regionMembers conn cerealProduction (Year 1980) -- 2024 not all values 
+    let cerealFood = scaleRegionTable 0.1 pops1980   -- 100 kg per head   
+    let cerealDomUse = scaleRegionTable (2.5) cerealFood -- 40..45% for human food 
+    let potExport = combineRegionTables (-) cerealProd cerealDomUse 
+
+    close conn
+
+    let mdCols = 
+            [ MdColumn "Getreideproduktion (T kg)" 1000000 2  cerealProd
+            -- value is t
+            , MdColumn "menschliche Ernaehrung (M kg)" 1000000 2  cerealFood
+            -- value is 10**11 kg 
+            , MdColumn "total Verbrauch (M kg)" 1000000 2 cerealDomUse 
+            , MdColumn "potential fuer Export (M kg)" 1000000 2 potExport
+
+            ]
+    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+
+    -- let md = markdownTable regionsList mdCols
+    let md = markdownTable sortedRegions mdCols
+    putStrLn md 
+
+-- duengerverbrauch und produktion 
+getData23 = do
+    conn <- open dbPath 
+    (pops3, surfs3) <- popsSurf conn
+
+    arablHA  <- aggregate regionMembers conn agriculturalLand (Year 2023)
+    fertConsumpha <- aggregate regionMembers conn ferilizerConsum (Year 2023)
+    let fertilizerConsumTot = combineRegionTables (*) arablHA fertConsumpha 
+    
+    fertConsumpc <- aggregate regionMembers conn ferilizerConsum2 (Year 2023) -- leer
+    let fertilizerProd = combineRegionTables (/) fertilizerConsumTot fertConsumpc 
+    close conn
+
+    let mdCols = 
+            [ 
+            MdColumn "arablHA (M ha)" 1000000 2  arablHA
+            , MdColumn "fertConsum (kg/ha)" 1 2  fertConsumpha
+            , MdColumn "fertilizerConsum Tot(G kg)" 1000000000 2  fertilizerConsumTot
+            , MdColumn "Duengerverbrauch (% der Produktion)" 1 2  fertConsumpc
+            , MdColumn "Duengerproduktio (M kg)" 1000000 2  fertilizerProd
+            -- value is t
+            -- value is 10**11 kg 
+            ]
+    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+
+    -- let md = markdownTable regionsList mdCols
+    let md = markdownTable sortedRegions mdCols
+    putStrLn md 
+
+

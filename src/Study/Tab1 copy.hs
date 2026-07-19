@@ -60,7 +60,7 @@ getData11 = do
             , MdColumn "Flaeche per capita (ha/person)" 
                     0.01 1 surfPerCap
             , MdColumn "Nutzbares Land per capita (ha/person)" 
-                    0.01 1 surAgrarfPerCap 
+                    0.01 1 surfAgrarPerCap
             ]
     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
 

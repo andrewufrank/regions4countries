@@ -36,6 +36,14 @@ executables:
     main: Main.hs
     source-dirs: app/makedb
     dependencies: Regions4Countries 
+  show-indicator:
+    main: Main.hs
+    source-dirs: app/show-indicator
+    dependencies:
+      - Regions4Countries
+      - sqlite-simple
+      - text
+      - uniformBase
 
 tests:
   r4c-test:

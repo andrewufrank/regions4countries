@@ -83,11 +83,6 @@ instance ToRow Observation where
       , toField (obsValue o)
       ]
 
-data YearValue = YearValue
-    { yvYear  :: Year
-    , yvValue :: Value
-    }
-    deriving Show
 instance FromRow YearValue where
     fromRow =
         YearValue

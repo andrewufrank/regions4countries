@@ -110,13 +110,16 @@ lookupTable
     -> IndicatorId
     -> Year
     -> IO CountryTable
-lookupTable conn ind yr =
-    query conn
+lookupTable conn ind yr = do 
+    res <- query conn
         "SELECT country, value \
         \FROM observation \
         \WHERE indicator = ? AND year = ?"
         (ind, yr)
-
+    if length res == 0 
+        then putStrLn ("lookupTable empty for " ++ show ind ++ show yr)
+        else putStrLn ("lookupTable for " ++ show ind)
+    return res
 ------------------------------------------------------Country record 
 insertCountry
     :: Connection
@@ -175,12 +178,7 @@ indicators4db
     -> IO [Indicator]
 
 indicators4db conn =
-    query_ conn
-        "SELECT indicator,\
-        \       name,\
-        \       sourceNote,\
-        \       sourceOrganization,\
-        \FROM indicator"
+    query_ conn "SELECT indicator, name, sourceNote, sourceOrganization FROM indicator"
         
         -- \       aggregation \
 -----------------------------------observations

@@ -14,6 +14,7 @@ import Numeric (showFFloat)
 import qualified Data.Scientific as Sc
 
 import R4C.Model
+import qualified Data.Map.Strict as Map 
 
 type Column a = [(RegionId, Maybe a)]
 
@@ -87,6 +88,36 @@ sortRegionsByColumn order table =
 valueToDouble :: Value -> Double
 valueToDouble (Value v) =
     Sc.toRealFloat v
+
+scaleRegionTable :: Double -> RegionTable -> RegionTable
+scaleRegionTable k =
+    map $ \rv ->
+        rv { rvValue = fmap (* k) (rvValue rv) }
+
+
+combineRegionTables
+    :: (Double -> Double -> Double)
+    -> RegionTable
+    -> RegionTable
+    -> RegionTable
+combineRegionTables f xs ys =
+    [ RegionValue
+        { rvRegion = r
+        , rvValue  = lift2 f (rvValue x) (rvValue y)
+        }
+    | x <- xs
+    , Just y <- [Map.lookup (rvRegion x) yMap]
+    , let r = rvRegion x
+    ]
+  where
+    yMap =
+        Map.fromList
+            [ (rvRegion y, y)
+            | y <- ys
+            ]
+
+    lift2 g (Just a) (Just b) = Just (g a b)
+    lift2 _ _ _               = Nothing
 
 -- toDTable :: [(RegionId, Maybe Value)] -> RegionTable
 -- toDTable = map convert

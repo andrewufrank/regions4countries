@@ -96,6 +96,22 @@ aggregate memberships conn dataset year =
                     memberships
                     table
 
+
+-- convenience wrapper to compute aggregate for a single region
+aggregateSingleRegion
+    :: RegionMembers
+    -> Connection
+    -> Dataset
+    -> Year
+    -> RegionId
+    -> IO (Maybe Double)
+aggregateSingleRegion memberships conn dataset year region = do
+    table <- aggregate memberships conn dataset year
+    pure $
+        case find (\rv -> rvRegion rv == region) table of
+            Just rv -> rvValue rv
+            Nothing -> Nothing
+
 aggregateTable
     :: ([Double] -> Double)
     -> RegionMembers
@@ -171,29 +187,6 @@ weightedAverage memberships conn valueInd weightInd year = do
         ]
 
 
-combineRegionTables
-    :: (Double -> Double -> Double)
-    -> RegionTable
-    -> RegionTable
-    -> RegionTable
-combineRegionTables f xs ys =
-    [ RegionValue
-        { rvRegion = r
-        , rvValue  = lift2 f (rvValue x) (rvValue y)
-        }
-    | x <- xs
-    , Just y <- [Map.lookup (rvRegion x) yMap]
-    , let r = rvRegion x
-    ]
-  where
-    yMap =
-        Map.fromList
-            [ (rvRegion y, y)
-            | y <- ys
-            ]
-
-    lift2 g (Just a) (Just b) = Just (g a b)
-    lift2 _ _ _               = Nothing
 
 -- a better matchCountryTables (the join) wit Map 
 -- matchCountryTables xs ys =
