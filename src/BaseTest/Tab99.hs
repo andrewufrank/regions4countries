@@ -61,8 +61,8 @@ getData11 = do
     close conn
 
     let mdCols = 
-            [ MdColumn "Bevoelkerung 2024 (M)" 1000000 6  pops3
-            , MdColumn "Flaeche 2023 (M km²)" 1000000 2  surfs3
+            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  pops3
+            , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs3
              
             ]
     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
@@ -83,8 +83,8 @@ getData12 = do
     close conn
 
     let mdCols = 
-            [ MdColumn "fig 12  2024 (M)" 1000000 0  pops3
-            , MdColumn "fig 12  2023 (M km²)" 1000000 0 surfs3
+            [ MdColumn "fig 12  2024 (Mega)" Mega 0  pops3
+            , MdColumn "fig 12  2023 (Mega km²)" Mega 0 surfs3
              
             ]
     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap

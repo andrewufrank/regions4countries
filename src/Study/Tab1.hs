@@ -62,17 +62,17 @@ getData11 = do
 
     let surfPerCap = combineRegionTables (/) surfs3 pops3
     let surAgrarfPerCap = combineRegionTables (/) agrar pops3
-    let netmigPC = combineRegionTables (/) netmigration pops3 
+    -- let netmigPC = combineRegionTables (/) netmigration pops3 
     
     close conn
 
     let mdCols = 
-            [ MdColumn "Bevoelkerung 2024 (M)" 1000000 6  pops3
-            , MdColumn "Flaeche 2023 (M km²)" 1000000 2  surfs3
+            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  pops3
+            , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs3
             , MdColumn "Flaeche per capita (ha/person)" 
-                    0.01 1 surfPerCap
+                    Centi 1 surfPerCap
             , MdColumn "Nutzbares Land per capita (ha/person)" 
-                    0.01 1 surAgrarfPerCap 
+                    Centi 0 surAgrarfPerCap 
             ]
     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
 
@@ -101,9 +101,9 @@ getData12 = do
 
     let mdCols = 
             [
-            MdColumn "Fertilitaetsrate" 1 2
+            MdColumn "Fertilitaetsrate" Unit 2
                  fertility,
-            MdColumn "Netto Migration (per M)" 0.000001 0
+            MdColumn "Netto Migration (per Mega)" Micro 0
                 netmigPC
             ]
     let sortedRegions = sortRegionsByColumn Descending fertility
@@ -133,10 +133,8 @@ getData13 = do
     let netmigPC = combineRegionTables (/) netmigration pops3
     let fertNetmig = regionCorrelation fertility netmigPC
     let md = unlines
-            [ "| Measure | Value |"
-            , "|:---|---:|"
-            , "| Correlation: fertility rate / net migration per capita | "
-                ++ show fertNetmig ++ " |"
+            [ " Correlation: fertility rate / net migration per capita "
+                ++ show fertNetmig 
             ]
 
     putStrLn md

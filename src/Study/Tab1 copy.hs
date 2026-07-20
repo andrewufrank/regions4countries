@@ -55,8 +55,8 @@ getData11 = do
     close conn
 
     let mdCols = 
-            [ MdColumn "Bevoelkerung 2024 (M)" 1000000 6  pops3
-            , MdColumn "Flaeche 2023 (M km²)" 1000000 2  surfs3
+            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  pops3
+            , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs3
             , MdColumn "Flaeche per capita (ha/person)" 
                     0.01 1 surfPerCap
             , MdColumn "Nutzbares Land per capita (ha/person)" 
@@ -90,7 +90,7 @@ getData12 = do
             [
             MdColumn "Fertilitaetsrate" 1 2
                  fertility,
-            MdColumn "Netto Migration (per M)" 0.000001 0
+            MdColumn "Netto Migration (per Mega)" 0.000001 0
                 netmigPC
             ]
     let sortedRegions = sortRegionsByColumn Descending fertility

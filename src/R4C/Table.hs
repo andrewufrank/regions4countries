@@ -19,10 +19,24 @@ import qualified Data.Map.Strict as Map
 type Column a = [(RegionId, Maybe a)]
 
 -- type DTable = Column Double -- replace with regionTable
+data Scale = Kilo | Mega | Giga | Tera | Centi | Unit | Milli| Micro | Nano | Pico deriving (Eq, Ord, Show )
+
+scale2divisor ::   Scale -> Double
+scale2divisor s = case s of  
+                    Kilo -> 1000 
+                    Mega-> 10**6
+                    Giga-> 10**9 
+                    Tera -> 10**12 
+                    Centi -> 0.01
+                    Unit -> 1 
+                    Milli -> 10**(-3)
+                    Micro -> 10**(-6)
+                    Nano -> 10**(-9)
+                    Pico -> 10**(-12)
 
 data MdColumn = MdColumn
     { colTitle    :: String
-    , colScale    :: Double
+    , colScale    :: Scale
     , colDecimals :: Int
     , colValues   :: RegionTable
     } 
@@ -53,7 +67,7 @@ markdownTable regions cols =
 
                     Just x -> showFFloat
                             (Just (colDecimals col))
-                            (x / colScale col)
+                            (x / scale2divisor (colScale  col))
                             ""
 
     showRegion (RegionId t) =

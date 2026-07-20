@@ -56,9 +56,9 @@ popsSurf conn =  do
 --     close conn
 
 --     let mdCols = 
---             [ MdColumn "Getreideproduktion (T kg)" 1000000 2  cerealProd
+--             [ MdColumn "Getreideproduktion (T kg)" Mega 2  cerealProd
 --             -- value is t
---             , MdColumn "menschliche Ernaehrung (M kg)" 1000000 2  cerealFood
+--             , MdColumn "menschliche Ernaehrung (Mega kg)" Mega 2  cerealFood
 --             -- value is 10**11 kg 
 --             ]
 --     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
@@ -82,12 +82,12 @@ getData22 = do
     close conn
 
     let mdCols = 
-            [ MdColumn "Getreideproduktion (T kg)" 1000000 0  cerealProd
+            [ MdColumn "Getreideproduktion (T kg)" Mega 0  cerealProd
             -- value is t
-            , MdColumn "menschliche Ernaehrung (M kg)" 1000000 0  cerealFood
+            , MdColumn "menschliche Ernaehrung (Mega kg)" Mega 0  cerealFood
             -- value is 10**11 kg 
-            , MdColumn "total Verbrauch (M kg)" 1000000 0 cerealDomUse 
-            , MdColumn "potential fuer Export (M kg)" 1000000 0 potExport
+            , MdColumn "total Verbrauch (Mega kg)" Mega 0 cerealDomUse 
+            , MdColumn "potential fuer Export (Mega kg)" Mega 0 potExport
 
             ]
     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
@@ -112,11 +112,11 @@ getData23 = do
 
     let mdCols = 
             [ 
-            MdColumn "arablHA (M ha)" 1000000 0  arablHA
-            , MdColumn "fertConsum (kg/ha)" 1 0  fertConsumpha
-            , MdColumn "fertilizerConsum Tot(G kg)" 1000000000 0  fertilizerConsumTot
-            , MdColumn "Duengerverbrauch (% der Produktion)" 1 0  fertConsumpc
-            , MdColumn "Duengerproduktion (M kg)" 1000000 0  fertilizerProd
+            MdColumn "arablHA (M ha)" Mega 0  arablHA
+            , MdColumn "fertConsum (kg/ha)" Unit 0  fertConsumpha
+            , MdColumn "fertilizerConsum Tot(G kg)" Giga 0  fertilizerConsumTot
+            , MdColumn "Duengerverbrauch (% der Produktion)" Unit 0  fertConsumpc
+            , MdColumn "Duengerproduktion (M kg)" Mega 0  fertilizerProd
             -- value is t
             -- value is 10**11 kg 
             ]
