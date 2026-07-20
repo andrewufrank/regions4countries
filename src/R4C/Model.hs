@@ -44,6 +44,7 @@ data Region = Region
     { regionId   :: RegionId
     , regionName :: Text
     }
+    deriving (Eq, Ord, Show)
 
 type RegionMembers = [(RegionId, [CountryId])]
 

@@ -5,9 +5,7 @@
 -----------------------------------------------------------------------------
 
 module Study.Region2
-  ( regionMembers
-  , regionsList
-  ) where
+  where
 
 import R4C.Model
 import UniformBase
@@ -86,6 +84,25 @@ regionMembers =
         -- mk :: Text -> [Text] -> [(RegionId, CountryId)]
     -- mk r = map (\c -> (RegionId r, CountryId c))
 
+ 
+regionNames :: [Region]
+regionNames =
+  [ Region (RegionId "SAMERICA")      "Südamerika"
+  , Region (RegionId "USCAN")         "USA & Kanada"
+  , Region (RegionId "EUROPE")        "Europa"
+  , Region (RegionId "RUSSIA")        "Russland"
+  , Region (RegionId "CHINA")         "China"
+  , Region (RegionId "INDIA")         "Indien"
+  , Region (RegionId "JAPAN")         "Japan"
+  , Region (RegionId "FAREAST")       "Fernost"
+  , Region (RegionId "CENTRAL_ASIA")  "Zentralasien"
+  , Region (RegionId "SOUTH_ASIA")    "Südasien"
+  , Region (RegionId "NORTH_AFRICA")  "Nordafrika"
+  , Region (RegionId "SUBSAHARA")     "Subsahara-Afrika"
+  , Region (RegionId "ANZ")           "Australien & Neuseeland"
+  , Region (RegionId "GULF")          "Golfstaaten"
+  ]
+ 
 
 
 

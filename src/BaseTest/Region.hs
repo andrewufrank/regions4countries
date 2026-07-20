@@ -5,9 +5,7 @@
 -----------------------------------------------------------------------------
 
 module BaseTest.Region
-  ( regionMembers
---   , countriesInRegion
-  ) where
+    where
 
 import R4C.Model
 import Database.SQLite.Simple  -- for debug
@@ -32,7 +30,10 @@ regionMembers =
     mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
 
 
-
+regionNames :: [Region] 
+regionNames = [Region (RegionId "G7") "Gruppe 7"
+              , Region (RegionId "EU") "Europ. Union" 
+              ]
 
 
 

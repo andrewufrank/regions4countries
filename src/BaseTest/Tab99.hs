@@ -68,7 +68,7 @@ getData11 = do
     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable sortedRegions mdCols
+    let md = markdownTable regionNames sortedRegions mdCols
     putStrLn md 
     writeTab1Table "tab11" md
 
@@ -90,7 +90,7 @@ getData12 = do
     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable sortedRegions mdCols
+    let md = markdownTable regionNames sortedRegions mdCols
     putStrLn md 
     writeTab1Table "tab12" md
 

@@ -43,8 +43,8 @@ data MdColumnX a =   MdColumn
     } 
     deriving (Eq, Ord, Show)
 
-markdownTable :: ShowCell a => [RegionId] -> [MdColumnX a] -> String
-markdownTable regions cols =
+markdownTable :: ShowCell a => [Region] -> [RegionId] -> [MdColumnX a] -> String
+markdownTable regionNames regions cols =
     unlines (header : separator : map row regions)
   where
     header =
@@ -72,8 +72,16 @@ markdownTable regions cols =
                         --     (x / scale2divisor (colScale  col))
                         --     ""
 
-    showRegion (RegionId t) =
-        T.unpack t
+    showRegion :: RegionId -> String
+    showRegion rid =
+        case find (\r -> regionId r == rid) regionNames of
+            Just r  -> T.unpack (regionName r)
+            Nothing ->
+                case rid of
+                    RegionId t -> T.unpack t
+                    
+    -- showRegion (RegionId t) =
+    --     T.unpack t
 
 lookupRegion
     :: RegionId
