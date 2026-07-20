@@ -117,13 +117,15 @@ data CountryValue = CountryValue
     }
     deriving (Eq, Ord, Show)
 
-type RegionTable = [RegionValue]
+type RegionTableX a = [RegionValueX a]
+type RegionTable = RegionTableX Double 
 
-data RegionValue = RegionValue
+data RegionValueX a = RegionValue
     { rvRegion :: RegionId
-    , rvValue  :: Maybe Double
+    , rvValue  :: Maybe a
     }
     deriving (Eq, Ord, Show)
+type RegionValue = RegionValueX Double 
 
 data YearValue = YearValue
     { yvYear  :: Year

@@ -15,6 +15,7 @@ import qualified Data.Scientific as Sc
 
 import R4C.Model
 import qualified Data.Map.Strict as Map 
+import UniformBase 
 
 type Column a = [(RegionId, Maybe a)]
 
@@ -34,15 +35,15 @@ scale2divisor s = case s of
                     Nano -> 10**(-9)
                     Pico -> 10**(-12)
 
-data MdColumn = MdColumn
+data MdColumnX a =   MdColumn
     { colTitle    :: String
     , colScale    :: Scale
     , colDecimals :: Int
-    , colValues   :: RegionTable
+    , colValues   :: RegionTableX  a
     } 
     deriving (Eq, Ord, Show)
 
-markdownTable :: [RegionId] -> [MdColumn] -> String
+markdownTable :: ShowCell a => [RegionId] -> [MdColumnX a] -> String
 markdownTable regions cols =
     unlines (header : separator : map row regions)
   where
@@ -65,21 +66,40 @@ markdownTable regions cols =
                 case rvValue rv of
                     Nothing -> ""
 
-                    Just x -> showFFloat
-                            (Just (colDecimals col))
-                            (x / scale2divisor (colScale  col))
-                            ""
+                    Just x -> showCell col x 
+                        -- showFFloat
+                        --     (Just (colDecimals col))
+                        --     (x / scale2divisor (colScale  col))
+                        --     ""
 
     showRegion (RegionId t) =
         T.unpack t
 
 lookupRegion
     :: RegionId
-    -> RegionTable
-    -> Maybe RegionValue
+    -> RegionTableX a
+    -> Maybe (RegionValueX a)
 lookupRegion r =
     find (\rv -> rvRegion rv == r)
 
+-------------
+class ShowCell a where
+    showCell :: MdColumnX a -> a -> String
+
+instance ShowCell Double where
+    showCell :: MdColumnX Double -> Double -> String
+    showCell col x =
+        showFFloat
+            (Just (colDecimals col))
+            (x / scale2divisor (colScale col))
+            ""
+
+instance ShowCell Text where
+    showCell :: MdColumnX Text -> Text -> String
+    showCell _ = T.unpack
+
+
+------------------
 data SortOrder
     = Ascending
     | Descending
