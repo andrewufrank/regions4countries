@@ -27,6 +27,7 @@ import Text.Read (readMaybe)
 -- |  ISO 3166-1 alpha-3 country code
 newtype CountryId = CountryId Text
     deriving (Eq, Ord, Show)
+unCountryId (CountryId code) = code 
 
 data Country = Country
     { countryId   :: CountryId
