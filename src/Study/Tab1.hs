@@ -115,7 +115,7 @@ getData12 = do
     writeTab1Table "tab12" md
 
     -- compute correlation fertiity and netmigPC 
-    let fertNetmig = regionCorrelation fertility netmigPC
+    let fertNetmig = regionCorrelation2 fertility netmigPC
 
     putStrLn $ "correlation between fertility and net migration per capita" ++ show fertNetmig 
 
@@ -131,7 +131,7 @@ getData13 = do
     close conn
 
     let netmigPC = combineRegionTables (/) netmigration pops3
-    let fertNetmig = regionCorrelation fertility netmigPC
+    let fertNetmig = regionCorrelation2 fertility netmigPC
     let md = unlines
             [ " Correlation: fertility rate / net migration per capita "
                 ++ show fertNetmig 

@@ -14,65 +14,9 @@ import Data.List
 
 import R4C.Model 
 import R4C.Import.Database
-import qualified Data.Map.Strict as Map 
-
--- showAggregate :: RegionMembers -> Connection -> Dataset -> Year -> RegionId -> IO ()
--- showAggregate memberships conn ds yr reg = do
---     result <- aggregate memberships conn ds yr reg
---     putStrLn $
---         show (dsName ds)
---         ++ " "
---         ++ show yr
---         ++ " "
---         ++ show reg
---         ++ " = "
---         ++ show result
-
-valuesInRegion
-    :: RegionMembers
-    -> CountryTable
-    -> RegionId
-    -> CountryTable
-valuesInRegion memberships table region =
-    filter belongs table
-  where
-    countries =
-        countriesInRegion memberships region
-
-    belongs row =
-        tvCode row `elem` countries
-
-aggregateRegion
-    :: ([Double] -> Double)
-    -> RegionMembers
-    -> CountryTable
-    -> RegionId
-    -> Maybe Double
-aggregateRegion agg memberships table region =
-    case values of
-        [] -> Nothing
-        _ ->  Just . agg  . catMaybes $ values
-  where
-    values =  map tvValue $
-            valuesInRegion memberships table region
-
-    -- lift2 g (Just a) (Just b) = Just (g a b)
-    -- lift2 _ _ _               = Nothing
-
-
--- sumAgg :: [Double] -> Double
--- sumAgg = sum
-
--- meanAgg :: [Double] -> Double
--- meanAgg xs = sum xs / fromIntegral (length xs)
-
-aggregationFunction
-    :: Aggregation
-    -> [Double] -> Double
-aggregationFunction Sum  xs = sum xs
-aggregationFunction Mean xs = sum xs / fromIntegral (length xs)
-aggregationFunction (WeightedBy _) _ =
-    error "WeightedBy handled separately"
+-- import qualified Data.Map.Strict as Map 
+import R4C.Territory 
+import R4C.Statistics
 
 aggregate
     :: RegionMembers
@@ -81,6 +25,7 @@ aggregate
     -> Year
     -> IO RegionTable
 -- | produce a table with for each region the value for the dataset 
+-- retrieves the dataset and possibly the weight 
 aggregate memberships conn dataset year =
     case dsAggregation dataset of
 
@@ -100,24 +45,17 @@ aggregate memberships conn dataset year =
                     memberships
                     table
 
+aggregationFunction
+    :: Aggregation
+    -> [Double] -> Maybe Double
+aggregationFunction Sum  xs = sum1 xs
+aggregationFunction Mean xs = average1 xs 
+aggregationFunction (WeightedBy _) _ =
+    error "WeightedBy handled separately"
 
--- convenience wrapper to compute aggregate for a single region
-aggregateSingleRegion
-    :: RegionMembers
-    -> Connection
-    -> Dataset
-    -> Year
-    -> RegionId
-    -> IO (Maybe Double)
-aggregateSingleRegion memberships conn dataset year region = do
-    table <- aggregate memberships conn dataset year
-    pure $
-        case find (\rv -> tvCode rv == region) table of
-            Just rv -> tvValue rv
-            Nothing -> Nothing
 
 aggregateTable
-    :: ([Double] -> Double)
+    :: ([Double] -> Maybe Double)
     -> RegionMembers
     -> CountryTable
     -> RegionTable
@@ -127,51 +65,20 @@ aggregateTable f memberships table =
     | (region, _) <- memberships
     ]
 
--- aggregationFunction
---     :: Dataset
---     -> [Double] -> Double
--- aggregationFunction ds xs =
---     case dsAggregation ds of
---         Sum -> sum xs
---         Mean -> sum xs / fromIntegral (length xs)
 
-
-
-matchCountryTables
-    :: CountryTable
+aggregateRegion
+    :: ([Double] -> Maybe Double)
+    -> RegionMembers
     -> CountryTable
-    -> CountryPairs
--- this is essentially a db join 
-matchCountryTables xs ys =
-    [ (x, y)
-    | x <- xs
-    , Just y <- [findCountry (tvCode x) ys]
-    ]
-
-findCountry
-    :: CountryId
-    -> CountryTable
-    -> Maybe CountryValue
-findCountry c =
-    find (\cv -> tvCode cv == c)
-
-weightedMean
-    :: CountryPairs
+    -> RegionId
     -> Maybe Double
-weightedMean pairs
-    | null pairs = Nothing
-    | sw == 0    = Nothing
-    | otherwise  = lift2 (/) sx  sw
+aggregateRegion agg memberships table region =
+    case values of
+        [] -> Nothing
+        _ ->  agg  . catMaybes $ values
   where
-    sw = sum [tvValue w | (_, w) <- pairs]
-
-    sx = sum
-            [ tvValue x * tvValue w
-            | (x, w) <- pairs
-            ]
-
-    lift2 g (Just a) (Just b) = Just (g a b)
-    lift2 _ _ _               = Nothing
+    values =  map tvValue $
+            valuesInRegion memberships table region
 
 weightedAverage
     :: RegionMembers
@@ -186,12 +93,146 @@ weightedAverage memberships conn valueInd weightInd year = do
 
     pure
         [ TerryValue region
-              (weightedMean
-                  (matchCountryTables
+              (weightedMean2
+                  (terryTables2pairs
                       (valuesInRegion memberships valueTable region)
                       (valuesInRegion memberships weightTable region)))
         | (region, _) <- memberships
         ]
+
+regionCorrelation1
+    :: (Eq t, Show t) => TerryPairs t Double
+    -> Maybe Double
+regionCorrelation1 pairs =
+    pearson $
+        terryValues $ pairs
+   
+regionCorrelation2 :: (Eq t, Show t) => [TerryValue t Double] -> [TerryValue t Double] -> Maybe Double
+regionCorrelation2 tab1 tab2 = regionCorrelation1 (terryTables2pairs tab1 tab2)
+
+weightedMean2
+    :: TerryPairs t Double
+    ->  Maybe Double
+weightedMean2 [] = Nothing 
+weightedMean2 pairs =   wAverage1 . terryValues $ pairs 
+--     | null pairs = Nothing
+--     | sw == 0    = Nothing
+--     | otherwise  = Just (sx / sw)
+--   where
+--     sw = sum [cvValue w | (_, w) <- pairs]
+
+--     sx = sum
+--             [ cvValue x * cvValue w
+--             | (x, w) <- pairs
+--             ]
+
+
+
+
+
+-- showAggregate :: RegionMembers -> Connection -> Dataset -> Year -> RegionId -> IO ()
+-- showAggregate memberships conn ds yr reg = do
+--     result <- aggregate memberships conn ds yr reg
+--     putStrLn $
+--         show (dsName ds)
+--         ++ " "
+--         ++ show yr
+--         ++ " "
+--         ++ show reg
+--         ++ " = "
+--         ++ show result
+
+-- regionCorrelation
+--     :: (Eq t, Show t) => TerryTable t Double
+--     -> TerryTable t Double
+--     -> Maybe Double
+-- regionCorrelation xs ys =
+--     pearson $
+--         terryValues $
+--             matchTerryTables xs ys
+
+    -- lift2 g (Just a) (Just b) = Just (g a b)
+    -- lift2 _ _ _               = Nothing
+
+
+-- sumAgg :: [Double] -> Double
+-- sumAgg = sum
+
+-- meanAgg :: [Double] -> Double
+-- meanAgg xs = sum xs / fromIntegral (length xs)
+
+
+
+
+
+
+-- -- convenience wrapper to compute aggregate for a single region
+-- aggregateSingleRegion
+--     :: RegionMembers
+--     -> Connection
+--     -> Dataset
+--     -> Year
+--     -> RegionId
+--     -> IO (Maybe Double)
+-- aggregateSingleRegion memberships conn dataset year region = do
+--     table <- aggregate memberships conn dataset year
+--     pure $
+--         case find (\rv -> tvCode rv == region) table of
+--             Just rv -> tvValue rv
+--             Nothing -> Nothing
+
+-- aggregationFunction
+--     :: Dataset
+--     -> [Double] -> Double
+-- aggregationFunction ds xs =
+--     case dsAggregation ds of
+--         Sum -> sum xs
+--         Mean -> sum xs / fromIntegral (length xs)
+
+
+
+-- matchCountryTables
+--     :: CountryTable
+--     -> CountryTable
+--     -> CountryPairs
+-- -- this is essentially a db join 
+-- matchCountryTables xs ys =
+--     [ (x, y)
+--     | x <- xs
+--     , Just y <- [findCountry (tvCode x) ys]
+--     ]
+
+-- findCountry
+--     :: CountryId
+--     -> CountryTable
+--     -> Maybe CountryValue
+-- findCountry c =
+--     find (\cv -> tvCode cv == c)
+
+-- weightedMean
+--     :: CountryPairs
+--     -> Maybe Double
+-- weightedMean pairs
+--     | null pairs = Nothing
+--     | sw == 0    = Nothing
+--     | otherwise  = lift2 (/) sx  sw
+--   where
+--     sw = sum [tvValue w | (_, w) <- pairs]
+
+--     sx = sum
+--             [ tvValue x * tvValue w
+--             | (x, w) <- pairs
+--             ]
+
+--     lift2 g (Just a) (Just b) = Just (g a b)
+--     lift2 _ _ _               = Nothing
+
+
+
+
+
+
+
 
 
 

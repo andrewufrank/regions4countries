@@ -18,7 +18,21 @@ import R4C.Model
     -- ( CountryPairs, valuesInRegion, matchCountryTables )
 import Data.List  
 import UniformBase
+import qualified Data.List.NonEmpty as NE 
 
+valuesInRegion
+    :: RegionMembers
+    -> CountryTable
+    -> RegionId
+    -> CountryTable
+valuesInRegion memberships table region =
+    filter belongs table
+  where
+    countries =
+        countriesInRegion memberships region
+
+    belongs row =
+        tvCode row `elem` countries
 
 -- RegionValue is a a record {id, maybe value}, could be a map 
 -- a version with map 
@@ -38,10 +52,10 @@ import UniformBase
 --             | y <- ys
 --             ]
 
-matchTerryTables :: (Eq t, Show t) => [TerryValue t v1] -> TerryTable t v2 -> [(TerryValue t v1, TerryValue t v2)]
+terryTables2pairs :: (Eq t, Show t) => [TerryValue t v1] -> [TerryValue t v2] -> [(TerryValue t v1, TerryValue t v2)]
 -- |find, not using map, bombs when not found 
 -- this is essentially a db join 
-matchTerryTables -- matchCountryTables
+terryTables2pairs -- matchTerryTables -- matchCountryTables
  xs ys =
     [ (x, y)
     | x <- xs
@@ -53,13 +67,15 @@ terryValues
 -- was countryValues or regionValues
     :: TerryPairs t Double
     -> [(Double, Double)]
-terryValues =
-    map
-        (\(x, y) ->
-            (tvValue x, tvValue y))
+terryValues = catMaybes . map terryPairs2pairs
+    -- map
+    --     (\(x, y) ->
+    --         (tvValue x, tvValue y))
 
-terryTabel2pairs :: (TerryValue t Double, TerryValue t Double) -> (Double, Double)
-terryTabel2pairs (c1,c2)= (tvValue c1, tvValue c2) 
+terryPairs2pairs :: (TerryValue t Double, TerryValue t Double) -> Maybe (Double, Double)
+terryPairs2pairs (c1,c2) = case (tvValue c1, tvValue c2)  of 
+                    (Just v1, Just v2) -> Just (v1, v2)
+                    _   -> Nothing
 
 findTerry -- findCountry
     :: (Eq t, Show t) => t

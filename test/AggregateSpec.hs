@@ -29,11 +29,11 @@ testAggregateG7 = do
         , Observation (CountryId "AUT") (dsIndicator population) (Year 2024) (Value 999)
         ]
 
-    result <- aggregateSingleRegion regionMembers conn population (Year 2024) (RegionId "G7")
-
+    result1 <- aggregate  regionMembers conn population (Year 2024) -- (RegionId "G7")
+    let result = show result1
     close conn
 
-    result @?= Just 130
+    result @?= "[TerryValue {tvCode = RegionId \"G7\", tvValue = Just 130.0},TerryValue {tvCode = RegionId \"EU\", tvValue = Just 1019.0}]"
 
 
 -- testPop = do 

@@ -44,29 +44,29 @@ popsSurf conn =  do
 
     return (pops,surfs)
 
--- getData21 :: IO ()
--- -- fig21 cereal production and veg. consumption 
--- getData21 = do
---     conn <- open dbPath 
---     (pops3, surfs3) <- popsSurf conn
+getData21 :: IO ()
+-- fig21 cereal production and veg. consumption 
+getData21 = do
+    conn <- open dbPath 
+    (pops3, surfs3) <- popsSurf conn
 
---     cerealProd <- aggregate regionMembers conn cerealProduction (Year 2023) -- 2024 not all values 
---     let cerealFood = scaleRegionTable 0.1 pops3   -- 100 kg per head   
+    cerealProd <- aggregate regionMembers conn cerealProduction (Year 2023) -- 2024 not all values 
+    let cerealFood = scaleRegionTable 0.1 pops3   -- 100 kg per head   
     
---     close conn
+    close conn
 
---     let mdCols = 
---             [ MdColumn "Getreideproduktion (T kg)" Mega 2  cerealProd
---             -- value is t
---             , MdColumn "menschliche Ernaehrung (Mega kg)" Mega 2  cerealFood
---             -- value is 10**11 kg 
---             ]
---     let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+    let mdCols = 
+            [ MdColumn "Getreideproduktion (T kg)" Mega 2  cerealProd
+            -- value is t
+            , MdColumn "menschliche Ernaehrung (Mega kg)" Mega 2  cerealFood
+            -- value is 10**11 kg 
+            ]
+    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
 
---     -- let md = markdownTable regionsList mdCols
---     let md = markdownTable sortedRegions mdCols
---     putStrLn md
---     writeTab2Table "tab21" md
+    -- let md = markdownTable regionsList mdCols
+    let md = markdownTable regionNames sortedRegions mdCols
+    putStrLn md
+    writeTab2Table "tab21" md
 
 getData22 :: IO ()
 -- | Ernaehrungssituation 1980 (ohne Russland, noch nicht existent)
