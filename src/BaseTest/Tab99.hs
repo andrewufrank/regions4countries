@@ -65,7 +65,7 @@ getData11 = do
             , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs3
              
             ]
-    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames sortedRegions mdCols
@@ -87,7 +87,7 @@ getData12 = do
             , MdColumn "fig 12  2023 (Mega km²)" Mega 0 surfs3
              
             ]
-    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames sortedRegions mdCols

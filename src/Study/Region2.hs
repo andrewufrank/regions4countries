@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 --
--- Module      :   Region 
+-- Module      :   Terry 
 -- the definitions of the regions 
 -----------------------------------------------------------------------------
 
@@ -13,11 +13,11 @@ import Data.List (nub)
 import Database.SQLite.Simple  -- for debug
 -- import Study.Indicator
 
-regionsList :: [RegionId]
-regionsList = nub $ map fst regionMembers
+regionsList2 :: [RegionId]
+regionsList2 = nub $ map fst regionMembers2
 
-regionMembers :: RegionMembers  -- [(RegionId, CountryId)]
-regionMembers = 
+regionMembers2 :: RegionMembers  -- [(RegionId, CountryId)]
+regionMembers2 = 
   [
 
   mk "SAMERICA"
@@ -85,22 +85,22 @@ regionMembers =
     -- mk r = map (\c -> (RegionId r, CountryId c))
 
  
-regionNames :: [Region]
-regionNames =
-  [ Region (RegionId "SAMERICA")      "Südamerika"
-  , Region (RegionId "USCAN")         "USA & Kanada"
-  , Region (RegionId "EUROPE")        "Europa"
-  , Region (RegionId "RUSSIA")        "Russland"
-  , Region (RegionId "CHINA")         "China"
-  , Region (RegionId "INDIA")         "Indien"
-  , Region (RegionId "JAPAN")         "Japan"
-  , Region (RegionId "FAREAST")       "Fernost"
-  , Region (RegionId "CENTRAL_ASIA")  "Zentralasien"
-  , Region (RegionId "SOUTH_ASIA")    "Südasien"
-  , Region (RegionId "NORTH_AFRICA")  "Nordafrika"
-  , Region (RegionId "SUBSAHARA")     "Subsahara-Afrika"
-  , Region (RegionId "ANZ")           "Australien & Neuseeland"
-  , Region (RegionId "GULF")          "Golfstaaten"
+regionNames2 :: [TerryName RegionId] --  [Region]
+regionNames2 =
+  [ Terry (RegionId "SAMERICA")      "Südamerika"
+  , Terry (RegionId "USCAN")         "USA & Kanada"
+  , Terry (RegionId "EUROPE")        "Europa"
+  , Terry (RegionId "RUSSIA")        "Russland"
+  , Terry (RegionId "CHINA")         "China"
+  , Terry (RegionId "INDIA")         "Indien"
+  , Terry (RegionId "JAPAN")         "Japan"
+  , Terry (RegionId "FAREAST")       "Fernost"
+  , Terry (RegionId "CENTRAL_ASIA")  "Zentralasien"
+  , Terry (RegionId "SOUTH_ASIA")    "Südasien"
+  , Terry (RegionId "NORTH_AFRICA")  "Nordafrika"
+  , Terry (RegionId "SUBSAHARA")     "Subsahara-Afrika"
+  , Terry (RegionId "ANZ")           "Australien & Neuseeland"
+  , Terry (RegionId "GULF")          "Golfstaaten"
   ]
  
 

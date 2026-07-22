@@ -30,9 +30,9 @@ regionMembers =
     mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
 
 
-regionNames :: [Region] 
-regionNames = [Region (RegionId "G7") "Gruppe 7"
-              , Region (RegionId "EU") "Europ. Union" 
+regionNames :: [TerryName RegionId] 
+regionNames = [Terry (RegionId "G7") "Gruppe 7"
+              , Terry (RegionId "EU") "Europ. Union" 
               ]
 
 

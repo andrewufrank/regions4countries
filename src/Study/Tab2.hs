@@ -39,8 +39,8 @@ writeTab2Table filename contents = do
 popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
 popsSurf conn =  do 
     conn <- open dbPath 
-    pops :: RegionTable <-  (aggregate regionMembers conn population (Year 2024))  
-    surfs <-  (aggregate regionMembers conn surfaceArea (Year 2023)) 
+    pops :: RegionTable <-  (aggregate regionMembers2 conn population (Year 2024))  
+    surfs <-  (aggregate regionMembers2 conn surfaceArea (Year 2023)) 
 
     return (pops,surfs)
 
@@ -50,7 +50,7 @@ getData21 = do
     conn <- open dbPath 
     (pops3, surfs3) <- popsSurf conn
 
-    cerealProd <- aggregate regionMembers conn cerealProduction (Year 2023) -- 2024 not all values 
+    cerealProd <- aggregate regionMembers2 conn cerealProduction (Year 2023) -- 2024 not all values 
     let cerealFood = scaleRegionTable 0.1 pops3   -- 100 kg per head   
     
     close conn
@@ -61,10 +61,10 @@ getData21 = do
             , MdColumn "menschliche Ernaehrung (Mega kg)" Mega 2  cerealFood
             -- value is 10**11 kg 
             ]
-    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames sortedRegions mdCols
+    let md = markdownTable regionNames2 sortedRegions mdCols
     putStrLn md
     writeTab2Table "tab21" md
 
@@ -73,8 +73,8 @@ getData22 :: IO ()
 getData22 = do
     conn <- open dbPath 
     (pops3, surfs3) <- popsSurf conn
-    pops1980 :: RegionTable <-  (aggregate regionMembers conn population (Year 1980)) 
-    cerealProd <- aggregate regionMembers conn cerealProduction (Year 1980) -- 2024 not all values 
+    pops1980 :: RegionTable <-  (aggregate regionMembers2 conn population (Year 1980)) 
+    cerealProd <- aggregate regionMembers2 conn cerealProduction (Year 1980) -- 2024 not all values 
     let cerealFood = scaleRegionTable 0.1 pops1980   -- 100 kg per head   
     let cerealDomUse = scaleRegionTable (2.5) cerealFood -- 40..45% for human food 
     let potExport = combineRegionTables (-) cerealProd cerealDomUse 
@@ -90,10 +90,10 @@ getData22 = do
             , MdColumn "potential fuer Export (Mega kg)" Mega 0 potExport
 
             ]
-    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames sortedRegions mdCols
+    let md = markdownTable regionNames2 sortedRegions mdCols
     putStrLn md
     writeTab2Table "tab22" md
 
@@ -102,11 +102,11 @@ getData23 = do
     conn <- open dbPath 
     (pops3, surfs3) <- popsSurf conn
 
-    arablHA  <- aggregate regionMembers conn agriculturalLand (Year 2023)
-    fertConsumpha <- aggregate regionMembers conn ferilizerConsum (Year 2023)
+    arablHA  <- aggregate regionMembers2 conn agriculturalLand (Year 2023)
+    fertConsumpha <- aggregate regionMembers2 conn ferilizerConsum (Year 2023)
     let fertilizerConsumTot = combineRegionTables (*) arablHA fertConsumpha 
     
-    fertConsumpc <- aggregate regionMembers conn ferilizerConsum2 (Year 2023) -- leer
+    fertConsumpc <- aggregate regionMembers2 conn ferilizerConsum2 (Year 2023) -- leer
     let fertilizerProd = combineRegionTables (/) fertilizerConsumTot fertConsumpc 
     close conn
 
@@ -120,10 +120,10 @@ getData23 = do
             -- value is t
             -- value is 10**11 kg 
             ]
-    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames sortedRegions mdCols
+    let md = markdownTable regionNames2 sortedRegions mdCols
     putStrLn md
     writeTab2Table "tab23" md
 

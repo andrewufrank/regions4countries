@@ -35,16 +35,17 @@ scale2divisor s = case s of
                     Nano -> 10**(-9)
                     Pico -> 10**(-12)
 
-data MdColumnX =   MdColumn
+data MdColumn t v =   MdColumn
     { colTitle    :: String
     , colScale    :: Scale
     , colDecimals :: Int
-    , colValues   :: RegionTable
+    , colValues   :: TerryTable t v
     } 
     deriving (Eq, Ord, Show)
 
-markdownTable ::  [Region] -> [RegionId] -> [MdColumnX] -> String
-markdownTable regionNames regions cols =
+markdownTable ::  (Eq id, Show id, ShowCell id, ShowTerryId id) 
+    => [TerryName id] -> [id] -> [MdColumn id Double] -> String
+markdownTable names regions cols =
     unlines (header : separator : map row regions)
   where
     header =
@@ -54,12 +55,13 @@ markdownTable regionNames regions cols =
         "|:---|" ++ concat (replicate (length cols) "---:|")  -- the colon controls alignement
 
     row r =
-        "| " ++ showRegion r ++ " | "
+        "| " ++ showRegion names r ++ " | "
         ++ intercalate " | " (map (cell r) cols)
         ++ " |"
 
+    cell :: (Eq id, Show id, ShowCell id) => id -> MdColumn id Double -> String 
     cell r col =
-        case lookupRegion r (colValues col) of
+        case lookupTerry r (colValues col) of
             Nothing -> ""
 
             Just rv ->
@@ -72,13 +74,13 @@ markdownTable regionNames regions cols =
                         --     (x / scale2divisor (colScale  col))
                         --     ""
 
-    showRegion :: RegionId -> String
-    showRegion rid =
-        case find (\r -> regionId r == rid) regionNames of
-            Just r  -> T.unpack (regionName r)
-            Nothing ->
-                case rid of
-                    RegionId t -> T.unpack t
+    showRegion :: (Eq id, Show id, ShowTerryId id) =>  [TerryName id] -> id -> String
+    showRegion names rid =
+        case find (\r -> terryId r == rid) names of
+            Just r  -> T.unpack (terryName r)
+            Nothing -> t2s $ showTerryId rid 
+                -- case rid of
+                --     Id t -> T.unpack t
                     
     -- showRegion (RegionId t) =
     --     T.unpack t
@@ -90,12 +92,20 @@ lookupRegion
 lookupRegion r =
     find (\rv -> tvCode rv == r)
 
+lookupTerry 
+    :: (Eq t) => t
+    -> TerryTable t v
+    -> Maybe (TerryValue t v)
+lookupTerry r =
+    find (\rv -> tvCode rv == r)
+
+
 -------------
 class ShowCell a where
-    showCell :: MdColumnX -> a -> String
+    showCell :: MdColumn i a -> a -> String
 
 instance ShowCell Double where
-    showCell :: MdColumnX -> Double -> String
+    showCell :: MdColumn i Double -> Double -> String
     showCell col x =
         showFFloat
             (Just (colDecimals col))
@@ -103,7 +113,7 @@ instance ShowCell Double where
             ""
 
 instance ShowCell Text where
-    showCell :: MdColumnX -> Text -> String
+    showCell :: MdColumn i Text -> Text -> String
     showCell _ = T.unpack
 
 
@@ -112,12 +122,12 @@ data SortOrder
     = Ascending
     | Descending
 
-sortRegionsByColumn
-    :: SortOrder
-    -> RegionTable
-    -> [RegionId]
+sortTerryByColumn
+    :: (Ord v) => SortOrder
+    -> TerryTable t v
+    -> [t]
 -- sorts (attention: Nothing is lowest!)
-sortRegionsByColumn order table =
+sortTerryByColumn order table =
     case order of
         Ascending ->
             map tvCode $

@@ -39,8 +39,8 @@ writeTab1Table filename contents = do
 popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
 popsSurf conn =  do 
     conn <- open dbPath 
-    pops <-  (aggregate regionMembers conn population (Year 2024)) 
-    surfs <-  (aggregate regionMembers conn surfaceArea (Year 2023)) 
+    pops <-  (aggregate regionMembers2 conn population (Year 2024)) 
+    surfs <-  (aggregate regionMembers2 conn surfaceArea (Year 2023)) 
 
     -- let 
     --         p =  zip regionsList pops  
@@ -56,9 +56,9 @@ getData11 = do
     conn <- open dbPath 
     (pops3, surfs3) <- popsSurf conn
 
-    netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
-    fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
-    agrar <-  (aggregate regionMembers conn agrarland (Year 2024))  
+    netmigration <-  (aggregate regionMembers2 conn migrationNet (Year 2024))  
+    fertility <-  (aggregate regionMembers2 conn fertilityRate (Year 2024))  
+    agrar <-  (aggregate regionMembers2 conn agrarland (Year 2024))  
 
     let surfPerCap = combineRegionTables (/) surfs3 pops3
     let surAgrarfPerCap = combineRegionTables (/) agrar pops3
@@ -74,10 +74,10 @@ getData11 = do
             , MdColumn "Nutzbares Land per capita (ha/person)" 
                     Centi 0 surAgrarfPerCap 
             ]
-    let sortedRegions = sortRegionsByColumn Descending  pops3 --surfPerCap
+    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames sortedRegions mdCols
+    let md = markdownTable regionNames2 sortedRegions mdCols
     putStrLn md 
     writeTab1Table "tab11" md
 
@@ -89,8 +89,8 @@ getData12 = do
     conn <- open dbPath 
     (pops3, surfs3) <- popsSurf conn
 
-    netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
-    fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
+    netmigration <-  (aggregate regionMembers2 conn migrationNet (Year 2024))  
+    fertility <-  (aggregate regionMembers2 conn fertilityRate (Year 2024))  
 
     -- let surfs2 = zip regionsList surfs
     let surfPerCap = combineRegionTables (/) surfs3 pops3
@@ -106,11 +106,11 @@ getData12 = do
             MdColumn "Netto Migration (per Mega)" Micro 0
                 netmigPC
             ]
-    let sortedRegions = sortRegionsByColumn Descending fertility
+    let sortedRegions = sortTerryByColumn Descending fertility
      -- surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames sortedRegions mdCols
+    let md = markdownTable regionNames2 sortedRegions mdCols
     putStrLn md 
     writeTab1Table "tab12" md
 
@@ -126,8 +126,8 @@ getData13 :: IO ()
 getData13 = do
     conn <- open dbPath
     (pops3, _) <- popsSurf conn
-    netmigration <- aggregate regionMembers conn migrationNet (Year 2024)
-    fertility <- aggregate regionMembers conn fertilityRate (Year 2024)
+    netmigration <- aggregate regionMembers2 conn migrationNet (Year 2024)
+    fertility <- aggregate regionMembers2 conn fertilityRate (Year 2024)
     close conn
 
     let netmigPC = combineRegionTables (/) netmigration pops3

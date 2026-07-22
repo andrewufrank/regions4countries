@@ -31,7 +31,7 @@ getCountries4db = do
     close conn
 
     -- mapM_ print countries
-    -- dumpCountries countries
+    dumpCountries countries
 
     putStr "allWBcodes ="
     -- print . map (unCountryId . countryId) $ countries
@@ -41,15 +41,16 @@ getCountries4db = do
 
     let smallCountries = filter ((< 10**7). fromJustNote "smallCountries dwerwcc" . tvValue) countryTable :: CountryTable
     putStr "smallCountries = "   -- scheidet schweiz und oesterreich aus 
-    print . map (unCountryId. tvCode) $ smallCountries
-    mapM_ print smallCountries 
+    -- print . map (unCountryId. tvCode) $ smallCountries
+
+    -- mapM_ print smallCountries 
     -- let smallCountriesSize = matchCountryTable smallCountries 
 
 ppCountry :: Country -> String
 ppCountry c =
-    "Country "
+    "Country ("
         ++ show (countryId c)
-        ++ " "
+        ++ ") "
         ++ show (countryName c)
         ++ " "
         ++ show (countryRegion c)
