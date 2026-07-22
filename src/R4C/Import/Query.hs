@@ -8,11 +8,11 @@
 -- R4C.Aggregate — compute sums, averages, weighted averages, etc., from queried data.
 -----------------------------------------------------------------------------
 
-module R4C.Query where
+module R4C.Import.Query where
 
 import Database.SQLite.Simple
 import R4C.Model
-import R4C.Database.Instances
+import R4C.Import.Instances
 
 latestObservation
     :: Connection

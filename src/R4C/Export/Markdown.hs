@@ -1,4 +1,4 @@
-module R4C.Markdown
+module R4C.Export.Markdown
   ( expandMarkdownIncludes
   , writeMarkdownIncludes
   , writeMarkdownBlock

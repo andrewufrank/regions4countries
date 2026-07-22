@@ -4,7 +4,7 @@
 -- read a csv file from the world bank and convert 
 -----------------------------------------------------------------------------
 
-module R4C.WorldBank  where 
+module R4C.Import.WorldBank  where 
 
 import UniformBase 
 import R4C.Model 

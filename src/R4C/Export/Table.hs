@@ -5,7 +5,7 @@
 -- Produce Markdown tables
 -----------------------------------------------------------------------------
 
-module R4C.Table where
+module R4C.Export.Table where
 
 import Data.List  
 import Data.Ord (Down(..))

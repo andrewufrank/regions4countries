@@ -16,14 +16,14 @@ import Database.SQLite.Simple  -- for debug
 -- import Study.Indicator 
 import BaseTest.Region 
 import R4C.Aggregate 
-import R4C.Query
-import R4C.Table 
+import R4C.Import.Query
+import R4C.Export.Table 
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import BaseTest.Config 
 import BaseTest.Dataset 
 import R4C.Statistics
-import R4C.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
+import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 

@@ -13,7 +13,7 @@ import Data.List
 -- import qualified Data.Text as T
 
 import R4C.Model 
-import R4C.Database
+import R4C.Import.Database
 import qualified Data.Map.Strict as Map 
 
 -- showAggregate :: RegionMembers -> Connection -> Dataset -> Year -> RegionId -> IO ()

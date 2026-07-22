@@ -8,9 +8,9 @@ import Database.SQLite.Simple
 import System.Directory
 import Control.Monad (forM_)
 
-import R4C.Orchestrator
-import R4C.WorldBank
-import R4C.Database
+import R4C.Import.Orchestrator
+import R4C.Import.WorldBank
+import R4C.Import.Database
 -- import R4C.Query 
 import R4C.Model
 -- import BaseTest.Indicator

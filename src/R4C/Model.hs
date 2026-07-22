@@ -97,6 +97,12 @@ data Dataset = Dataset
 newtype Year = Year Int
     deriving (Eq, Ord, Show)
 
+data YearValue = YearValue
+    { yvYear  :: Year
+    , yvValue :: Value
+    }
+    deriving (Eq, Ord, Show)
+
 newtype Value = Value Sc.Scientific
     deriving (Eq, Ord, Show)
     -- to keep scientifi local
@@ -111,6 +117,7 @@ data Observation = Observation
     }
     deriving (Eq, Ord, Show)
 
+--------------------------------------------------------the table to generalize
 type CountryTable = [CountryValue]
 
 data CountryValue = CountryValue
@@ -129,8 +136,3 @@ data RegionValueX a = RegionValue
     deriving (Eq, Ord, Show)
 type RegionValue = RegionValueX Double 
 
-data YearValue = YearValue
-    { yvYear  :: Year
-    , yvValue :: Value
-    }
-    deriving (Eq, Ord, Show)

@@ -4,7 +4,7 @@
 -- store (bulk load) the observations from the read CSV file 
 -----------------------------------------------------------------------------
 
-module R4C.Database   
+module R4C.Import.Database   
 -- ( openDB
 --   , closeDB
 --   , createSchema
@@ -26,7 +26,7 @@ import Database.SQLite.Simple.ToField
 import Database.SQLite.Simple.FromField
 
 import R4C.Model
-import R4C.Database.Instances
+import R4C.Import.Instances
 
 openDB :: FilePath -> IO Connection
 openDB = open

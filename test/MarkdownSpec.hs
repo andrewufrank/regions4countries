@@ -6,7 +6,7 @@ import System.IO.Temp (withSystemTempDirectory)
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import R4C.Markdown
+import R4C.Export.Markdown
 
 tests :: TestTree
 tests =

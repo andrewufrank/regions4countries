@@ -23,24 +23,24 @@ library
       BaseTest.Config
       BaseTest.Dataset
       BaseTest.Region
+      BaseTest.Tab99
       R4C.Aggregate
-      R4C.Database
-      R4C.Database.Instances
-      R4C.Markdown
+      R4C.Country
+      R4C.Export.Markdown
+      R4C.Export.Table
+      R4C.Import.Database
+      R4C.Import.Instances
+      R4C.Import.Orchestrator
+      R4C.Import.Query
+      R4C.Import.WorldBank
       R4C.Model
-      R4C.Orchestrator
-      R4C.Query
       R4C.Statistics
-      R4C.Table
-      R4C.WorldBank
       Study.Config
       Study.Dataset
       Study.Region2
       Study.Tab1
       Study.Tab2
   other-modules:
-      BaseTest.Tab99
-      R4C.Country
       Paths_Regions4Countries
   hs-source-dirs:
       src

@@ -7,8 +7,8 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import R4C.Model
-import R4C.WorldBank 
-import R4C.Database
+import R4C.Import.WorldBank 
+import R4C.Import.Database
 import BaseTest.Config
 
 tests :: TestTree

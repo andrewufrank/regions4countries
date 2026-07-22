@@ -11,7 +11,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Vector.Unboxed as V
 import qualified Statistics.Correlation as C
 import R4C.Model 
-import R4C.Database 
+import R4C.Import.Database 
 import Database.SQLite.Simple
 import Data.Maybe 
 import R4C.Aggregate

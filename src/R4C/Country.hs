@@ -9,8 +9,8 @@ module R4C.Country where
 
 import Database.SQLite.Simple
 import R4C.Model
-import R4C.Database.Instances
-import R4C.Database
+import R4C.Import.Instances
+import R4C.Import.Database
 import Study.Config 
 import Study.Dataset
 import Data.List 

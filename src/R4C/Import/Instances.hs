@@ -5,7 +5,7 @@
  
 -----------------------------------------------------------------------------
 
-module R4C.Database.Instances  
+module R4C.Import.Instances  
      where
 import UniformBase  
 

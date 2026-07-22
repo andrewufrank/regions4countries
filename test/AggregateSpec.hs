@@ -5,7 +5,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import R4C.Aggregate
-import R4C.Database
+import R4C.Import.Database
 -- import BaseTest.Indicator
 import BaseTest.Region
 import R4C.Model

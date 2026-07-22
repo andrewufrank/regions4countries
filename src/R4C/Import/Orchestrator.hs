@@ -4,7 +4,7 @@
 -- the connection between the module reading the WorldBank files 
 -- and the database storing  
 -----------------------------------------------------------------------------
-module R4C.Orchestrator
+module R4C.Import.Orchestrator
     ( importWorldBankArchives
     ) where
 
@@ -12,8 +12,8 @@ import Database.SQLite.Simple
 
 import Control.Monad (forM_)
 
-import R4C.WorldBank
-import R4C.Database
+import R4C.Import.WorldBank
+import R4C.Import.Database
 import UniformBase
 
 
