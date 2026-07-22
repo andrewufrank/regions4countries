@@ -53,6 +53,10 @@ tests:
       - test
     other-modules:
       - MarkdownSpec
+      - OrchestratorSpec
+      - RegionSpec
+      - WorldBankSpec
+      - AggregateSpec
     dependencies:
       - Regions4Countries
       - tasty

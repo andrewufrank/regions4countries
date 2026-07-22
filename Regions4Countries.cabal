@@ -142,6 +142,10 @@ test-suite r4c-test
   main-is: Spec.hs
   other-modules:
       MarkdownSpec
+      OrchestratorSpec
+      RegionSpec
+      WorldBankSpec
+      AggregateSpec
   hs-source-dirs:
       test
   default-extensions:
