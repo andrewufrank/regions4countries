@@ -23,6 +23,39 @@ import Database.SQLite.Simple.ToRow
 import qualified Data.Text as Text
 import Text.Read (readMaybe)
 
+
+-- |  ISO 3166-1 alpha-3 country code
+newtype CountryId = CountryId Text
+    deriving (Eq, Ord, Show)
+unCountryId (CountryId code) = code 
+
+data Country = Country
+    { countryId   :: CountryId
+    , countryName :: Text  -- ^ english, the WB tabble name
+    , countryRegion    :: Text -- ^ the WB region 
+    , countryIncomeGroup :: Text -- ^ the WB incomeGroup
+    , countrySpecialNotes :: Text -- ^ the WB specialNotes 
+    }
+    deriving (Eq, Ord, Show)
+
+newtype RegionId = RegionId Text 
+    deriving (Eq, Ord, Show)
+
+data Region = Region
+    { regionId   :: RegionId
+    , regionName :: Text
+    }
+    deriving (Eq, Ord, Show)
+
+type RegionMembers = [(RegionId, [CountryId])]
+
+countriesInRegion :: RegionMembers -> RegionId -> [CountryId]
+-- get all countries in a region (could be a map but list is short)
+countriesInRegion memberships region =
+    case lookup region memberships of
+        Just cs -> cs
+        Nothing -> []
+
 -- | world bank indicator code, eg SP.POP.TOTL
 newtype IndicatorId =
     IndicatorId
@@ -129,51 +162,77 @@ data TerryValue t v = TerryValue
 
 --------------------------------------------Regions and Countries
 
--- | ISO 3166-1 alpha-3 country code
-newtype CountryId = CountryId Text
-    deriving (Eq, Ord, Show)
-unCountryId (CountryId code) = code 
+-- |  ISO 3166-1 alpha-3 country code
+-- newtype CountryId = CountryId Text
+--     deriving (Eq, Ord, Show)
+-- unCountryId (CountryId code) = code 
 
-data Country = Country
-    { countryId   :: CountryId
-    , countryName :: Text  -- ^ english, the WB tabble name
-    , countryRegion    :: Text -- ^ the WB region 
-    , countryIncomeGroup :: Text -- ^ the WB incomeGroup
-    , countrySpecialNotes :: Text -- ^ the WB specialNotes 
-    }
-    deriving (Eq, Ord, Show)
 
 type CountryName = TerryName CountryId 
 
-newtype RegionId = RegionId Text 
-    deriving (Eq, Ord, Show)
-
-data Region = Region
-    { regionId   :: RegionId
-    , regionName :: Text
-    }
-    deriving (Eq, Ord, Show)
-
-type RegionMembers = [(RegionId, [CountryId])]
-
-countriesInRegion :: RegionMembers -> RegionId -> [CountryId]
--- get all countries in a region (could be a map but list is short)
-countriesInRegion memberships region =
-    case lookup region memberships of
-        Just cs -> cs
-        Nothing -> []
+-- newtype RegionId = RegionId Text 
+--     deriving (Eq, Ord, Show)
 
 type RegionName = TerryName RegionId
 
 type CountryValue = TerryValue CountryId Double 
-type CountryTable = TerryTable CountryId ( Double)
+-- data CountryValue = CountryValue
+--     { cvCountry :: CountryId
+--     , cvValue   :: Double
+--     }
+--     deriving (Eq, Ord, Show)
 
+-- data RegionValueX a = RegionValue
+--     { rvRegion :: RegionId
+--     , rvValue  ::  a
+--     }
+--     deriving (Eq, Ord, Show)
 type RegionValue = TerryValue RegionId Double  -- RegionValueX Double 
-type RegionTable  = TerryTable RegionId ( Double) -- [RegionValue]
 
+type CountryTable = TerryTable CountryId ( Double)
+type RegionTable  = TerryTable RegionId ( Double) -- [RegionValue]
 type TerryTable t v = [TerryValue t v]
 
 type CountryPairs = [(CountryValue, CountryValue)]
-type RegionPairs = [(RegionValue, RegionValue)]
 
+type RegionPairs = [(RegionValue, RegionValue)]
 type TerryPairs t v  = [(TerryValue t v, TerryValue t v )]
+
+-- type RegionTable = RegionTableX Double 
+
+-- data RegionValueX a = RegionValue
+--     { rvRegion :: RegionId
+--     , rvValue  ::  a
+--     }
+--     deriving (Eq, Ord, Show)
+-- type RegionValue = RegionValueX Double 
+
+
+-- individual types for Country or Region: 
+-- data CountryDesc = CountryDesc 
+--     { countryId   :: CountryId
+--     , countryName :: Text  -- ^ english, the WB tabble name
+--     , countryRegion    :: Text -- ^ the WB region 
+--     , countryIncomeGroup :: Text -- ^ the WB incomeGroup
+--     , countrySpecialNotes :: Text -- ^ the WB specialNotes 
+--     }
+--     deriving (Eq, Ord, Show)
+
+
+-- type RegionMembers = [(RegionId, [CountryId])]
+
+-- countriesInRegion :: RegionMembers -> RegionId -> [CountryId]
+-- -- get all countries in a region (could be a map but list is short)
+-- countriesInRegion memberships region =
+--     case lookup region memberships of
+--         Just cs -> cs
+--         Nothing -> []
+
+-- type Region = Terry RegionId
+-- type Country = Terry CountryId 
+
+
+
+
+
+

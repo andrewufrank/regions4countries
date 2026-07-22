@@ -64,7 +64,7 @@ instance FromField Value where
 
 --------
 instance FromRow CountryValue where
-    fromRow = CountryValue <$> field <*> field
+    fromRow = TerryValue <$> field <*>  field
     
 instance FromRow Observation where
     fromRow =

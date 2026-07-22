@@ -35,15 +35,15 @@ scale2divisor s = case s of
                     Nano -> 10**(-9)
                     Pico -> 10**(-12)
 
-data MdColumnX a =   MdColumn
+data MdColumnX =   MdColumn
     { colTitle    :: String
     , colScale    :: Scale
     , colDecimals :: Int
-    , colValues   :: RegionTableX  a
+    , colValues   :: RegionTable
     } 
     deriving (Eq, Ord, Show)
 
-markdownTable :: ShowCell a => [Region] -> [RegionId] -> [MdColumnX a] -> String
+markdownTable ::  [Region] -> [RegionId] -> [MdColumnX] -> String
 markdownTable regionNames regions cols =
     unlines (header : separator : map row regions)
   where
@@ -63,7 +63,7 @@ markdownTable regionNames regions cols =
             Nothing -> ""
 
             Just rv ->
-                case rvValue rv of
+                case tvValue rv of
                     Nothing -> ""
 
                     Just x -> showCell col x 
@@ -85,17 +85,17 @@ markdownTable regionNames regions cols =
 
 lookupRegion
     :: RegionId
-    -> RegionTableX a
-    -> Maybe (RegionValueX a)
+    -> RegionTable
+    -> Maybe (RegionValue)
 lookupRegion r =
-    find (\rv -> rvRegion rv == r)
+    find (\rv -> tvCode rv == r)
 
 -------------
 class ShowCell a where
-    showCell :: MdColumnX a -> a -> String
+    showCell :: MdColumnX -> a -> String
 
 instance ShowCell Double where
-    showCell :: MdColumnX Double -> Double -> String
+    showCell :: MdColumnX -> Double -> String
     showCell col x =
         showFFloat
             (Just (colDecimals col))
@@ -103,7 +103,7 @@ instance ShowCell Double where
             ""
 
 instance ShowCell Text where
-    showCell :: MdColumnX Text -> Text -> String
+    showCell :: MdColumnX -> Text -> String
     showCell _ = T.unpack
 
 
@@ -120,12 +120,12 @@ sortRegionsByColumn
 sortRegionsByColumn order table =
     case order of
         Ascending ->
-            map rvRegion $
-                sortOn rvValue table
+            map tvCode $
+                sortOn tvValue table
 
         Descending ->
-            map rvRegion $
-                sortOn (Down . rvValue) table
+            map tvCode $
+                sortOn (Down . tvValue) table
     
 valueToDouble :: Value -> Double
 valueToDouble (Value v) =
@@ -134,7 +134,7 @@ valueToDouble (Value v) =
 scaleRegionTable :: Double -> RegionTable -> RegionTable
 scaleRegionTable k =
     map $ \rv ->
-        rv { rvValue = fmap (* k) (rvValue rv) }
+        rv { tvValue = fmap (* k) (tvValue rv) }
 
 
 combineRegionTables
@@ -143,18 +143,18 @@ combineRegionTables
     -> RegionTable
     -> RegionTable
 combineRegionTables f xs ys =
-    [ RegionValue
-        { rvRegion = r
-        , rvValue  = lift2 f (rvValue x) (rvValue y)
+    [ TerryValue
+        { tvCode = r
+        , tvValue  = lift2 f (tvValue x) (tvValue y)
         }
     | x <- xs
-    , Just y <- [Map.lookup (rvRegion x) yMap]
-    , let r = rvRegion x
+    , Just y <- [Map.lookup (tvCode x) yMap]
+    , let r = tvCode x
     ]
   where
     yMap =
         Map.fromList
-            [ (rvRegion y, y)
+            [ (tvCode y, y)
             | y <- ys
             ]
 

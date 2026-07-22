@@ -7,9 +7,9 @@
 module R4C.Aggregate
       where
 
-import Data.Maybe (mapMaybe)
+import Data.Maybe  
 import Database.SQLite.Simple  
-import Data.List  
+import Data.List
 -- import qualified Data.Text as T
 
 import R4C.Model 
@@ -40,7 +40,7 @@ valuesInRegion memberships table region =
         countriesInRegion memberships region
 
     belongs row =
-        cvCountry row `elem` countries
+        tvCode row `elem` countries
 
 aggregateRegion
     :: ([Double] -> Double)
@@ -51,10 +51,14 @@ aggregateRegion
 aggregateRegion agg memberships table region =
     case values of
         [] -> Nothing
-        _ ->  Just (agg values)
+        _ ->  Just . agg  . catMaybes $ values
   where
-    values =  map cvValue $
+    values =  map tvValue $
             valuesInRegion memberships table region
+
+    -- lift2 g (Just a) (Just b) = Just (g a b)
+    -- lift2 _ _ _               = Nothing
+
 
 -- sumAgg :: [Double] -> Double
 -- sumAgg = sum
@@ -108,8 +112,8 @@ aggregateSingleRegion
 aggregateSingleRegion memberships conn dataset year region = do
     table <- aggregate memberships conn dataset year
     pure $
-        case find (\rv -> rvRegion rv == region) table of
-            Just rv -> rvValue rv
+        case find (\rv -> tvCode rv == region) table of
+            Just rv -> tvValue rv
             Nothing -> Nothing
 
 aggregateTable
@@ -118,7 +122,7 @@ aggregateTable
     -> CountryTable
     -> RegionTable
 aggregateTable f memberships table =
-    [ RegionValue region
+    [ TerryValue region
           (aggregateRegion f memberships table region)
     | (region, _) <- memberships
     ]
@@ -131,7 +135,7 @@ aggregateTable f memberships table =
 --         Sum -> sum xs
 --         Mean -> sum xs / fromIntegral (length xs)
 
-type CountryPairs = [(CountryValue, CountryValue)]
+
 
 matchCountryTables
     :: CountryTable
@@ -141,7 +145,7 @@ matchCountryTables
 matchCountryTables xs ys =
     [ (x, y)
     | x <- xs
-    , Just y <- [findCountry (cvCountry x) ys]
+    , Just y <- [findCountry (tvCode x) ys]
     ]
 
 findCountry
@@ -149,7 +153,7 @@ findCountry
     -> CountryTable
     -> Maybe CountryValue
 findCountry c =
-    find (\cv -> cvCountry cv == c)
+    find (\cv -> tvCode cv == c)
 
 weightedMean
     :: CountryPairs
@@ -157,14 +161,17 @@ weightedMean
 weightedMean pairs
     | null pairs = Nothing
     | sw == 0    = Nothing
-    | otherwise  = Just (sx / sw)
+    | otherwise  = lift2 (/) sx  sw
   where
-    sw = sum [cvValue w | (_, w) <- pairs]
+    sw = sum [tvValue w | (_, w) <- pairs]
 
     sx = sum
-            [ cvValue x * cvValue w
+            [ tvValue x * tvValue w
             | (x, w) <- pairs
             ]
+
+    lift2 g (Just a) (Just b) = Just (g a b)
+    lift2 _ _ _               = Nothing
 
 weightedAverage
     :: RegionMembers
@@ -178,7 +185,7 @@ weightedAverage memberships conn valueInd weightInd year = do
     weightTable <- lookupTable conn (  weightInd) year
 
     pure
-        [ RegionValue region
+        [ TerryValue region
               (weightedMean
                   (matchCountryTables
                       (valuesInRegion memberships valueTable region)

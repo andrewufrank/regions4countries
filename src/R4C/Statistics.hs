@@ -11,74 +11,34 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Vector.Unboxed as V
 import qualified Statistics.Correlation as C
 import R4C.Model 
-import R4C.Import.Database 
-import Database.SQLite.Simple
-import Data.Maybe 
-import R4C.Aggregate
+-- import R4C.Database 
+-- import Database.SQLite.Simple
+-- import Data.Maybe 
+-- import R4C.Aggregate
+    -- ( CountryPairs, valuesInRegion, matchCountryTables )
+-- import Data.List  
+import R4C.Territory 
 
--- type CountryPairs = [(CountryValue, CountryValue)]
+--------------------------- statistics on list of [Doubles] or [(Double,Double)]
+-- these list are constructed and are not empty
 
-type RegionPairs = [(RegionValue, RegionValue)]
+sum1 :: [(Double)] -> Double 
+sum1 = sum 
 
+average1 :: [(Double)] -> Double 
+-- average [] = error ["average empty list"]
+average1 xs = sum xs / (fromIntegral . length $ xs) 
 
-matchRegionTables
-    :: RegionTable
-    -> RegionTable
-    -> RegionPairs
-matchRegionTables xs ys =
-    [ (x, y)
-    | x <- xs
-    , Just y <- [Map.lookup (rvRegion x) yMap]
-    ]
-  where
-    yMap =
-        Map.fromList
-            [ (rvRegion y, y)
-            | y <- ys
-            ]
-
--- matchCountryTables
---     :: CountryTable
---     -> CountryTable
---     -> CountryPairs
--- matchCountryTables xs ys =
---     [ (x, y)
---     | x <- xs
---     , Just y <- [Map.lookup (cvCountry x) yMap]
---     ]
---   where
---     yMap =
---         Map.fromList
---             [ (cvCountry y, y)
---             | y <- ys
---             ]
-
-countryValues
-    :: CountryPairs
-    -> [(Double, Double)]
-countryValues =
-    map
-        (\(x, y) ->
-            (cvValue x, cvValue y))
-
-regionValues
-    :: RegionPairs
-    -> [(Double, Double)]
-regionValues =
-    mapMaybe values
-  where
-    values (x, y) =
-        case (rvValue x, rvValue y) of
-            (Just a, Just b) ->
-                Just (a, b)
-
-            _ ->
-                Nothing
+wAverage1 :: [(Double, Double)] -> Double 
+-- weighted average of non empty list; weight is second!
+wAverage1 xsws = (sum . zipWith (*)  (map fst xsws) $ (map snd xsws)) / (sum . map snd $ xsws)
 
 
 toVectors
     :: [(Double, Double)]
     -> (V.Vector Double, V.Vector Double)
+
+
 toVectors pairs =
     ( V.fromList [x | (x, _) <- pairs]
     , V.fromList [y | (_, y) <- pairs]
@@ -101,44 +61,27 @@ pearson pairs
         toVectors pairs
 
 regionCorrelation
-    :: RegionTable
-    -> RegionTable
+    :: (Eq t, Show t) => TerryTable t Double
+    -> TerryTable t Double
     -> Maybe Double
 regionCorrelation xs ys =
     pearson $
-        regionValues $
-            matchRegionTables xs ys
-
-countryCorrelation
-    :: RegionMembers
-    -> CountryTable
-    -> CountryTable
-    -> RegionId
-    -> Maybe Double
-countryCorrelation memberships xs ys region =
-    pearson $
-        countryValues $
-            matchCountryTables
-                (valuesInRegion memberships xs region)
-                (valuesInRegion memberships ys region)
+        terryValues $
+            matchTerryTables xs ys
 
 
-countryCorrelationIO
-    :: RegionMembers
-    -> Connection
-    -> IndicatorId
-    -> IndicatorId
-    -> Year
-    -> RegionId
-    -> IO (Maybe Double)
-countryCorrelationIO memberships conn ind1 ind2 year region = do
-    t1 <- lookupTable conn ind1 year
-    t2 <- lookupTable conn ind2 year
 
-    pure $
-        countryCorrelation
-            memberships
-            t1
-            t2
-            region
-            
+weightedMean
+    :: TerryPairs t Double
+    ->  Double
+weightedMean pairs = wAverage1 . map terryTabel2pairs $ pairs 
+--     | null pairs = Nothing
+--     | sw == 0    = Nothing
+--     | otherwise  = Just (sx / sw)
+--   where
+--     sw = sum [cvValue w | (_, w) <- pairs]
+
+--     sx = sum
+--             [ cvValue x * cvValue w
+--             | (x, w) <- pairs
+--             ]

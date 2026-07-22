@@ -14,6 +14,7 @@ import R4C.Import.Database
 import Study.Config 
 import Study.Dataset
 import Data.List 
+import UniformBase
 
 lookupCountries :: Connection -> IO [Country]
 lookupCountries conn =
@@ -26,7 +27,7 @@ getCountries4db :: IO ()
 getCountries4db = do
     conn <- open dbPath
     countries <- lookupCountries conn
-    countryTable <- lookupTable conn (dsIndicator population) (Year 2024)
+    countryTable :: CountryTable <- lookupTable conn (dsIndicator population) (Year 2024) 
     close conn
 
     -- mapM_ print countries
@@ -38,9 +39,9 @@ getCountries4db = do
     putStr "countriesOnly = "
     -- print . map (unCountryId. countryId) $ countriesOnly
 
-    let smallCountries = filter ((< 10**7). cvValue) countryTable :: CountryTable
+    let smallCountries = filter ((< 10**7). fromJustNote "smallCountries dwerwcc" . tvValue) countryTable :: CountryTable
     putStr "smallCountries = "   -- scheidet schweiz und oesterreich aus 
-    print . map (unCountryId. cvCountry) $ smallCountries
+    print . map (unCountryId. tvCode) $ smallCountries
     mapM_ print smallCountries 
     -- let smallCountriesSize = matchCountryTable smallCountries 
 
