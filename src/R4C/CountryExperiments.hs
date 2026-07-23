@@ -41,6 +41,7 @@ less10Mcountries = ["ABW","ALB","AND","ARM","ASM","ATG","AUT",
     "QAT","SGP","SLB","SLE","SLV","SMR","SRB","STP","SUR","SVK","SVN","SWZ","SXM","SYC",
     "TCA","TGO","TKM","TLS","TON","TTO","TUV","URY","VCT","VGB","VIR","VUT","WSM","XKX"]
 
+less1Mcountries :: [Text]
 less1Mcountries = ["ABW","AND","ASM","ATG","BHS","BLZ","BMU","BRB","BRN","BTN",
     "CHI","COM","CPV","CUW","CYM","DMA","FJI","FRO","FSM","GIB","GRD","GRL","GUM","GUY",
     "IMN","ISL","KIR","KNA","LCA","LIE","LUX","MAC","MAF","MCO",
@@ -71,16 +72,21 @@ exp2 :: IO ()
 -- } show the totals for the small, and very small countries
 exp2 = do 
     conn <- open dbPath 
-    pops <-  (aggregate regionMembersSmall conn population (Year 2024)) 
-    surfs <-  (aggregate regionMembersSmall conn surfaceArea (Year 2023)) 
-    gnp <-  (aggregate regionMembersSmall conn grossNatProd (Year 2024))  
-    gnpPCwb <-  (aggregate regionMembersSmall conn gnpPPpc (Year 2024))  
-    -- fertility <-  (aggregate regionMembersSmall conn fertilityRate (Year 2024))  
-    -- agrar <-  (aggregate regionMembersSmall conn agrarland (Year 2024))  
 
-    let gnpPC = combineRegionTables (/) gnp surfs
-    -- let surAgrarfPerCap = combineRegionTables (/) agrar pops3
-    -- let netmigPC = combineRegionTables (/) netmigration pops3 
+    tabPop :: CountryTable  <- lookupTable conn (dsIndicator population)(Year 2024)
+    tabGNP :: CountryTable <- lookupTable conn (dsIndicator grossNatProd) (Year 2024)
+    tabSurf <- lookupTable conn (dsIndicator surfaceArea) (Year 2023)
+    -- for weighted values aggregateTable does not work
+    -- tabGNPpcwb <- lookupTable conn (dsIndicator gnpPPpc) (Year 2024)
+    gnpPCwb <-  (aggregate regionMembersSmall conn gnpPPpc (Year 2024))  
+
+    let 
+        pops = aggregateTable (aggregationFunction $ dsAggregation population) regionMembersSmall  tabPop
+        surfs = aggregateTable (aggregationFunction $ dsAggregation surfaceArea) regionMembersSmall tabSurf 
+        gnp = aggregateTable (aggregationFunction $ dsAggregation grossNatProd) regionMembersSmall tabGNP
+        -- gnpPCwb =  aggregateTable (aggregationFunction $ dsAggregation gnpPPpc) regionMembersSmall tabGNPpcwb
+
+        gnpPC = combineRegionTables (/) gnp pops
     
     close conn
 
@@ -94,7 +100,7 @@ exp2 = do
             -- , MdColumn "Nutzbares Land per capita (ha/person)" 
             --         Centi 0 surAgrarfPerCap 
             ]
-    let sortedRegions = sortTerryByColumn Descending  pops --surfPerCap
+    let sortedRegions = sortTerryByColumn Descending  pops :: [RegionId]
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames2 sortedRegions mdCols
@@ -115,14 +121,23 @@ exp1 = do
 
     let mdCols = 
             [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  tabPop
-            , MdColumn "Flaeche 2023 (Kilo km²)" Kilo 2  tabSurf
-            , MdColumn "GNP pro Kopf (kilo PP)" Kilo 3 tabGNPpc 
+            , MdColumn "Flaeche 2023 (Kilo km²)" Kilo 0  tabSurf
+            , MdColumn "GNP pro Kopf (kilo PP)" Kilo 0 tabGNPpc 
              
             ]
-    let tabPop' = sortTerryByColumn Descending  tabPop --surfPerCap
+    -- let  less1m = map CountryId less1Mcountries :: [CountryId]
+    let sort = sortTerryByColumn Descending  tabGNPpc --surfPerCap
+    let sort2 = filter (\c -> elem c less1m) sort
 
-    let md = markdownTable allCodeNames tabPop' mdCols
+    let md = markdownTable allCodeNames sort2 mdCols
     putStrLn md 
+    putStrLn . show . map unCountryId $ sort2
     writeTab1Table "exp1" md
     return ()
 
+less1m = map CountryId less1Mcountries
+
+-- break was 60k$ GNP 2024
+less1mTax = ["LUX","MAC","BMU","CYM","BRN","ISL","FRO","GUY","AND","MLT"]
+
+less1mNonTax = ["SXM","ABW","BHS","TCA","KNA","MNE","ATG","SYC","CUW","LCA","MDV","BRB","SUR","DMA","VCT","PLW","GRD","BTN","FJI","BLZ","NRU","CPV","WSM","MHL","TON","TUV","STP","FSM","VUT","COM","KIR","SLB"]
