@@ -19,8 +19,8 @@ regionsList2 = nub $ map fst regionMembers2
 regionMembers2 :: RegionMembers  -- [(RegionId, CountryId)]
 regionMembers2 = 
   [
-
-  mk "SAMERICA"
+    
+      mk "SAMERICA"
       [ "ATG","ARG","ABW","BHS","BRB","BLZ","BOL","BRA","CHL","COL"
       , "CRI","CUB","DMA","DOM","ECU","SLV","GRD","GTM","GUY","HTI"
       , "HND","JAM","MEX","NIC","PAN","PRY","PER","KNA","LCA","VCT"
@@ -81,8 +81,6 @@ regionMembers2 =
   where
     mk :: Text -> [Text] -> (RegionId, [CountryId])
     mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
-        -- mk :: Text -> [Text] -> [(RegionId, CountryId)]
-    -- mk r = map (\c -> (RegionId r, CountryId c))
 
  
 regionNames2 :: [TerryName RegionId] --  [Region]

@@ -36,6 +36,7 @@ library
       R4C.Import.Query
       R4C.Import.WorldBank
       R4C.Model
+      R4C.Region3
       R4C.Statistics
       R4C.Territory
       Study.Config
