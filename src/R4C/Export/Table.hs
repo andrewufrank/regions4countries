@@ -43,8 +43,9 @@ data MdColumn t v =   MdColumn
     } 
     deriving (Eq, Ord, Show)
 
-markdownTable ::  (Eq id, Show id, ShowCell id, ShowTerryId id) 
+markdownTable ::  (Eq id, Show id,   ShowTerryId id) 
     => [TerryName id] -> [id] -> [MdColumn id Double] -> String
+-- markdownTable :: [TerryName RegionId] -> [RegionId] -> [MdColumn RegionId Double] -> String
 markdownTable names regions cols =
     unlines (header : separator : map row regions)
   where
@@ -59,22 +60,20 @@ markdownTable names regions cols =
         ++ intercalate " | " (map (cell r) cols)
         ++ " |"
 
-    cell :: (Eq id, Show id, ShowCell id) => id -> MdColumn id Double -> String 
+    -- cell :: (Eq id, Show id, ShowCell id) => id -> MdColumn id Double -> String 
     cell r col =
         case lookupTerry r (colValues col) of
             Nothing -> ""
-
             Just rv ->
                 case tvValue rv of
                     Nothing -> ""
-
                     Just x -> showCell col x 
                         -- showFFloat
                         --     (Just (colDecimals col))
                         --     (x / scale2divisor (colScale  col))
                         --     ""
 
-    showRegion :: (Eq id, Show id, ShowTerryId id) =>  [TerryName id] -> id -> String
+    -- showRegion :: (Eq id, Show id, ShowTerryId id) =>  [TerryName id] -> id -> String
     showRegion names rid =
         case find (\r -> terryId r == rid) names of
             Just r  -> T.unpack (terryName r)

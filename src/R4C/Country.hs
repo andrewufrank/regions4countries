@@ -33,14 +33,22 @@ getCountries4db = do
     -- mapM_ print countries
     dumpCountries countries
 
-    putStr "allWBcodes ="
+    -- putStr "allWBcodes ="
     -- print . map (unCountryId . countryId) $ countries
     let countriesOnly = filter (not . ("" ==) . countryRegion) countries 
-    putStr "countriesOnly = "
+    -- putStr "countriesOnly = "
     -- print . map (unCountryId. countryId) $ countriesOnly
 
-    let smallCountries = filter ((< 10**7). fromJustNote "smallCountries dwerwcc" . tvValue) countryTable :: CountryTable
-    putStr "smallCountries = "   -- scheidet schweiz und oesterreich aus 
+    let less10Mcountries = filter ((< 10**7). fromJustNote "smallCountries dwerwcc" . tvValue) countryTable :: CountryTable
+    -- putStr "less10Mcountries = "   -- scheidet schweiz und oesterreich aus 
+    putStr "less10Mcountries = "
+    print . map (unCountryId .  tvCode) $ less10Mcountries
+
+    let less1Mcountries = filter ((< 10**6). fromJustNote "smallCountries dwaaawcc" . tvValue) countryTable :: CountryTable
+    -- putStr "less1Mcountries = "   --  
+    putStr "less1Mcountries = "
+    print . map (unCountryId . tvCode) $ less1Mcountries
+
     -- print . map (unCountryId. tvCode) $ smallCountries
 
     -- mapM_ print smallCountries 
@@ -48,7 +56,7 @@ getCountries4db = do
 
 ppCountry :: Country -> String
 ppCountry c =
-    "Country ("
+    "Terry ("
         ++ show (countryId c)
         ++ ") "
         ++ show (countryName c)

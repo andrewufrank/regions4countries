@@ -1,0 +1,63 @@
+-----------------------------------------------------------------------------
+--
+-- Module      :   CountryTable 
+--
+-- Produce Markdown tables for countries 
+-----------------------------------------------------------------------------
+
+module R4C.Export.CountryTable where
+
+import Data.List  
+-- import Data.Ord (Down(..))
+import qualified Data.Text as T
+-- import Numeric (showFFloat)
+-- import qualified Data.Scientific as Sc
+-- import qualified Data.Map.Strict as Map 
+import R4C.Export.Table 
+import R4C.Model
+import UniformBase 
+
+
+
+-- markdownTable ::  (Eq id, Show id, ShowCell id, ShowTerryId id) 
+--     => [TerryName id] -> [id] -> [MdColumn id Double] -> String
+-- markdownCountryTable :: [TerryName CountryId] -> [CountryId] -> [MdColumn CountryId Double] -> String
+markdownCountryTable :: (Foldable t, Eq a1, ShowTerryId a1, ShowCell a2) => 
+            t (TerryName a1) -> [a1] -> [MdColumn a1 a2] -> String
+markdownCountryTable names regions cols =
+    unlines (header : separator : map row regions)
+  where
+    header =
+        "| Region | " ++ intercalate " | " (map colTitle cols) ++ " |"
+
+    separator =
+        "|:---|" ++ concat (replicate (length cols) "---:|")  -- the colon controls alignement
+
+    row r =
+        "| " ++ showRegion names r ++ " | "
+        ++ intercalate " | " (map (cell r) cols)
+        ++ " |"
+
+    -- cell :: (Eq id, Show id, ShowCell id) => id -> MdColumn id Double -> String 
+    cell r col =
+        case lookupTerry r (colValues col) of
+            Nothing -> ""
+            Just rv ->
+                case tvValue rv of
+                    Nothing -> ""
+                    Just x -> showCell col x 
+                        -- showFFloat
+                        --     (Just (colDecimals col))
+                        --     (x / scale2divisor (colScale  col))
+                        --     ""
+
+    -- showRegion :: (Eq id, Show id, ShowTerryId id) =>  [TerryName id] -> id -> String
+    showRegion names rid =
+        case find (\r -> terryId r == rid) names of
+            Just r  -> T.unpack (terryName r)
+            Nothing -> t2s $ showTerryId rid 
+                -- case rid of
+                --     Id t -> T.unpack t
+                    
+    -- showRegion (RegionId t) =
+    --     T.unpack t

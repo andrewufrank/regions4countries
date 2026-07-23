@@ -94,6 +94,21 @@ surfaceArea =
         , dsName = "Surface area"
         , dsAggregation   = Sum
         }
+grossNatProd :: Dataset 
+grossNatProd = Dataset 
+    { dsIndicator = IndicatorId "NY.GNP.ATLS.CD"
+    , dsName = "GNP"
+    , dsAggregation = Sum
+    }
+-- Gross national income is the total income earned by all residents within an economic territory during an accounting period. It is equal to gross domestic product plus earned income receivable from abroad minus earned income payable abroad. This figure is converted to U.S. dollars using the World Bank Atlas method. GNI, calculated in national currency, is usually converted to U.S. dollars at official exchange rates for comparisons across economies, although an alternative rate is used when the official exchange rate is judged to diverge by an exceptionally large margin from the rate actually applied in international transactions. To smooth fluctuations in prices and exchange rates, a special Atlas method of conversion is used by the World Bank. This applies a conversion factor that averages the exchange rate for a given year and the two preceding years, adjusted for differences in rates of inflation between the country, and through 2000, the G-5 countries (France, Germany, Japan, the United Kingdom, and the United States). From 2001, these countries include the Euro area, Japan, the United Kingdom, and the United States. This indicator is expressed in current prices, meaning no adjustment has been made to account for price changes over time. This indicator is expressed in United States dollars.
+
+gnpPPpc :: Dataset 
+gnpPPpc = Dataset 
+    { dsIndicator = IndicatorId "NY.GDP.PCAP.PP.CD"
+    , dsName = "GNP PP per Capita"
+    , dsAggregation = WeightedBy (dsIndicator population)
+    }
+
 
 indicators :: [Dataset]
 indicators =

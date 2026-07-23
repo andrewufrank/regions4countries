@@ -15,7 +15,6 @@ import Database.SQLite.Simple  -- for debug
 import Study.Region2 
 import R4C.Aggregate 
 import R4C.Import.Query
-import R4C.Export.Table 
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import Study.Config 
@@ -24,12 +23,13 @@ import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
-import UniformBase
+import UniformBase hiding ((</>))
 import R4C.Import.Database
+-- import R4C.Export.CountryTable
+import R4C.Export.Table 
+import R4C.Export.CountnryCodeNames
 
-
-
-smallCountries = ["ABW","ALB","AND","ARM","ASM","ATG","AUT",
+less10Mcountries = ["ABW","ALB","AND","ARM","ASM","ATG","AUT",
     "BGR","BHR","BHS","BIH","BLR","BLZ","BMU","BRB","BRN","BTN",
     "BWA","CAF","CHE","CHI","COG","COM","CPV","CRI","CSS","CUW","CYM","CYP",
     "DJI","DMA","DNK","ERI","EST","FIN","FJI","FRO","FSM",
@@ -41,319 +41,88 @@ smallCountries = ["ABW","ALB","AND","ARM","ASM","ATG","AUT",
     "QAT","SGP","SLB","SLE","SLV","SMR","SRB","STP","SUR","SVK","SVN","SWZ","SXM","SYC",
     "TCA","TGO","TKM","TLS","TON","TTO","TUV","URY","VCT","VGB","VIR","VUT","WSM","XKX"]
 
+less1Mcountries = ["ABW","AND","ASM","ATG","BHS","BLZ","BMU","BRB","BRN","BTN",
+    "CHI","COM","CPV","CUW","CYM","DMA","FJI","FRO","FSM","GIB","GRD","GRL","GUM","GUY",
+    "IMN","ISL","KIR","KNA","LCA","LIE","LUX","MAC","MAF","MCO",
+    "MDV","MHL","MLT","MNE","MNP","NCL","NRU","PLW","PYF",
+    "SLB","SMR","STP","SUR","SXM","SYC","TCA","TON",
+    "TUV","VCT","VGB","VIR","VUT","WSM"]
+
 regionMembersSmall :: RegionMembers  -- [(RegionId, CountryId)]
 regionMembersSmall = 
-  [ mk "less10mio" smallCountries 
-
+  [ mk "less10mio" less10Mcountries 
+    , mk "less1mio" less1Mcountries
   ]
   where
     mk :: Text -> [Text] -> (RegionId, [CountryId])
     mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
-        -- mk :: Text -> [Text] -> [(RegionId, CountryId)]
-    -- mk r = map (\c -> (RegionId r, CountryId c))
 
-popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
-popsSurf conn =  do 
+tableOutputDirectory :: FilePath
+tableOutputDirectory =   "/home/frank/CountryExperiments"
+
+writeTab1Table :: FilePath -> String -> IO ()
+writeTab1Table filename contents = do
+    createDirectoryIfMissing True tableOutputDirectory
+    writeFile (  tableOutputDirectory </> filename) contents
+
+
+
+exp2 :: IO ()
+-- } show the totals for the small, and very small countries
+exp2 = do 
     conn <- open dbPath 
     pops <-  (aggregate regionMembersSmall conn population (Year 2024)) 
     surfs <-  (aggregate regionMembersSmall conn surfaceArea (Year 2023)) 
+    gnp <-  (aggregate regionMembersSmall conn grossNatProd (Year 2024))  
+    gnpPCwb <-  (aggregate regionMembersSmall conn gnpPPpc (Year 2024))  
+    -- fertility <-  (aggregate regionMembersSmall conn fertilityRate (Year 2024))  
+    -- agrar <-  (aggregate regionMembersSmall conn agrarland (Year 2024))  
 
-    -- let 
-    --         p =  zip regionsList pops  
-    --         s =  zip regionsList surfs 
-    return (pops,surfs)
-
-
-
-
-getData11 :: IO ()
--- fig11 
-getData11 = do
-    conn <- open dbPath 
-    tabPop :: CountryTable  <- lookupTable conn (dsIndicator population)(Year 2024)
---    pops3 <- 
---    surf3 <- 
-  
+    let gnpPC = combineRegionTables (/) gnp surfs
+    -- let surAgrarfPerCap = combineRegionTables (/) agrar pops3
+    -- let netmigPC = combineRegionTables (/) netmigration pops3 
     
     close conn
 
     let mdCols = 
+            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 0  pops
+            , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs
+            , MdColumn "GNP (Mega $)" Giga 0 gnp
+            , MdColumn "GNP pc (Kilo $)" Kilo 0 gnpPC  
+            , MdColumn "GNP pc WorldBank cal (Kilo $)" Kilo 0 gnpPCwb 
+            --         Centi 1 surfPerCap
+            -- , MdColumn "Nutzbares Land per capita (ha/person)" 
+            --         Centi 0 surAgrarfPerCap 
+            ]
+    let sortedRegions = sortTerryByColumn Descending  pops --surfPerCap
+
+    -- let md = markdownTable regionsList mdCols
+    let md = markdownTable regionNames2 sortedRegions mdCols
+    putStrLn md 
+    writeTab1Table "tab11" md
+
+
+exp1 :: IO ()  
+-- | show all countries with popuplation surface and GNP
+-- fig11 
+exp1 = do
+    conn <- open dbPath 
+    tabPop :: CountryTable  <- lookupTable conn (dsIndicator population)(Year 2024)
+    tabGNPpc :: CountryTable <- lookupTable conn (dsIndicator gnpPPpc) (Year 2024)
+    tabSurf <- lookupTable conn (dsIndicator surfaceArea) (Year 2023)
+
+    close conn
+
+    let mdCols = 
             [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  tabPop
---             , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs3
+            , MdColumn "Flaeche 2023 (Kilo km²)" Kilo 2  tabSurf
+            , MdColumn "GNP pro Kopf (kilo PP)" Kilo 3 tabGNPpc 
              
             ]
-    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
+    let tabPop' = sortTerryByColumn Descending  tabPop --surfPerCap
 
---     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable allCodeNames tabPop mdCols
---     putStrLn md 
---     -- writeTab1Table "tab11" md
+    let md = markdownTable allCodeNames tabPop' mdCols
+    putStrLn md 
+    writeTab1Table "exp1" md
     return ()
 
-allCodeNames :: [TerryName CountryId]
-allCodeNames =
-   [ Terry (CountryId "AFG") "Afghanistan"
-  , Terry (CountryId "AFE") "Africa Eastern and Southern"
-  , Terry (CountryId "AFW") "Africa Western and Central"
-  , Terry (CountryId "ALB") "Albania"
-  , Terry (CountryId "DZA") "Algeria"
-  , Terry (CountryId "ASM") "American Samoa"
-  , Terry (CountryId "AND") "Andorra"
-  , Terry (CountryId "AGO") "Angola"
-  , Terry (CountryId "ATG") "Antigua and Barbuda"
-  , Terry (CountryId "ARB") "Arab World"
-  , Terry (CountryId "ARG") "Argentina"
-  , Terry (CountryId "ARM") "Armenia"
-  , Terry (CountryId "ABW") "Aruba"
-  , Terry (CountryId "AUS") "Australia"
-  , Terry (CountryId "AUT") "Austria"
-  , Terry (CountryId "AZE") "Azerbaijan"
-  , Terry (CountryId "BHS") "Bahamas, The"
-  , Terry (CountryId "BHR") "Bahrain"
-  , Terry (CountryId "BGD") "Bangladesh"
-  , Terry (CountryId "BRB") "Barbados"
-  , Terry (CountryId "BLR") "Belarus"
-  , Terry (CountryId "BEL") "Belgium"
-  , Terry (CountryId "BLZ") "Belize"
-  , Terry (CountryId "BEN") "Benin"
-  , Terry (CountryId "BMU") "Bermuda"
-  , Terry (CountryId "BTN") "Bhutan"
-  , Terry (CountryId "BOL") "Bolivia"
-  , Terry (CountryId "BIH") "Bosnia and Herzegovina"
-  , Terry (CountryId "BWA") "Botswana"
-  , Terry (CountryId "BRA") "Brazil"
-  , Terry (CountryId "VGB") "British Virgin Islands"
-  , Terry (CountryId "BRN") "Brunei Darussalam"
-  , Terry (CountryId "BGR") "Bulgaria"
-  , Terry (CountryId "BFA") "Burkina Faso"
-  , Terry (CountryId "BDI") "Burundi"
-  , Terry (CountryId "CPV") "Cabo Verde"
-  , Terry (CountryId "KHM") "Cambodia"
-  , Terry (CountryId "CMR") "Cameroon"
-  , Terry (CountryId "CAN") "Canada"
-  , Terry (CountryId "CSS") "Caribbean small states"
-  , Terry (CountryId "CYM") "Cayman Islands"
-  , Terry (CountryId "CAF") "Central African Republic"
-  , Terry (CountryId "CEB") "Central Europe and the Baltics"
-  , Terry (CountryId "TCD") "Chad"
-  , Terry (CountryId "CHI") "Channel Islands"
-  , Terry (CountryId "CHL") "Chile"
-  , Terry (CountryId "CHN") "China"
-  , Terry (CountryId "COL") "Colombia"
-  , Terry (CountryId "COM") "Comoros"
-  , Terry (CountryId "COD") "Congo, Dem. Rep."
-  , Terry (CountryId "COG") "Congo, Rep."
-  , Terry (CountryId "CRI") "Costa Rica"
-  , Terry (CountryId "HRV") "Croatia"
-  , Terry (CountryId "CUB") "Cuba"
-  , Terry (CountryId "CUW") "Cura\231ao"
-  , Terry (CountryId "CYP") "Cyprus"
-  , Terry (CountryId "CZE") "Czechia"
-  , Terry (CountryId "CIV") "C\244te d'Ivoire"
-  , Terry (CountryId "DNK") "Denmark"
-  , Terry (CountryId "DJI") "Djibouti"
-  , Terry (CountryId "DMA") "Dominica"
-  , Terry (CountryId "DOM") "Dominican Republic"
-  , Terry (CountryId "EAR") "Early-demographic dividend"
-  , Terry (CountryId "EAS") "East Asia & Pacific"
-  , Terry (CountryId "TEA") "East Asia & Pacific (IDA & IBRD)"
-  , Terry (CountryId "EAP") "East Asia & Pacific (excluding high income)"
-  , Terry (CountryId "ECU") "Ecuador"
-  , Terry (CountryId "EGY") "Egypt, Arab Rep."
-  , Terry (CountryId "SLV") "El Salvador"
-  , Terry (CountryId "GNQ") "Equatorial Guinea"
-  , Terry (CountryId "ERI") "Eritrea"
-  , Terry (CountryId "EST") "Estonia"
-  , Terry (CountryId "SWZ") "Eswatini"
-  , Terry (CountryId "ETH") "Ethiopia"
-  , Terry (CountryId "EMU") "Euro area"
-  , Terry (CountryId "ECS") "Europe & Central Asia"
-  , Terry (CountryId "TEC") "Europe & Central Asia (IDA & IBRD)"
-  , Terry (CountryId "ECA") "Europe & Central Asia (excluding high income)"
-  , Terry (CountryId "EUU") "European Union"
-  , Terry (CountryId "FRO") "Faroe Islands"
-  , Terry (CountryId "FJI") "Fiji"
-  , Terry (CountryId "FIN") "Finland"
-  , Terry (CountryId "FRA") "France"
-  , Terry (CountryId "PYF") "French Polynesia"
-  , Terry (CountryId "GAB") "Gabon"
-  , Terry (CountryId "GMB") "Gambia, The"
-  , Terry (CountryId "GEO") "Georgia"
-  , Terry (CountryId "DEU") "Germany"
-  , Terry (CountryId "GHA") "Ghana"
-  , Terry (CountryId "GIB") "Gibraltar"
-  , Terry (CountryId "GRC") "Greece"
-  , Terry (CountryId "GRL") "Greenland"
-  , Terry (CountryId "GRD") "Grenada"
-  , Terry (CountryId "GUM") "Guam"
-  , Terry (CountryId "GTM") "Guatemala"
-  , Terry (CountryId "GIN") "Guinea"
-  , Terry (CountryId "GNB") "Guinea-Bissau"
-  , Terry (CountryId "GUY") "Guyana"
-  , Terry (CountryId "HTI") "Haiti"
-  , Terry (CountryId "HPC") "Heavily indebted poor countries (HIPC)"
-  , Terry (CountryId "HIC") "High income"
-  , Terry (CountryId "HND") "Honduras"
-  , Terry (CountryId "HKG") "Hong Kong SAR, China"
-  , Terry (CountryId "HUN") "Hungary"
-  , Terry (CountryId "IBD") "IBRD only"
-  , Terry (CountryId "IBT") "IDA & IBRD total"
-  , Terry (CountryId "IDB") "IDA blend"
-  , Terry (CountryId "IDX") "IDA only"
-  , Terry (CountryId "IDA") "IDA total"
-  , Terry (CountryId "ISL") "Iceland"
-  , Terry (CountryId "IND") "India"
-  , Terry (CountryId "IDN") "Indonesia"
-  , Terry (CountryId "IRN") "Iran, Islamic Rep."
-  , Terry (CountryId "IRQ") "Iraq"
-  , Terry (CountryId "IRL") "Ireland"
-  , Terry (CountryId "IMN") "Isle of Man"
-  , Terry (CountryId "ISR") "Israel"
-  , Terry (CountryId "ITA") "Italy"
-  , Terry (CountryId "JAM") "Jamaica"
-  , Terry (CountryId "JPN") "Japan"
-  , Terry (CountryId "JOR") "Jordan"
-  , Terry (CountryId "KAZ") "Kazakhstan"
-  , Terry (CountryId "KEN") "Kenya"
-  , Terry (CountryId "KIR") "Kiribati"
-  , Terry (CountryId "PRK") "Korea, Dem. People's Rep."
-  , Terry (CountryId "KOR") "Korea, Rep."
-  , Terry (CountryId "XKX") "Kosovo"
-  , Terry (CountryId "KWT") "Kuwait"
-  , Terry (CountryId "KGZ") "Kyrgyz Republic"
-  , Terry (CountryId "LAO") "Lao PDR"
-  , Terry (CountryId "LTE") "Late-demographic dividend"
-  , Terry (CountryId "LCN") "Latin America & Caribbean"
-  , Terry (CountryId "TLA") "Latin America & Caribbean (IDA & IBRD)"
-  , Terry (CountryId "LAC") "Latin America & Caribbean (excluding high income)"
-  , Terry (CountryId "LVA") "Latvia"
-  , Terry (CountryId "LDC") "Least developed countries: UN classification"
-  , Terry (CountryId "LBN") "Lebanon"
-  , Terry (CountryId "LSO") "Lesotho"
-  , Terry (CountryId "LBR") "Liberia"
-  , Terry (CountryId "LBY") "Libya"
-  , Terry (CountryId "LIE") "Liechtenstein"
-  , Terry (CountryId "LTU") "Lithuania"
-  , Terry (CountryId "LMY") "Low & middle income"
-  , Terry (CountryId "LIC") "Low income"
-  , Terry (CountryId "LMC") "Lower middle income"
-  , Terry (CountryId "LUX") "Luxembourg"
-  , Terry (CountryId "MAC") "Macao SAR, China"
-  , Terry (CountryId "MDG") "Madagascar"
-  , Terry (CountryId "MWI") "Malawi"
-  , Terry (CountryId "MYS") "Malaysia"
-  , Terry (CountryId "MDV") "Maldives"
-  , Terry (CountryId "MLI") "Mali"
-  , Terry (CountryId "MLT") "Malta"
-  , Terry (CountryId "MHL") "Marshall Islands"
-  , Terry (CountryId "MRT") "Mauritania"
-  , Terry (CountryId "MUS") "Mauritius"
-  , Terry (CountryId "MEX") "Mexico"
-  , Terry (CountryId "FSM") "Micronesia, Fed. Sts."
-  , Terry (CountryId "MEA") "Middle East, North Africa, Afghanistan & Pakistan"
-  , Terry (CountryId "TMN") "Middle East, North Africa, Afghanistan & Pakistan (IDA & IBRD)"
-  , Terry (CountryId "MNA") "Middle East, North Africa, Afghanistan & Pakistan (excluding high income)"
-  , Terry (CountryId "MIC") "Middle income"
-  , Terry (CountryId "MDA") "Moldova"
-  , Terry (CountryId "MCO") "Monaco"
-  , Terry (CountryId "MNG") "Mongolia"
-  , Terry (CountryId "MNE") "Montenegro"
-  , Terry (CountryId "MAR") "Morocco"
-  , Terry (CountryId "MOZ") "Mozambique"
-  , Terry (CountryId "MMR") "Myanmar"
-  , Terry (CountryId "NAM") "Namibia"
-  , Terry (CountryId "NRU") "Naoero"
-  , Terry (CountryId "NPL") "Nepal"
-  , Terry (CountryId "NLD") "Netherlands"
-  , Terry (CountryId "NCL") "New Caledonia"
-  , Terry (CountryId "NZL") "New Zealand"
-  , Terry (CountryId "NIC") "Nicaragua"
-  , Terry (CountryId "NER") "Niger"
-  , Terry (CountryId "NGA") "Nigeria"
-  , Terry (CountryId "NAC") "North America"
-  , Terry (CountryId "MKD") "North Macedonia"
-  , Terry (CountryId "MNP") "Northern Mariana Islands"
-  , Terry (CountryId "NOR") "Norway"
-  , Terry (CountryId "OED") "OECD members"
-  , Terry (CountryId "OMN") "Oman"
-  , Terry (CountryId "OSS") "Other small states"
-  , Terry (CountryId "PSS") "Pacific island small states"
-  , Terry (CountryId "PAK") "Pakistan"
-  , Terry (CountryId "PLW") "Palau"
-  , Terry (CountryId "PAN") "Panama"
-  , Terry (CountryId "PNG") "Papua New Guinea"
-  , Terry (CountryId "PRY") "Paraguay"
-  , Terry (CountryId "PER") "Peru"
-  , Terry (CountryId "PHL") "Philippines"
-  , Terry (CountryId "POL") "Poland"
-  , Terry (CountryId "PRT") "Portugal"
-  , Terry (CountryId "PST") "Post-demographic dividend"
-  , Terry (CountryId "PRE") "Pre-demographic dividend"
-  , Terry (CountryId "PRI") "Puerto Rico (US)"
-  , Terry (CountryId "QAT") "Qatar"
-  , Terry (CountryId "ROU") "Romania"
-  , Terry (CountryId "RUS") "Russian Federation"
-  , Terry (CountryId "RWA") "Rwanda"
-  , Terry (CountryId "WSM") "Samoa"
-  , Terry (CountryId "SMR") "San Marino"
-  , Terry (CountryId "SAU") "Saudi Arabia"
-  , Terry (CountryId "SEN") "Senegal"
-  , Terry (CountryId "SRB") "Serbia"
-  , Terry (CountryId "SYC") "Seychelles"
-  , Terry (CountryId "SLE") "Sierra Leone"
-  , Terry (CountryId "SGP") "Singapore"
-  , Terry (CountryId "SXM") "Sint Maarten (Dutch part)"
-  , Terry (CountryId "SVK") "Slovak Republic"
-  , Terry (CountryId "SVN") "Slovenia"
-  , Terry (CountryId "SST") "Small states"
-  , Terry (CountryId "SLB") "Solomon Islands"
-  , Terry (CountryId "SOM") "Somalia, Fed. Rep."
-  , Terry (CountryId "ZAF") "South Africa"
-  , Terry (CountryId "SAS") "South Asia"
-  , Terry (CountryId "TSA") "South Asia (IDA & IBRD)"
-  , Terry (CountryId "SSD") "South Sudan"
-  , Terry (CountryId "ESP") "Spain"
-  , Terry (CountryId "LKA") "Sri Lanka"
-  , Terry (CountryId "KNA") "St. Kitts and Nevis"
-  , Terry (CountryId "LCA") "St. Lucia"
-  , Terry (CountryId "MAF") "St. Martin (French part)"
-  , Terry (CountryId "VCT") "St. Vincent and the Grenadines"
-  , Terry (CountryId "SSF") "Sub-Saharan Africa"
-  , Terry (CountryId "TSS") "Sub-Saharan Africa (IDA & IBRD)"
-  , Terry (CountryId "SSA") "Sub-Saharan Africa (excluding high income)"
-  , Terry (CountryId "SDN") "Sudan"
-  , Terry (CountryId "SUR") "Suriname"
-  , Terry (CountryId "SWE") "Sweden"
-  , Terry (CountryId "CHE") "Switzerland"
-  , Terry (CountryId "SYR") "Syrian Arab Republic"
-  , Terry (CountryId "STP") "S\227o Tom\233 and Principe"
-  , Terry (CountryId "TJK") "Tajikistan"
-  , Terry (CountryId "TZA") "Tanzania"
-  , Terry (CountryId "THA") "Thailand"
-  , Terry (CountryId "TLS") "Timor-Leste"
-  , Terry (CountryId "TGO") "Togo"
-  , Terry (CountryId "TON") "Tonga"
-  , Terry (CountryId "TTO") "Trinidad and Tobago"
-  , Terry (CountryId "TUN") "Tunisia"
-  , Terry (CountryId "TKM") "Turkmenistan"
-  , Terry (CountryId "TCA") "Turks and Caicos Islands"
-  , Terry (CountryId "TUV") "Tuvalu"
-  , Terry (CountryId "TUR") "T\252rkiye"
-  , Terry (CountryId "UGA") "Uganda"
-  , Terry (CountryId "UKR") "Ukraine"
-  , Terry (CountryId "ARE") "United Arab Emirates"
-  , Terry (CountryId "GBR") "United Kingdom"
-  , Terry (CountryId "USA") "United States"
-  , Terry (CountryId "UMC") "Upper middle income"
-  , Terry (CountryId "URY") "Uruguay"
-  , Terry (CountryId "UZB") "Uzbekistan"
-  , Terry (CountryId "VUT") "Vanuatu"
-  , Terry (CountryId "VEN") "Venezuela, RB"
-  , Terry (CountryId "VNM") "Viet Nam"
-  , Terry (CountryId "VIR") "Virgin Islands (US)"
-  , Terry (CountryId "PSE") "West Bank and Gaza"
-  , Terry (CountryId "WLD") "World"
-  , Terry (CountryId "YEM") "Yemen, Rep."
-  , Terry (CountryId "ZMB") "Zambia"
-  , Terry (CountryId "ZWE") "Zimbabwe"
-  ]
