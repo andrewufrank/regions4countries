@@ -28,9 +28,7 @@ import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 import R4C.Region3
 
-tableOutputDirectory :: FilePath
-tableOutputDirectory =
-    "/home/frank/Desktop/buecher/worldFundamentals/figures"
+
 
 writeTab1Table :: FilePath -> String -> IO ()
 writeTab1Table filename contents = do
@@ -58,32 +56,21 @@ getData11 = do
     (pops3, surfs3) <- popsSurf conn
 
     netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
-    fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
+    -- fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
     agrar <-  (aggregate regionMembers conn agriculturalLand (Year 2023))  
     agrarPC <-  (aggregate regionMembers conn agriculturalLandPC (Year 2023))  
 
-    let surfPerCap = combineRegionTables (/) surfs3 pops3
-    -- let surAgrarfPerCap = combineRegionTables (/) agrar pops3
-    -- let netmigPC = combineRegionTables (/) netmigration pops3 
-    
     close conn
 
     let mdCols = 
-            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 0 pops3
-            , MdColumn "Flaeche 2023 (Mega km²)" Mega 0  surfs3
-            , MdColumn "Flaeche per capita (ha/person)" 
-                    Centi 1 surfPerCap
-            , MdColumn "Nutzbares Land per capita (ha/person)" Centi 1 agrarPC 
-            , MdColumn "Nutzbares Land (M ha)" Mega 1 agrar
+            [ pops3
+            , surfs3
+            , agrarPC
+            , agrar
             ]
-    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
-
-    -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames2 regionOrder mdCols
     putStrLn md 
     writeTab1Table "tab11" md
-
-    -- compute correlation 
 
 getData12 :: IO ()
 -- fig11 
@@ -95,33 +82,21 @@ getData12 = do
     fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
 
     -- let surfs2 = zip regionsList surfs
-    let surfPerCap = combineRegionTables (/) surfs3 pops3
+    let surfPerCap = combineRegionTables Divide surfs3 pops3
     -- let netmig2 = zip regionsList netmigration 
-    let netmigPC = combineRegionTables (/) netmigration pops3 :: RegionTable 
+    let netmigPC = combineRegionTables Divide netmigration pops3 :: RegionTable 
     -- let fertility2 = zip regionsList fertility 
     close conn
 
     let mdCols = 
-            [
-            MdColumn "Fertilitaetsrate" Unit 2
-                 fertility,
-            MdColumn "Netto Migration (per Mega)" Micro 0
-                netmigPC
+            [ surfPerCap
+            , netmigPC
+            , fertility
+            , netmigration
             ]
-    let sortedRegions = sortTerryByColumn Descending fertility
-     -- surfPerCap
-
-    -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames2 regionOrder mdCols
     putStrLn md 
     writeTab1Table "tab12" md
-
-    -- compute correlation fertiity and netmigPC 
-    let fertNetmig = regionCorrelation2 fertility netmigPC
-
-    putStrLn $ "correlation between fertility and net migration per capita" ++ show fertNetmig 
-
-    return ()
 
 getData13 :: IO ()
 -- | Correlation of fertility rate and net migration per capita.
@@ -132,8 +107,8 @@ getData13 = do
     fertility <- aggregate regionMembers conn fertilityRate (Year 2024)
     close conn
 
-    let netmigPC = combineRegionTables (/) netmigration pops3
-    let fertNetmig = regionCorrelation2 fertility netmigPC
+    let netmigPC = combineRegionTables Divide netmigration pops3
+    let fertNetmig = regionCorrelation2 ( fertility) ( netmigPC)
     let md = unlines
             [ " Correlation: fertility rate / net migration per capita "
                 ++ show fertNetmig 
@@ -142,15 +117,15 @@ getData13 = do
     putStrLn md
     writeTab1Table "tab13" md
 
-storeTab1Tables :: IO ()
--- | Regenerate all Tab1 output files and update the book markdown files.
-storeTab1Tables = do
-    getData11
-    getData12
-    getData13
-    let filename = buch </> "p30Tableaux" </> "010.Natur.md"
-    let tables = ["tab11", "tab12", "tab13"]
-    mapM_ (\tab -> writeMarkdownBlock filename filename tab (tableOutputDirectory </> tab)) tables
+-- storeTab1Tables :: IO ()
+-- -- | Regenerate all Tab1 output files and update the book markdown files.
+-- storeTab1Tables = do
+--     getData11
+--     getData12
+--     getData13
+--     let filename = buch </> "p30Tableaux" </> "010.Natur.md"
+--     let tables = ["tab11", "tab12", "tab13"]
+--     mapM_ (\tab -> writeMarkdownBlock filename filename tab (tableOutputDirectory </> tab)) tables
 
 --     writeMarkdownBlock (buch </> "001.Natur.md") (buch </> "001.Natur.md") "tab12" (tableOutputDirectory </> "tab12")
 --     writeMarkdownBlock (buch </> "001.Natur.md") (buch </> "001.Natur.md") "tab13" (tableOutputDirectory </> "tab13")
@@ -175,28 +150,3 @@ regionsWithExtra :: [RegionId]
 regionsWithExtra = map fst regionMembers 
 
 
-regionOrder = [
-    RegionId "USCAN",
-    RegionId "SAMERICA",
-    RegionId "EUROPE",
-    RegionId "NORTH_AFRICA",
-    RegionId "SUBSAHARA",
-    RegionId "RUSSIA",
-    RegionId "CENTRAL_ASIA",
-    RegionId "GULF",
-    RegionId "INDIA",
-    RegionId "SOUTH_ASIA",
-    RegionId "CHINA",
-    RegionId "FAREAST",
-    RegionId "JAPAN",
-    RegionId "ANZ",
-
-    RegionId "notInRegion",
-
-    RegionId "World Totals",
-    RegionId "EU",
-    RegionId "G7",
-    RegionId "OPEC",
-    RegionId "BRICS",
-
-    RegionId "SCO"]

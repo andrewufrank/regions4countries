@@ -6,7 +6,7 @@
 
 -----------------------------------------------------------------------------
 
-module Study.Config (filesUsed, dbPath, buch) where
+module Study.Config  where
 
 databaseFolder = "/home/frank/afWorldDB/"
 
@@ -20,3 +20,7 @@ filesUsed =
 
 buch:: FilePath
 buch = "/home/frank/Desktop/buecher/worldFundamentals"
+
+tableOutputDirectory :: FilePath
+tableOutputDirectory =
+    "/home/frank/Desktop/buecher/worldFundamentals/figures"

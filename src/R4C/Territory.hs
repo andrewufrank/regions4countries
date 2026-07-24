@@ -52,15 +52,18 @@ valuesInRegion memberships table region =
 --             | y <- ys
 --             ]
 
-terryTables2pairs :: (Eq t, Show t) => [TerryValue t v1] -> [TerryValue t v2] -> [(TerryValue t v1, TerryValue t v2)]
+-- terryTables2pairs :: (Eq t, Show t) => [TerryValue t v1] -> [TerryValue t v2] -> [(TerryValue t v1, TerryValue t v2)]
 -- |find, not using map, bombs when not found 
 -- this is essentially a db join 
 terryTables2pairs -- matchTerryTables -- matchCountryTables
- xs ys =
+ xsc ysc =
     [ (x, y)
     | x <- xs
     , y <- [findTerry (tvCode x) ys]  -- fails if not found!
     ]
+  where
+    xs = colValues xsc 
+    ys = colValues ysc 
 
 terryValues
 -- must be checked that not one or the other value only 

@@ -4,22 +4,24 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import R4C.Model
-import BaseTest.Region
+import R4C.Region3
 import R4C.Aggregate
+import Study.Region2 
+
 
 tests :: TestTree
 tests =
   testGroup "RegionSpec"
     [ testCase "G7 has seven members" $
-        length (countriesInRegion regionMembers (RegionId "G7")) @?= 7
+        length (countriesInRegion regionMembers2 (RegionId "G7")) @?= 7
 
     , testCase "Austria is in EU" $
         assertBool "AUT should be in EU" $
-          CountryId "AUT" `elem` countriesInRegion regionMembers (RegionId "EU")
+          CountryId "AUT" `elem` countriesInRegion regionMembers2 (RegionId "EU")
 
     , testCase "Austria is not in G7" $
         assertBool "AUT should not be in G7" $
-          CountryId "AUT" `notElem` countriesInRegion regionMembers (RegionId "G7")
+          CountryId "AUT" `notElem` countriesInRegion regionMembers2 (RegionId "G7")
     ]
 
 -- testRegions = do

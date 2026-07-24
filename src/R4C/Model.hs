@@ -177,7 +177,7 @@ type CountryValue = TerryValue CountryId Double
 type CountryTable = TerryTable CountryId ( Double)
 
 type RegionValue = TerryValue RegionId Double  -- RegionValueX Double 
-type RegionTable  = TerryTable RegionId ( Double) -- [RegionValue]
+type RegionTable  = MdColumn RegionId Double  -- TerryTable RegionId ( Double) -- [RegionValue]
 
 type TerryTable t v = [TerryValue t v]
 
@@ -185,3 +185,15 @@ type CountryPairs = [(CountryValue, CountryValue)]
 type RegionPairs = [(RegionValue, RegionValue)]
 
 type TerryPairs t v  = [(TerryValue t v, TerryValue t v )]
+
+data Scale = Kilo | Mega | Giga | Tera | Centi | Unit | Milli| Micro | Nano | Pico deriving (Eq, Ord, Show )
+
+
+data MdColumn t v =   MdColumn
+    { colTitle    :: String
+    , colScale    :: Scale
+    , colUnit    :: Text 
+    , colDecimals :: Int
+    , colValues   :: TerryTable t v
+    } 
+    deriving (Eq, Ord, Show)

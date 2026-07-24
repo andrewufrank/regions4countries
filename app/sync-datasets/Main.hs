@@ -2,7 +2,7 @@
 module Main where
 
 import Control.Exception (bracket)
-import Data.List (isPrefixOf)
+import Data.List (isPrefixOf, sortOn)
 import System.Directory (renameFile)
 import System.Environment (getArgs)
 import System.IO (hClose, hPutStr, openTempFile)
@@ -66,7 +66,8 @@ rewriteDatasetSource records = do
     let path = "src/Study/Dataset.hs"
         begin = "-- BEGIN GENERATED DATASETS"
         end = "-- END GENERATED DATASETS"
-        generated = unlines (map renderNamedDataset records)
+        generated = unlines
+            (map renderNamedDataset (sortOn (dsIndicator . snd) records))
     source <- readFile path
     case replaceSection begin end generated source of
         Nothing -> error "sync-datasets: generated Dataset section not found"

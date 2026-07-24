@@ -16,11 +16,12 @@ import qualified Data.Scientific as Sc
 import R4C.Model
 import qualified Data.Map.Strict as Map 
 import UniformBase 
+import R4C.Region3
+
 
 type Column a = [(RegionId, Maybe a)]
 
 -- type DTable = Column Double -- replace with regionTable
-data Scale = Kilo | Mega | Giga | Tera | Centi | Unit | Milli| Micro | Nano | Pico deriving (Eq, Ord, Show )
 
 scale2divisor ::   Scale -> Double
 scale2divisor s = case s of  
@@ -35,13 +36,8 @@ scale2divisor s = case s of
                     Nano -> 10**(-9)
                     Pico -> 10**(-12)
 
-data MdColumn t v =   MdColumn
-    { colTitle    :: String
-    , colScale    :: Scale
-    , colDecimals :: Int
-    , colValues   :: TerryTable t v
-    } 
-    deriving (Eq, Ord, Show)
+
+
 
 markdownTable ::  (Eq id, Show id,   ShowTerryId id) 
     => [TerryName id] -> [id] -> [MdColumn id Double] -> String
@@ -50,7 +46,7 @@ markdownTable names regions cols =
     unlines (header : separator : map row regions)
   where
     header =
-        "| Region | " ++ intercalate " | " (map colTitle cols) ++ " |"
+        "| Region | " ++ intercalate " | " (map title_units cols) ++ " |"
 
     separator =
         "|:---|" ++ concat (replicate (length cols) "---:|")  -- the colon controls alignement
@@ -86,7 +82,7 @@ markdownTable names regions cols =
 
 lookupRegion
     :: RegionId
-    -> RegionTable
+    -> (TerryTable RegionId Double)
     -> Maybe (RegionValue)
 lookupRegion r =
     find (\rv -> tvCode rv == r)
@@ -98,7 +94,7 @@ lookupTerry
 lookupTerry r =
     find (\rv -> tvCode rv == r)
 
-
+title_units col = colTitle col ++ "(" ++ (t2s . colUnit $ col) ++ ")"
 -------------
 class ShowCell a where
     showCell :: MdColumn i a -> a -> String
@@ -140,18 +136,37 @@ valueToDouble :: Value -> Double
 valueToDouble (Value v) =
     Sc.toRealFloat v
 
-scaleRegionTable :: Double -> RegionTable -> RegionTable
-scaleRegionTable k =
-    map $ \rv ->
-        rv { tvValue = fmap (* k) (tvValue rv) }
+-- scaleRegionTable :: Double -> (TerryTable RegionId Double) -> (TerryTable RegionId Double)
+scaleRegionTable :: Double -> MdColumn RegionId Double -> MdColumn RegionId Double
+scaleRegionTable k ct = ct{colValues = cv2}
+    where   cv2 :: TerryTable RegionId Double 
+            cv2 = map  (\rv -> rv { tvValue = fmap (* k) (tvValue rv) }) (colValues ct) 
 
+-- | combine two MdColumns t v with a functioin 
+combineRegionTables :: Operation -> MdColumn RegionId Double -> MdColumn RegionId Double -> MdColumn RegionId Double
+combineRegionTables f xs ys = MdColumn{colValues = xyt
+        , colTitle = colTitle xs <> colTitle ys  --
+        , colDecimals = min (colDecimals xs) (colDecimals ys)
+        -- , colUnit = colUnit xs <> show f <>  colUnit ys
+        , colUnit     = colUnit xs <> s2t (operationSymbol f) <> colUnit ys
+        , colScale =  min (colScale xs)   (colScale ys)        }
 
-combineRegionTables
+    where 
+        xt = colValues xs 
+        yt = colValues ys 
+        xyt = combineTerryTables (operationFunction f) xt yt 
+        -- xytitle = colTitle xs <> colTitle ys  --
+        -- xyDecimals = min (colDecimals xs) (colDecimals ys)
+        -- xyUnit = colUnit xs <> " op " <> colUnit ys
+        -- xyScale =  min (colScale xs)   (colScale ys)
+
+combineTerryTables
     :: (Double -> Double -> Double)
-    -> RegionTable
-    -> RegionTable
-    -> RegionTable
-combineRegionTables f xs ys =
+    -> (TerryTable RegionId Double)
+    -> (TerryTable RegionId Double)
+    -> (TerryTable RegionId Double)
+-- | combine two tables with function 
+combineTerryTables f xs ys = 
     [ TerryValue
         { tvCode = r
         , tvValue  = lift2 f (tvValue x) (tvValue y)
@@ -169,6 +184,20 @@ combineRegionTables f xs ys =
 
     lift2 g (Just a) (Just b) = Just (g a b)
     lift2 _ _ _               = Nothing
+
+data Operation = Add | Subtract | Multiply | Divide
+
+operationFunction :: Operation -> Double -> Double -> Double
+operationFunction Add      = (+)
+operationFunction Subtract = (-)
+operationFunction Multiply = (*)
+operationFunction Divide   = (/)
+
+operationSymbol :: Operation -> String
+operationSymbol Add      = "+"
+operationSymbol Subtract = "-"
+operationSymbol Multiply = "*"
+operationSymbol Divide   = "/"
 
 -- toDTable :: [(RegionId, Maybe Value)] -> RegionTable
 -- toDTable = map convert

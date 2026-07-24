@@ -14,18 +14,22 @@ import R4C.Model
 import qualified Data.Text as T
 import Database.SQLite.Simple  -- for debug
 -- import Study.Indicator 
-import BaseTest.Region 
+import R4C.Region3 
 import R4C.Aggregate 
 import R4C.Import.Query
 import R4C.Export.Table 
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import BaseTest.Config 
-import BaseTest.Dataset 
+-- import BaseTest.Dataset 
+import Study.Dataset
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
+import R4C.Region3
+import Study.Region2 
+
 
 tableOutputDirectory :: FilePath
 tableOutputDirectory =
@@ -39,8 +43,8 @@ writeTab1Table filename contents = do
 popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
 popsSurf conn =  do 
     conn <- open dbPath 
-    pops <-  (aggregate regionMembers conn population (Year 2024)) 
-    surfs <-  (aggregate regionMembers conn surfaceArea (Year 2023)) 
+    pops <-  (aggregate regionMembers2 conn population (Year 2024)) 
+    surfs <-  (aggregate regionMembers2 conn surfaceArea (Year 2023)) 
 
     -- let 
     --         p =  zip regionsList pops  
@@ -58,17 +62,17 @@ getData11 = do
 
   
     
-    close conn
+    -- close conn
 
-    let mdCols = 
-            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  pops3
-            , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs3
+    -- let mdCols = 
+    --         [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  pops3
+    --         , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs3
              
-            ]
-    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
+    --         ]
+    -- let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames sortedRegions mdCols
+    let md = markdownTable regionNames2 regionOrder [pops3, surfs3]
     putStrLn md 
     writeTab1Table "tab11" md
 
@@ -82,15 +86,15 @@ getData12 = do
     
     close conn
 
-    let mdCols = 
-            [ MdColumn "fig 12  2024 (Mega)" Mega 0  pops3
-            , MdColumn "fig 12  2023 (Mega km²)" Mega 0 surfs3
+    -- let mdCols = 
+    --         [ MdColumn "fig 12  2024 (Mega)" Mega 0  pops3
+    --         , MdColumn "fig 12  2023 (Mega km²)" Mega 0 surfs3
              
-            ]
-    let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
+    --         ]
+    -- let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames sortedRegions mdCols
+    let md = markdownTable regionNames2 regionOrder [pops3, surfs3]
     putStrLn md 
     writeTab1Table "tab12" md
 

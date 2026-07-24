@@ -85,7 +85,7 @@ agrarland =
             <> " but excludes land under trees grown for wood or timber."
             <> " Permanent pasture is land used for five or more years for"
             <> " forage, including natural and cultivated crops."
-        , dsUnit = "TODO"
+        , dsUnit = "%"
         , dsAggregation = WeightedBy (IndicatorId "AG.SRF.TOTL.K2")
         , dsDecimals = 0
         , dsExtensive = False
@@ -124,7 +124,7 @@ agriculturalLand =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.ARBL.HA"}
         , dsShortName = "Landwirtschaftsland"
-        , dsName = "Arable land (hectares)"
+        , dsName = "Arable land "
         , dsDefinition =
             "Arable land (in hectares) includes land defined by the FAO"
             <> " as land under temporary crops (double-cropped areas are"
@@ -132,10 +132,10 @@ agriculturalLand =
             <> " pasture, land under market or kitchen gardens, and land"
             <> " temporarily fallow. Land abandoned as a result of shifting"
             <> " cultivation is excluded."
-        , dsUnit = "TODO"
+        , dsUnit = "ha"
         , dsAggregation = Sum
         , dsDecimals = 0
-        , dsExtensive = False
+        , dsExtensive = True
         , dsLastYear = Nothing
         , dsSourceOrganization =
             "FAO electronic files and web site, Food and Agriculture"
@@ -147,8 +147,8 @@ agriculturalLandPC :: Dataset
 agriculturalLandPC =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.ARBL.HA.PC"}
-        , dsShortName = "Landwirtschaftsland ha per capita"
-        , dsName = "Arable land (hectares per person)"
+        , dsShortName = "Landwirtschaftsland"
+        , dsName = "Arable land"
         , dsDefinition =
             "Arable land (hectares per person) includes land defined by"
             <> " the FAO as land under temporary crops (double-cropped"
@@ -156,7 +156,7 @@ agriculturalLandPC =
             <> " for pasture, land under market or kitchen gardens, and"
             <> " land temporarily fallow. Land abandoned as a result of"
             <> " shifting cultivation is excluded."
-        , dsUnit = "TODO"
+        , dsUnit = "ha/P"
         , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
         , dsDecimals = 0
         , dsExtensive = False
@@ -171,7 +171,7 @@ ferilizerConsum2 :: Dataset
 ferilizerConsum2 =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "AG.CON.FERT.PT.ZS"}
-        , dsShortName = "Duengerverbrauch pro ha arable land"
+        , dsShortName = "Duengerverbrauch (% von Duengerproduktion)"
         , dsName = "Fertilizer consumption (% of fertilizer production)"
         , dsDefinition =
             "Fertilizer consumption measures the quantity of plant"
@@ -192,7 +192,7 @@ ferilizerConsum2 =
             <> " Materials that are applied to the land primarily to"
             <> " enhance soil characteristics (rather than as plant food)"
             <> " are commonly referred to as soil amendments."
-        , dsUnit = "TODO"
+        , dsUnit = "%"
         , dsAggregation = WeightedBy (IndicatorId "AG.LND.ARBL.HA")
         , dsDecimals = 0
         , dsExtensive = False
@@ -320,11 +320,11 @@ population =
             <> " population, which counts all residents regardless of legal"
             <> " status or citizenship. The values shown are midyear"
             <> " estimates."
-        , dsUnit = "TODO"
-        , dsAggregation = Sum
+        , dsUnit = "P"  -- for Person
+        , dsAggregation = Sum  -- sum means extensive
         , dsDecimals = 0
-        , dsExtensive = False
-        , dsLastYear = Nothing
+        , dsExtensive = True
+        , dsLastYear = Just (Year 2024)
         , dsSourceOrganization =
             "World Population Prospects, United Nations (UN), uri:"
             <> " https://population.un.org/wpp/, publisher: UN Population"
@@ -348,10 +348,10 @@ surfaceArea =
         , dsDefinition =
             "Surface area is a country's total area, including areas"
             <> " under inland bodies of water and some coastal waterways."
-        , dsUnit = "TODO"
+        , dsUnit = "km²"
         , dsAggregation = Sum
         , dsDecimals = 0
-        , dsExtensive = False
+        , dsExtensive = True
         , dsLastYear = Nothing
         , dsSourceOrganization =
             "FAO electronic files and web site, Food and Agriculture"

@@ -17,25 +17,28 @@ import R4C.Import.Database
 -- import qualified Data.Map.Strict as Map 
 import R4C.Territory 
 import R4C.Statistics
+import R4C.Export.Table
+import UniformBase 
 
 aggregate
     :: RegionMembers
     -> Connection
     -> Dataset
     -> Year
-    -> IO RegionTable
+    -> IO (MdColumn RegionId Double)
 -- | produce a table with for each region the value for the dataset 
 -- retrieves the dataset and possibly the weight 
-aggregate memberships conn dataset year =
-    case dsAggregation dataset of
+aggregate memberships conn dataset year = do
+    regTab <- case dsAggregation dataset of   -- could be dsExtensive
 
-        WeightedBy wt ->
-            weightedAverage
-                memberships
-                conn
-                (dsIndicator dataset)
-                wt
-                year
+        WeightedBy wt ->                -- switch to use virtual (created) extensive dataset
+                errorT ["WeightedBy must be handled with virtual dataset for ", showT dataset]
+        --     weightedAverage
+        --         memberships
+        --         conn
+        --         (dsIndicator dataset)
+        --         wt
+        --         year
 
         agg -> do
             table <- lookupTable conn (dsIndicator dataset) year
@@ -44,6 +47,11 @@ aggregate memberships conn dataset year =
                     (aggregationFunction agg)
                     memberships
                     table
+    return (MdColumn {colTitle = t2s $ dsShortName dataset 
+                    , colScale = Mega 
+                    , colUnit = dsUnit dataset 
+                    , colDecimals = dsDecimals dataset
+                    , colValues = regTab})
 
 aggregationFunction
     :: Aggregation
@@ -58,7 +66,7 @@ aggregateTable
     :: ([Double] -> Maybe Double)
     -> RegionMembers
     -> CountryTable
-    -> RegionTable
+    -> (TerryTable RegionId Double)
 aggregateTable f memberships table =
     [ TerryValue region
           (aggregateRegion f memberships table region)
@@ -80,25 +88,25 @@ aggregateRegion agg memberships table region =
     values =  map tvValue $
             valuesInRegion memberships table region
 
-weightedAverage
-    :: RegionMembers
-    -> Connection
-    -> IndicatorId
-    -> IndicatorId
-    -> Year
-    -> IO RegionTable
-weightedAverage memberships conn valueInd weightInd year = do
-    valueTable  <- lookupTable conn (  valueInd) year
-    weightTable <- lookupTable conn (  weightInd) year
+-- weightedAverage
+--     :: RegionMembers
+--     -> Connection
+--     -> IndicatorId
+--     -> IndicatorId
+--     -> Year
+--     -> IO (TerryTable RegionId Double)
+-- weightedAverage memberships conn valueInd weightInd year = do
+--     valueTable  <- lookupTable conn (  valueInd) year
+--     weightTable <- lookupTable conn (  weightInd) year
 
-    pure
-        [ TerryValue region
-              (weightedMean2
-                  (terryTables2pairs
-                      (valuesInRegion memberships valueTable region)
-                      (valuesInRegion memberships weightTable region)))
-        | (region, _) <- memberships
-        ]
+--     pure
+--         [ TerryValue region
+--               (weightedMean2
+--                   (terryTables2pairs
+--                       (valuesInRegion memberships valueTable region)
+--                       (valuesInRegion memberships weightTable region)))
+--         | (region, _) <- memberships
+--         ]
 
 regionCorrelation1
     :: (Eq t, Show t) => TerryPairs t Double
@@ -107,7 +115,7 @@ regionCorrelation1 pairs =
     pearson $
         terryValues $ pairs
    
-regionCorrelation2 :: (Eq t, Show t) => [TerryValue t Double] -> [TerryValue t Double] -> Maybe Double
+regionCorrelation2 :: (Eq t, Show t) => MdColumn t Double -> MdColumn t Double -> Maybe Double
 regionCorrelation2 tab1 tab2 = regionCorrelation1 (terryTables2pairs tab1 tab2)
 
 weightedMean2
