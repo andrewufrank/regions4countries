@@ -59,26 +59,27 @@ getData11 = do
 
     netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
     fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
-    agrar <-  (aggregate regionMembers conn agrarland (Year 2024))  
+    agrar <-  (aggregate regionMembers conn agriculturalLand (Year 2023))  
+    agrarPC <-  (aggregate regionMembers conn agriculturalLandPC (Year 2023))  
 
     let surfPerCap = combineRegionTables (/) surfs3 pops3
-    let surAgrarfPerCap = combineRegionTables (/) agrar pops3
+    -- let surAgrarfPerCap = combineRegionTables (/) agrar pops3
     -- let netmigPC = combineRegionTables (/) netmigration pops3 
     
     close conn
 
     let mdCols = 
-            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  pops3
-            , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs3
+            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 0 pops3
+            , MdColumn "Flaeche 2023 (Mega km²)" Mega 0  surfs3
             , MdColumn "Flaeche per capita (ha/person)" 
                     Centi 1 surfPerCap
-            , MdColumn "Nutzbares Land per capita (ha/person)" 
-                    Centi 0 surAgrarfPerCap 
+            , MdColumn "Nutzbares Land per capita (ha/person)" Centi 1 agrarPC 
+            , MdColumn "Nutzbares Land (M ha)" Mega 1 agrar
             ]
     let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames2 sortedRegions mdCols
+    let md = markdownTable regionNames2 regionOrder mdCols
     putStrLn md 
     writeTab1Table "tab11" md
 
@@ -111,7 +112,7 @@ getData12 = do
      -- surfPerCap
 
     -- let md = markdownTable regionsList mdCols
-    let md = markdownTable regionNames2 sortedRegions mdCols
+    let md = markdownTable regionNames2 regionOrder mdCols
     putStrLn md 
     writeTab1Table "tab12" md
 
@@ -169,3 +170,33 @@ testlatest = do
         Just obs ->
             print  $ obsYear obs 
             -- @?= Year 2023
+
+regionsWithExtra :: [RegionId] 
+regionsWithExtra = map fst regionMembers 
+
+
+regionOrder = [
+    RegionId "USCAN",
+    RegionId "SAMERICA",
+    RegionId "EUROPE",
+    RegionId "NORTH_AFRICA",
+    RegionId "SUBSAHARA",
+    RegionId "RUSSIA",
+    RegionId "CENTRAL_ASIA",
+    RegionId "GULF",
+    RegionId "INDIA",
+    RegionId "SOUTH_ASIA",
+    RegionId "CHINA",
+    RegionId "FAREAST",
+    RegionId "JAPAN",
+    RegionId "ANZ",
+
+    RegionId "notInRegion",
+
+    RegionId "World Totals",
+    RegionId "EU",
+    RegionId "G7",
+    RegionId "OPEC",
+    RegionId "BRICS",
+
+    RegionId "SCO"]

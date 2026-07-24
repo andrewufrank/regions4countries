@@ -27,7 +27,7 @@ waterConsum = Dataset
 -- Annual freshwater withdrawals refer to total water withdrawals, not counting evaporation losses from storage basins. Withdrawals also include water from desalination plants in countries where they are a significant source. Withdrawals can exceed 100 percent of total renewable resources where extraction from nonrenewable aquifers or desalination plants is considerable or where there is significant water reuse. Withdrawals for agriculture and industry are total withdrawals for irrigation and livestock production and for direct industrial use (including withdrawals for cooling thermoelectric plants). Withdrawals for domestic uses include drinking water, municipal use or supply, and use for public services, commercial establishments, and homes. Data are for the most recent year available for 1987-2002.
 
 
-agrarland = Dataset 
+agrarland = Dataset  -- percent of total surface
     { dsIndicator = IndicatorId "AG.LND.AGRI.ZS"
     , dsName = "Landwirtschaftsland"
     , dsAggregation =  WeightedBy $ IndicatorId "AG.SRF.TOTL.K2"}
@@ -44,7 +44,10 @@ agriculturalLand = Dataset
     , dsName = "Landwirtschaftsland"
     , dsAggregation =  Sum}
 -- Arable land (in hectares) includes land defined by the FAO as land under temporary crops (double-cropped areas are counted once), temporary meadows for mowing or for pasture, land under market or kitchen gardens, and land temporarily fallow. Land abandoned as a result of shifting cultivation is excluded.
-
+agriculturalLandPC = Dataset 
+    { dsIndicator = IndicatorId "AG.LND.ARBL.HA.PC"
+    , dsName = "Landwirtschaftsland ha per capita"
+    , dsAggregation =  WeightedBy (dsIndicator population)} 
 
 ferilizerConsum2 = Dataset 
     { dsIndicator = IndicatorId "AG.CON.FERT.PT.ZS"
