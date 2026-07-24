@@ -10,7 +10,10 @@ import System.IO (hClose, hPutStr, openTempFile)
 import R4C.Import.Database (closeDB, indicators4db, openDB)
 import R4C.Model
     ( Dataset, dsIndicator, dsName, dsDefinition, dsSourceOrganization )
+import Study.Dataset (namedDatasets)
 import Study.Dataset2
+    ( DatasetWarning(..), reconcileDatasets, renderDatasetTemplate
+    , renderNamedDataset, renderWarning )
 import Study.Config
 
 main :: IO ()
@@ -31,7 +34,7 @@ main = do
         if writeSource
             then do
                 rewriteDatasetSource safeUpdated
-                putStrLn "Updated non-conflicting metadata in src/Study/Dataset2.hs."
+                putStrLn "Updated non-conflicting metadata in src/Study/Dataset.hs."
             else pure ()
         if null newDatasets
             then pure ()
@@ -60,13 +63,13 @@ preserveConflicts warnings (name, original) refreshed
 
 rewriteDatasetSource :: [(String, Dataset)] -> IO ()
 rewriteDatasetSource records = do
-    let path = "src/Study/Dataset2.hs"
+    let path = "src/Study/Dataset.hs"
         begin = "-- BEGIN GENERATED DATASETS"
         end = "-- END GENERATED DATASETS"
         generated = unlines (map renderNamedDataset records)
     source <- readFile path
     case replaceSection begin end generated source of
-        Nothing -> error "sync-datasets: generated Dataset2 section not found"
+        Nothing -> error "sync-datasets: generated Dataset section not found"
         Just rewritten -> do
             (temporaryPath, handle) <- openTempFile "src/Study" "Dataset2.hs.sync"
             hPutStr handle rewritten
