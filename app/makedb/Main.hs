@@ -16,7 +16,7 @@ import System.FilePath
     )
 import Study.Config
 
-import R4C.Orchestrator  
+import R4C.Import.Orchestrator
 
 
 main :: IO ()

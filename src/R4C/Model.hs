@@ -56,10 +56,18 @@ data Indicator = Indicator
 
 -- | Dataset is my description (indicaor is the WorldBank description)
 data Dataset = Dataset
-    { dsName :: Text 
-    , dsIndicator :: IndicatorId 
-    , dsAggregation:: Aggregation
+    { dsIndicator          :: IndicatorId
+    , dsShortName          :: Text
+    , dsName               :: Text
+    , dsDefinition         :: Text
+    , dsUnit               :: Text
+    , dsAggregation        :: Aggregation
+    , dsDecimals           :: Int
+    , dsExtensive          :: Bool
+    , dsLastYear           :: Maybe Year
+    , dsSourceOrganization :: Text
     }
+    deriving (Eq, Ord, Show)
 
 newtype Year = Year Int
     deriving (Eq, Ord, Show)

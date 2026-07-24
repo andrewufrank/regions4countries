@@ -1,0 +1,45 @@
+module DatasetSyncSpec (tests) where
+
+import Test.Tasty
+import Test.Tasty.HUnit
+
+import R4C.Model
+import Study.Dataset2
+
+tests :: TestTree
+tests = testGroup "Dataset synchronization"
+    [ testCase "fills placeholders and creates a template for a new indicator" $ do
+        let existing = Dataset
+                { dsIndicator = IndicatorId "KNOWN"
+                , dsShortName = "Known"
+                , dsName = "TODO"
+                , dsDefinition = "TODO"
+                , dsUnit = "TODO"
+                , dsAggregation = Sum
+                , dsDecimals = 0
+                , dsExtensive = False
+                , dsLastYear = Nothing
+                , dsSourceOrganization = "TODO"
+                }
+            known = Indicator (IndicatorId "KNOWN") "World Bank name" "World Bank definition" "World Bank"
+            new = Indicator (IndicatorId "NEW") "New name" "New definition" "New source"
+            (warnings, refreshed, newRecords) = reconcileDatasets [existing] [known, new]
+
+        warnings @?= []
+        case refreshed of
+            [record] -> do
+                dsName record @?= "World Bank name"
+                dsDefinition record @?= "World Bank definition"
+            _ -> assertFailure "expected one refreshed Dataset"
+        case newRecords of
+            [record] -> dsIndicator record @?= IndicatorId "NEW"
+            _ -> assertFailure "expected one new Dataset template"
+
+    , testCase "reports a changed non-placeholder value" $ do
+        let existing = (dummyDatasetFromIndicator (Indicator (IndicatorId "KNOWN") "Old" "Note" "Source"))
+                { dsName = "Checked-in name" }
+            imported = Indicator (IndicatorId "KNOWN") "New World Bank name" "Note" "Source"
+            (warnings, _, _) = reconcileDatasets [existing] [imported]
+
+        warnings @?= [MetadataChanged (IndicatorId "KNOWN") "name" "Checked-in name" "New World Bank name"]
+    ]
