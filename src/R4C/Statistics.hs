@@ -20,7 +20,7 @@ import qualified Statistics.Correlation as C
     -- ( CountryPairs, valuesInRegion, matchCountryTables )
 -- import Data.List  
 import R4C.Territory 
-
+import Data.List (sort)
 --------------------------- statistics on list of [Doubles] or [(Double,Double)]
 --  returns nothing on empty list (or other reasons noe computable )
 
@@ -28,10 +28,41 @@ sum1 :: [(Double)] -> Maybe Double
 sum1 [ ]=  Nothing 
 sum1 a = Just $ sum a
 
-average1 :: [(Double)] -> Maybe Double 
--- average [] = error ["average empty list"]
-average1 [] = Nothing 
-average1 xs = Just $ sum xs / (fromIntegral . length $ xs) 
+min1 :: [(Double)] -> Maybe Double 
+min1 [ ] =  Nothing 
+min1 a = Just $ minimum a
+
+max1 :: [(Double)] -> Maybe Double 
+max1 [ ] =  Nothing 
+max1 a = Just $ maximum a
+
+mean1 ::  [(Double)] -> Maybe Double  -- (Real a, Fractional b) => [a] -> Maybe b
+mean1 [] = Nothing
+mean1 xs = Just (realToFrac (sum xs) / fromIntegral (length xs))
+
+median1 :: [Double] -> Maybe Double
+median1 [] = Nothing
+median1 xs =
+    let ys = sort xs
+        n  = length ys
+        m  = n `div` 2
+    in Just $
+        if odd n
+            then ys !! m
+            else (ys !! (m - 1) + ys !! m) / 2
+
+stdDev1 :: [Double] -> Maybe Double
+stdDev1 [] = Nothing
+stdDev1 xs =
+    let n  = fromIntegral (length xs)
+        mu = sum xs / n
+        var = sum [ (x - mu)^2 | x <- xs ] / n
+    in Just (sqrt var)
+
+-- average1 :: [(Double)] -> Maybe Double 
+-- -- average [] = error ["average empty list"]
+-- average1 [] = Nothing 
+-- average1 xs = Just $ sum xs / (fromIntegral . length $ xs) 
 
 wAverage1 :: [(Double, Double)] -> Maybe Double 
 -- weighted average of non empty list; weight is second!

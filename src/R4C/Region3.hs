@@ -158,7 +158,7 @@ extraRegions3 =
     mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
 
 
-less1mTax = ["LUX","MAC","BMU","CYM","BRN","ISL","FRO","GUY","AND","MLT"]
+less1mTax = ["LUX","MAC","BMU","CYM","BRN","ISL","FRO","GUY","AND","MLT"] :: [Text]
 
 less1mNonTax = ["SXM","ABW","BHS","TCA","KNA","MNE","ATG","SYC","CUW","LCA","MDV","BRB","SUR","DMA","VCT","PLW","GRD","BTN","FJI","BLZ","NRU","CPV","WSM","MHL","TON","TUV","STP","FSM","VUT","COM","KIR","SLB"]
 

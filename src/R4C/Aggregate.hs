@@ -57,7 +57,7 @@ aggregationFunction
     :: Aggregation
     -> [Double] -> Maybe Double
 aggregationFunction Sum  xs = sum1 xs
-aggregationFunction Mean xs = average1 xs 
+aggregationFunction Mean xs = mean1 xs 
 aggregationFunction (WeightedBy _) _ =
     error "WeightedBy handled separately"
 
