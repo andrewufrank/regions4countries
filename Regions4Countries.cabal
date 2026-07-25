@@ -21,7 +21,7 @@ build-type:     Simple
 library
   exposed-modules:
       BaseTest.Config
-      BaseTest.Dataset
+      BaseTest.Dataset1
       BaseTest.Region
       BaseTest.Tab99
       R4C.Aggregate

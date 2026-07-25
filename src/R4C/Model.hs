@@ -63,6 +63,7 @@ data Dataset = Dataset
     , dsUnit               :: Text
     , dsAggregation        :: Aggregation
     , dsDecimals           :: Int
+    , dsScale                :: Scale 
     , dsExtensive          :: Bool
     , dsLastYear           :: Maybe Year
     , dsSourceOrganization :: Text

@@ -7,14 +7,28 @@
 
 -----------------------------------------------------------------------------
 
-module BaseTest.Dataset
+module BaseTest.Dataset1
      where
 
 import Data.List (find)
 import UniformBase 
 
-import R4C.Model
+import R4C.Model 
 
+-- data Dataset1 = Dataset
+--     { dsIndicator          :: IndicatorId
+--     , dsShortName          :: Text
+--     , dsName               :: Text
+--     , dsDefinition         :: Text
+--     , dsUnit               :: Text
+--     , dsAggregation        :: Aggregation
+--     , dsScale               :: Scale
+--     , dsDecimals           :: Int
+--     , dsExtensive          :: Bool
+--     , dsLastYear           :: Maybe Year
+--     , dsSourceOrganization :: Text
+--     }
+--     deriving (Eq, Ord, Show)
 
 population :: Dataset
 population =
@@ -30,6 +44,7 @@ population =
         , dsUnit = "P"  -- for Person
         , dsAggregation = Sum  -- sum means extensive
         , dsDecimals = 0
+        , dsScale = Mega
         , dsExtensive = True
         , dsLastYear = Just (Year 2024)
         , dsSourceOrganization =
@@ -58,6 +73,7 @@ surfaceArea =
         , dsUnit = "km²"
         , dsAggregation = Sum
         , dsDecimals = 0
+        , dsScale = Mega
         , dsExtensive = True
         , dsLastYear = Nothing
         , dsSourceOrganization =

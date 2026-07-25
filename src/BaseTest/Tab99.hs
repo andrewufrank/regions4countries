@@ -10,7 +10,7 @@
 module BaseTest.Tab99
     where
 
-import R4C.Model
+import R4C.Model 
 import qualified Data.Text as T
 import Database.SQLite.Simple  -- for debug
 -- import Study.Indicator 
@@ -22,7 +22,7 @@ import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import BaseTest.Config 
 -- import BaseTest.Dataset 
-import BaseTest.Dataset
+import BaseTest.Dataset1
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
