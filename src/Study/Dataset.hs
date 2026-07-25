@@ -7,166 +7,6 @@ import R4C.Model
 -- import qualified Study.Dataset2 as Previous
 
 -- BEGIN GENERATED DATASETS
-energyConsum :: Dataset
-energyConsum =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SM.POP.NETM"}
-        , dsShortName = "Energie Verbrauch"
-        , dsName = "Net migration"
-        , dsDefinition =
-            "Net migration is the net total of migrants during the"
-            <> " period, that is, the number of immigrants minus the number"
-            <> " of emigrants, including both citizens and noncitizens."
-        , dsUnit = "TODO"
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "World Population Prospects, United Nations (UN),"
-            <> " publisher: UN Population Division"
-        }
-
-waterConsum :: Dataset
-waterConsum =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "ER.H2O.FWTL.ZS"}
-        , dsShortName = "Wasserverbrauch"
-        , dsName = "Annual freshwater withdrawals, total (% of internal resources)"
-        , dsDefinition =
-            "Annual freshwater withdrawals refer to total water"
-            <> " withdrawals, not counting evaporation losses from storage"
-            <> " basins. Withdrawals also include water from desalination"
-            <> " plants in countries where they are a significant source."
-            <> " Withdrawals can exceed 100 percent of total renewable"
-            <> " resources where extraction from nonrenewable aquifers or"
-            <> " desalination plants is considerable or where there is"
-            <> " significant water reuse. Withdrawals for agriculture and"
-            <> " industry are total withdrawals for irrigation and"
-            <> " livestock production and for direct industrial use"
-            <> " (including withdrawals for cooling thermoelectric plants)."
-            <> " Withdrawals for domestic uses include drinking water,"
-            <> " municipal use or supply, and use for public services,"
-            <> " commercial establishments, and homes. Data are for the"
-            <> " most recent year available for 1987-2002."
-        , dsUnit = "TODO"
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "AQUASTAT - FAO's Global Information System on Water and"
-            <> " Agriculture, Food and Agriculture Organization of the"
-            <> " United Nations (FAO), uri:"
-            <> " https://data.apps.fao.org/aquastat/, publisher: Food and"
-            <> " Agriculture Organization of the United Nations (FAO), date"
-            <> " accessed: 20240529"
-        }
-
-agrarland :: Dataset
-agrarland =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.AGRI.ZS"}
-        , dsShortName = "Landwirtschaftsland"
-        , dsName = "Agricultural land (% of land area)"
-        , dsDefinition =
-            "Agricultural land refers to the share of land area that is"
-            <> " arable, under permanent crops, and under permanent"
-            <> " pastures. Arable land includes land defined by the FAO as"
-            <> " land under temporary crops (double-cropped areas are"
-            <> " counted once), temporary meadows for mowing or for"
-            <> " pasture, land under market or kitchen gardens, and land"
-            <> " temporarily fallow. Land abandoned as a result of shifting"
-            <> " cultivation is excluded. Land under permanent crops is"
-            <> " land cultivated with crops that occupy the land for long"
-            <> " periods and need not be replanted after each harvest, such"
-            <> " as cocoa, coffee, and rubber. This category includes land"
-            <> " under flowering shrubs, fruit trees, nut trees, and vines,"
-            <> " but excludes land under trees grown for wood or timber."
-            <> " Permanent pasture is land used for five or more years for"
-            <> " forage, including natural and cultivated crops."
-        , dsUnit = "%"
-        , dsAggregation = WeightedBy (IndicatorId "AG.SRF.TOTL.K2")
-        , dsDecimals = 0
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "FAO electronic files and web site, Food and Agriculture"
-            <> " Organization of the United Nations (FAO), publisher: Food"
-            <> " and Agriculture Organization of the United Nations (FAO)"
-        }
-
-cerealProduction :: Dataset
-cerealProduction =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.PRD.CREL.MT"}
-        , dsShortName = "Getreideproduktion"
-        , dsName = "Cereal production (metric tons)"
-        , dsDefinition =
-            "Production data on cereals relate to crops harvested for"
-            <> " dry grain only. Cereal crops harvested for hay or"
-            <> " harvested green for food, feed, or silage and those used"
-            <> " for grazing are excluded."
-        , dsUnit = "TODO"
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "FAO electronic files and web site, Food and Agriculture"
-            <> " Organization of the United Nations (FAO), uri:"
-            <> " https://www.fao.org/faostat/en/#data/QCL, publisher: Food"
-            <> " and Agriculture Organization of the United Nations (FAO)"
-        }
-
-agriculturalLand :: Dataset
-agriculturalLand =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.ARBL.HA"}
-        , dsShortName = "Landwirtschaftsland"
-        , dsName = "Arable land "
-        , dsDefinition =
-            "Arable land (in hectares) includes land defined by the FAO"
-            <> " as land under temporary crops (double-cropped areas are"
-            <> " counted once), temporary meadows for mowing or for"
-            <> " pasture, land under market or kitchen gardens, and land"
-            <> " temporarily fallow. Land abandoned as a result of shifting"
-            <> " cultivation is excluded."
-        , dsUnit = "ha"
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsExtensive = True
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "FAO electronic files and web site, Food and Agriculture"
-            <> " Organization of the United Nations (FAO), publisher: Food"
-            <> " and Agriculture Organization of the United Nations (FAO)"
-        }
-
-agriculturalLandPC :: Dataset
-agriculturalLandPC =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.ARBL.HA.PC"}
-        , dsShortName = "Landwirtschaftsland"
-        , dsName = "Arable land"
-        , dsDefinition =
-            "Arable land (hectares per person) includes land defined by"
-            <> " the FAO as land under temporary crops (double-cropped"
-            <> " areas are counted once), temporary meadows for mowing or"
-            <> " for pasture, land under market or kitchen gardens, and"
-            <> " land temporarily fallow. Land abandoned as a result of"
-            <> " shifting cultivation is excluded."
-        , dsUnit = "ha/P"
-        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
-        , dsDecimals = 0
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "FAO electronic files and web site, Food and Agriculture"
-            <> " Organization of the United Nations (FAO), publisher: Food"
-            <> " and Agriculture Organization of the United Nations (FAO)"
-        }
-
 ferilizerConsum2 :: Dataset
 ferilizerConsum2 =
     Dataset
@@ -235,49 +75,128 @@ ferilizerConsum =
             <> " and Agriculture Organization of the United Nations (FAO)"
         }
 
-migrationNet :: Dataset
-migrationNet =
+agrarland :: Dataset
+agrarland =
     Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SM.POP.NETM"}
-        , dsShortName = "Netto Migration (Persons)"
-        , dsName = "Net migration"
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.AGRI.ZS"}
+        , dsShortName = "Landwirtschaftsland"
+        , dsName = "Agricultural land (% of land area)"
         , dsDefinition =
-            "Net migration is the net total of migrants during the"
-            <> " period, that is, the number of immigrants minus the number"
-            <> " of emigrants, including both citizens and noncitizens."
+            "Agricultural land refers to the share of land area that is"
+            <> " arable, under permanent crops, and under permanent"
+            <> " pastures. Arable land includes land defined by the FAO as"
+            <> " land under temporary crops (double-cropped areas are"
+            <> " counted once), temporary meadows for mowing or for"
+            <> " pasture, land under market or kitchen gardens, and land"
+            <> " temporarily fallow. Land abandoned as a result of shifting"
+            <> " cultivation is excluded. Land under permanent crops is"
+            <> " land cultivated with crops that occupy the land for long"
+            <> " periods and need not be replanted after each harvest, such"
+            <> " as cocoa, coffee, and rubber. This category includes land"
+            <> " under flowering shrubs, fruit trees, nut trees, and vines,"
+            <> " but excludes land under trees grown for wood or timber."
+            <> " Permanent pasture is land used for five or more years for"
+            <> " forage, including natural and cultivated crops."
+        , dsUnit = "%"
+        , dsAggregation = WeightedBy (IndicatorId "AG.SRF.TOTL.K2")
+        , dsDecimals = 0
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "FAO electronic files and web site, Food and Agriculture"
+            <> " Organization of the United Nations (FAO), publisher: Food"
+            <> " and Agriculture Organization of the United Nations (FAO)"
+        }
+
+agriculturalLand :: Dataset
+agriculturalLand =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.ARBL.HA"}
+        , dsShortName = "Landwirtschaftsland"
+        , dsName = "Arable land "
+        , dsDefinition =
+            "Arable land (in hectares) includes land defined by the FAO"
+            <> " as land under temporary crops (double-cropped areas are"
+            <> " counted once), temporary meadows for mowing or for"
+            <> " pasture, land under market or kitchen gardens, and land"
+            <> " temporarily fallow. Land abandoned as a result of shifting"
+            <> " cultivation is excluded."
+        , dsUnit = "ha"
+        , dsAggregation = Sum
+        , dsDecimals = 0
+        , dsExtensive = True
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "FAO electronic files and web site, Food and Agriculture"
+            <> " Organization of the United Nations (FAO), publisher: Food"
+            <> " and Agriculture Organization of the United Nations (FAO)"
+        }
+
+agriculturalLandPC :: Dataset
+agriculturalLandPC =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.ARBL.HA.PC"}
+        , dsShortName = "Landwirtschaftsland"
+        , dsName = "Arable land"
+        , dsDefinition =
+            "Arable land (hectares per person) includes land defined by"
+            <> " the FAO as land under temporary crops (double-cropped"
+            <> " areas are counted once), temporary meadows for mowing or"
+            <> " for pasture, land under market or kitchen gardens, and"
+            <> " land temporarily fallow. Land abandoned as a result of"
+            <> " shifting cultivation is excluded."
+        , dsUnit = "ha/P"
+        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
+        , dsDecimals = 0
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "FAO electronic files and web site, Food and Agriculture"
+            <> " Organization of the United Nations (FAO), publisher: Food"
+            <> " and Agriculture Organization of the United Nations (FAO)"
+        }
+
+cerealProduction :: Dataset
+cerealProduction =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.PRD.CREL.MT"}
+        , dsShortName = "Getreideproduktion"
+        , dsName = "Cereal production (metric tons)"
+        , dsDefinition =
+            "Production data on cereals relate to crops harvested for"
+            <> " dry grain only. Cereal crops harvested for hay or"
+            <> " harvested green for food, feed, or silage and those used"
+            <> " for grazing are excluded."
         , dsUnit = "TODO"
         , dsAggregation = Sum
         , dsDecimals = 0
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "World Population Prospects, United Nations (UN),"
-            <> " publisher: UN Population Division"
+            "FAO electronic files and web site, Food and Agriculture"
+            <> " Organization of the United Nations (FAO), uri:"
+            <> " https://www.fao.org/faostat/en/#data/QCL, publisher: Food"
+            <> " and Agriculture Organization of the United Nations (FAO)"
         }
 
-fertilityRate :: Dataset
-fertilityRate =
+surfaceArea :: Dataset
+surfaceArea =
     Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
-        , dsShortName = "Fertilitaetsrate"
-        , dsName = "Fertility rate, total (births per woman)"
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.SRF.TOTL.K2"}
+        , dsShortName = "Flaeche"
+        , dsName = "Surface area (sq. km)"
         , dsDefinition =
-            "Total fertility rate represents the number of children"
-            <> " that would be born to a woman if she were to live to the"
-            <> " end of her childbearing years and bear children in"
-            <> " accordance with age-specific fertility rates of the"
-            <> " specified year."
-        , dsUnit = "TODO"
-        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
+            "Surface area is a country's total area, including areas"
+            <> " under inland bodies of water and some coastal waterways."
+        , dsUnit = "km\178"
+        , dsAggregation = Sum
         , dsDecimals = 0
-        , dsExtensive = False
+        , dsExtensive = True
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "World Population Prospects, United Nations (UN),"
-            <> " publisher: UN Population Division; Statistical databases"
-            <> " and publications from national statistical offices,"
-            <> " National Statistical Offices (NSOs); Demographic"
-            <> " Statistics, Eurostat (ESTAT)"
+            "FAO electronic files and web site, Food and Agriculture"
+            <> " Organization of the United Nations (FAO), publisher: Food"
+            <> " and Agriculture Organization of the United Nations (FAO)"
         }
 
 getreideErtrag :: Dataset
@@ -309,97 +228,40 @@ getreideErtrag =
             <> " and Agriculture Organization of the United Nations (FAO)"
         }
 
-population :: Dataset
-population =
+waterConsum :: Dataset
+waterConsum =
     Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.POP.TOTL"}
-        , dsShortName = "Population"
-        , dsName = "Population, total"
+        { dsIndicator = IndicatorId {unIndicatorId = "ER.H2O.FWTL.ZS"}
+        , dsShortName = "Wasserverbrauch"
+        , dsName = "Annual freshwater withdrawals, total (% of internal resources)"
         , dsDefinition =
-            "Total population is based on the de facto definition of"
-            <> " population, which counts all residents regardless of legal"
-            <> " status or citizenship. The values shown are midyear"
-            <> " estimates."
-        , dsUnit = "P"  -- for Person
-        , dsAggregation = Sum  -- sum means extensive
-        , dsDecimals = 0
-        , dsExtensive = True
-        , dsLastYear = Just (Year 2024)
-        , dsSourceOrganization =
-            "World Population Prospects, United Nations (UN), uri:"
-            <> " https://population.un.org/wpp/, publisher: UN Population"
-            <> " Division; Statistical databases and publications from"
-            <> " national statistical offices, National Statistical Offices"
-            <> " (NSOs), uri: https://unstats.un.org/home/nso_sites/,"
-            <> " publisher: National Statistical Offices; Eurostat:"
-            <> " Demographic Statistics, Eurostat (ESTAT), uri:"
-            <> " https://ec.europa.eu/eurostat/data/database?node_code=earn_ses_monthly,"
-            <> " publisher: Eurostat; Population and Vital Statistics"
-            <> " Report (various years), United Nations (UN), uri:"
-            <> " https://unstats.un.org, publisher: UN Statistics Division"
-        }
-
-surfaceArea :: Dataset
-surfaceArea =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.SRF.TOTL.K2"}
-        , dsShortName = "Flaeche"
-        , dsName = "Surface area (sq. km)"
-        , dsDefinition =
-            "Surface area is a country's total area, including areas"
-            <> " under inland bodies of water and some coastal waterways."
-        , dsUnit = "km²"
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsExtensive = True
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "FAO electronic files and web site, Food and Agriculture"
-            <> " Organization of the United Nations (FAO), publisher: Food"
-            <> " and Agriculture Organization of the United Nations (FAO)"
-        }
-
-grossNatProd :: Dataset
-grossNatProd =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "NY.GNP.ATLS.CD"}
-        , dsShortName = "GNP"
-        , dsName = "GNI, Atlas method (current US$)"
-        , dsDefinition =
-            "Gross national income is the total income earned by all"
-            <> " residents within an economic territory during an"
-            <> " accounting period. It is equal to gross domestic product"
-            <> " plus earned income receivable from abroad minus earned"
-            <> " income payable abroad. This figure is converted to U.S."
-            <> " dollars using the World Bank Atlas method. GNI, calculated"
-            <> " in national currency, is usually converted to U.S. dollars"
-            <> " at official exchange rates for comparisons across"
-            <> " economies, although an alternative rate is used when the"
-            <> " official exchange rate is judged to diverge by an"
-            <> " exceptionally large margin from the rate actually applied"
-            <> " in international transactions. To smooth fluctuations in"
-            <> " prices and exchange rates, a special Atlas method of"
-            <> " conversion is used by the World Bank. This applies a"
-            <> " conversion factor that averages the exchange rate for a"
-            <> " given year and the two preceding years, adjusted for"
-            <> " differences in rates of inflation between the country, and"
-            <> " through 2000, the G-5 countries (France, Germany, Japan,"
-            <> " the United Kingdom, and the United States). From 2001,"
-            <> " these countries include the Euro area, Japan, the United"
-            <> " Kingdom, and the United States. This indicator is"
-            <> " expressed in current prices, meaning no adjustment has"
-            <> " been made to account for price changes over time. This"
-            <> " indicator is expressed in United States dollars."
+            "Annual freshwater withdrawals refer to total water"
+            <> " withdrawals, not counting evaporation losses from storage"
+            <> " basins. Withdrawals also include water from desalination"
+            <> " plants in countries where they are a significant source."
+            <> " Withdrawals can exceed 100 percent of total renewable"
+            <> " resources where extraction from nonrenewable aquifers or"
+            <> " desalination plants is considerable or where there is"
+            <> " significant water reuse. Withdrawals for agriculture and"
+            <> " industry are total withdrawals for irrigation and"
+            <> " livestock production and for direct industrial use"
+            <> " (including withdrawals for cooling thermoelectric plants)."
+            <> " Withdrawals for domestic uses include drinking water,"
+            <> " municipal use or supply, and use for public services,"
+            <> " commercial establishments, and homes. Data are for the"
+            <> " most recent year available for 1987-2002."
         , dsUnit = "TODO"
         , dsAggregation = Sum
         , dsDecimals = 0
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "Country official statistics, National Statistical"
-            <> " Organizations and/or Central Banks; National Accounts data"
-            <> " files, Organisation for Economic Co-operation and"
-            <> " Development (OECD); Staff estimates, World Bank (WB)"
+            "AQUASTAT - FAO's Global Information System on Water and"
+            <> " Agriculture, Food and Agriculture Organization of the"
+            <> " United Nations (FAO), uri:"
+            <> " https://data.apps.fao.org/aquastat/, publisher: Food and"
+            <> " Agriculture Organization of the United Nations (FAO), date"
+            <> " accessed: 20240529"
         }
 
 gnpPPpc :: Dataset
@@ -457,6 +319,144 @@ gnpPPpc =
             <> " Organisation for Economic Co-operation and Development"
             <> " (OECD); World Economic Outlook database, International"
             <> " Monetary Fund (IMF)"
+        }
+
+grossNatProd :: Dataset
+grossNatProd =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "NY.GNP.ATLS.CD"}
+        , dsShortName = "GNP"
+        , dsName = "GNI, Atlas method (current US$)"
+        , dsDefinition =
+            "Gross national income is the total income earned by all"
+            <> " residents within an economic territory during an"
+            <> " accounting period. It is equal to gross domestic product"
+            <> " plus earned income receivable from abroad minus earned"
+            <> " income payable abroad. This figure is converted to U.S."
+            <> " dollars using the World Bank Atlas method. GNI, calculated"
+            <> " in national currency, is usually converted to U.S. dollars"
+            <> " at official exchange rates for comparisons across"
+            <> " economies, although an alternative rate is used when the"
+            <> " official exchange rate is judged to diverge by an"
+            <> " exceptionally large margin from the rate actually applied"
+            <> " in international transactions. To smooth fluctuations in"
+            <> " prices and exchange rates, a special Atlas method of"
+            <> " conversion is used by the World Bank. This applies a"
+            <> " conversion factor that averages the exchange rate for a"
+            <> " given year and the two preceding years, adjusted for"
+            <> " differences in rates of inflation between the country, and"
+            <> " through 2000, the G-5 countries (France, Germany, Japan,"
+            <> " the United Kingdom, and the United States). From 2001,"
+            <> " these countries include the Euro area, Japan, the United"
+            <> " Kingdom, and the United States. This indicator is"
+            <> " expressed in current prices, meaning no adjustment has"
+            <> " been made to account for price changes over time. This"
+            <> " indicator is expressed in United States dollars."
+        , dsUnit = "TODO"
+        , dsAggregation = Sum
+        , dsDecimals = 0
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "Country official statistics, National Statistical"
+            <> " Organizations and/or Central Banks; National Accounts data"
+            <> " files, Organisation for Economic Co-operation and"
+            <> " Development (OECD); Staff estimates, World Bank (WB)"
+        }
+
+energyConsum :: Dataset
+energyConsum =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "SM.POP.NETM"}
+        , dsShortName = "Energie Verbrauch"
+        , dsName = "Net migration"
+        , dsDefinition =
+            "Net migration is the net total of migrants during the"
+            <> " period, that is, the number of immigrants minus the number"
+            <> " of emigrants, including both citizens and noncitizens."
+        , dsUnit = "TODO"
+        , dsAggregation = Sum
+        , dsDecimals = 0
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "World Population Prospects, United Nations (UN),"
+            <> " publisher: UN Population Division"
+        }
+
+migrationNet :: Dataset
+migrationNet =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "SM.POP.NETM"}
+        , dsShortName = "Netto Migration (Persons)"
+        , dsName = "Net migration"
+        , dsDefinition =
+            "Net migration is the net total of migrants during the"
+            <> " period, that is, the number of immigrants minus the number"
+            <> " of emigrants, including both citizens and noncitizens."
+        , dsUnit = "TODO"
+        , dsAggregation = Sum
+        , dsDecimals = 0
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "World Population Prospects, United Nations (UN),"
+            <> " publisher: UN Population Division"
+        }
+
+fertilityRate :: Dataset
+fertilityRate =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
+        , dsShortName = "Fertilitaetsrate"
+        , dsName = "Fertility rate, total (births per woman)"
+        , dsDefinition =
+            "Total fertility rate represents the number of children"
+            <> " that would be born to a woman if she were to live to the"
+            <> " end of her childbearing years and bear children in"
+            <> " accordance with age-specific fertility rates of the"
+            <> " specified year."
+        , dsUnit = "TODO"
+        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
+        , dsDecimals = 0
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "World Population Prospects, United Nations (UN),"
+            <> " publisher: UN Population Division; Statistical databases"
+            <> " and publications from national statistical offices,"
+            <> " National Statistical Offices (NSOs); Demographic"
+            <> " Statistics, Eurostat (ESTAT)"
+        }
+
+population :: Dataset
+population =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "SP.POP.TOTL"}
+        , dsShortName = "Population"
+        , dsName = "Population, total"
+        , dsDefinition =
+            "Total population is based on the de facto definition of"
+            <> " population, which counts all residents regardless of legal"
+            <> " status or citizenship. The values shown are midyear"
+            <> " estimates."
+        , dsUnit = "P"
+        , dsAggregation = Sum
+        , dsDecimals = 0
+        , dsExtensive = True
+        , dsLastYear = Just (Year 2024)
+        , dsSourceOrganization =
+            "World Population Prospects, United Nations (UN), uri:"
+            <> " https://population.un.org/wpp/, publisher: UN Population"
+            <> " Division; Statistical databases and publications from"
+            <> " national statistical offices, National Statistical Offices"
+            <> " (NSOs), uri: https://unstats.un.org/home/nso_sites/,"
+            <> " publisher: National Statistical Offices; Eurostat:"
+            <> " Demographic Statistics, Eurostat (ESTAT), uri:"
+            <> " https://ec.europa.eu/eurostat/data/database?node_code=earn_ses_monthly,"
+            <> " publisher: Eurostat; Population and Vital Statistics"
+            <> " Report (various years), United Nations (UN), uri:"
+            <> " https://unstats.un.org, publisher: UN Statistics Division"
         }
 
 -- END GENERATED DATASETS
