@@ -57,7 +57,7 @@ getData11 = do
 
     netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
     -- fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
-    agrar <-  (aggregate regionMembers conn agriculturalLand (Year 2023))  
+    agrar <-  (aggregate regionMembers conn arableLand (Year 2023))    -- nur ackerland!
     -- agrarPC <-  (aggregate regionMembers conn agriculturalLandPC (Year 2023))  
             -- wheigted!
     close conn

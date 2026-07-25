@@ -94,7 +94,8 @@ lookupTerry
 lookupTerry r =
     find (\rv -> tvCode rv == r)
 
-title_units col = colTitle col ++ "(" ++ (t2s . colUnit $ col) ++ ")"
+title_units :: MdColumn t v -> [Char]
+title_units col = colTitle col ++ "(" ++ (show1scale  . colScale $ col) ++ (t2s . colUnit $ col) ++ ")"
 -------------
 class ShowCell a where
     showCell :: MdColumn i a -> a -> String

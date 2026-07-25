@@ -189,6 +189,11 @@ type TerryPairs t v  = [(TerryValue t v, TerryValue t v )]
 
 data Scale = Kilo | Mega | Giga | Tera | Centi | Unit | Milli| Micro | Nano | Pico deriving (Eq, Ord, Show )
 
+show1scale s = case s of 
+    Kilo -> "k"
+    Mega -> "M"
+    Unit -> ""
+    _ -> ""
 
 data MdColumn t v =   MdColumn
     { colTitle    :: String

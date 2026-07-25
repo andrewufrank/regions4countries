@@ -108,7 +108,7 @@ getData23 = do
     conn <- open dbPath 
     (pops3, surfs3) <- popsSurf conn
 
-    arablHA  <- aggregate regionMembers2 conn agriculturalLand (Year 2023)
+    arablHA  <- aggregate regionMembers2 conn arableLandPC (Year 2023)  -- nur ackerland
     fertConsumpha <- aggregate regionMembers2 conn ferilizerConsum (Year 2023)
     let fertilizerConsumTot = combineRegionTables Multiply arablHA fertConsumpha 
     

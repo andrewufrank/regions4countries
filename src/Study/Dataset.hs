@@ -77,8 +77,8 @@ ferilizerConsum =
             <> " and Agriculture Organization of the United Nations (FAO)"
         }
 
-agrarland :: Dataset
-agrarland =
+agrarlandPart :: Dataset
+agrarlandPart =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.AGRI.ZS"}
         , dsShortName = "Landwirtschaftsland"
@@ -111,11 +111,11 @@ agrarland =
             <> " and Agriculture Organization of the United Nations (FAO)"
         }
 
-agriculturalLand :: Dataset
-agriculturalLand =
+arableLand :: Dataset
+arableLand =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.ARBL.HA"}
-        , dsShortName = "Landwirtschaftsland"
+        , dsShortName = "Ackerland"
         , dsName = "Arable land "
         , dsDefinition =
             "Arable land (in hectares) includes land defined by the FAO"
@@ -136,11 +136,11 @@ agriculturalLand =
             <> " and Agriculture Organization of the United Nations (FAO)"
         }
 
-agriculturalLandPC :: Dataset
-agriculturalLandPC =
+arableLandPC :: Dataset
+arableLandPC =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.ARBL.HA.PC"}
-        , dsShortName = "Landwirtschaftsland"
+        , dsShortName = "Ackerland per capita"
         , dsName = "Arable land"
         , dsDefinition =
             "Arable land (hectares per person) includes land defined by"
@@ -479,9 +479,9 @@ population =
 namedDatasets :: [(String, Dataset)]
 namedDatasets =
     [ ("energyConsum", energyConsum), ("waterConsum", waterConsum)
-    , ("agrarland", agrarland), ("cerealProduction", cerealProduction)
-    , ("agriculturalLand", agriculturalLand)
-    , ("agriculturalLandPC", agriculturalLandPC)
+    , ("agrarland", arableLand), ("cerealProduction", cerealProduction)
+    , ("agriculturalLand", arableLandPC)
+    , ("agriculturalLandPC", arableLandPC)
     , ("ferilizerConsum2", ferilizerConsum2)
     , ("ferilizerConsum", ferilizerConsum), ("migrationNet", migrationNet)
     , ("fertilityRate", fertilityRate), ("getreideErtrag", getreideErtrag)
@@ -491,11 +491,11 @@ namedDatasets =
 
 datasets :: [Dataset]
 datasets =
-    [ waterConsum, agrarland, cerealProduction, agriculturalLand
-    , agriculturalLandPC, ferilizerConsum2, ferilizerConsum, migrationNet
+    [ waterConsum, agrarlandPart, cerealProduction, arableLand
+    , arableLandPC, ferilizerConsum2, ferilizerConsum, migrationNet
     , fertilityRate, getreideErtrag, population, surfaceArea, grossNatProd
     , gnpPPpc
-    ]
+    ]  -- how to keep this current? 
 
 lookupDataset :: IndicatorId -> Maybe Dataset
 lookupDataset iid = find ((== iid) . dsIndicator) datasets

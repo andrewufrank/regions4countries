@@ -1,5 +1,5 @@
-| Region | Population(P) | Surface area(km²) | Surface areaPopulation(km²/P) |
-|:---|---:|---:|---:|
-| Europa | 686 | 7 | 0.010443 |
-| Europ. Union | 450 | 4 | 0.009580 |
-| Gruppe 7 | 786 | 27 | 0.034821 |
+| Region | Population(MP) | Flaeche(Mkm²) | FlaechePopulation(km²/P) | AckerlandPopulation(ha/P) |
+|:---|---:|---:|---:|---:|
+| Europa | 686 | 7 | 0.010443 | 0.246989 |
+| Europ. Union | 450 | 4 | 0.009580 | 0.216282 |
+| Gruppe 7 | 786 | 27 | 0.034821 | 0.299750 |

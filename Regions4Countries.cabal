@@ -26,6 +26,7 @@ library
       BaseTest.Tab99
       R4C.Aggregate
       R4C.Country
+      R4C.DatasetVirtual
       R4C.Export.CountnryCodeNames
       R4C.Export.Markdown
       R4C.Export.Table
