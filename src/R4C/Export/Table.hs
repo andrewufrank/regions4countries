@@ -19,7 +19,7 @@ import UniformBase
 import R4C.Region3
 
 
-type Column a = [(RegionId, Maybe a)]
+-- type Column a = [(RegionId, Maybe a)]
 
 -- type DTable = Column Double -- replace with regionTable
 
@@ -138,13 +138,13 @@ valueToDouble (Value v) =
     Sc.toRealFloat v
 
 -- scaleRegionTable :: Double -> (TerryTable RegionId Double) -> (TerryTable RegionId Double)
-scaleRegionTable :: Double -> MdColumn RegionId Double -> MdColumn RegionId Double
+scaleRegionTable :: (Ord t, Show t, Eq t) => Double -> MdColumn t Double -> MdColumn t Double
 scaleRegionTable k ct = ct{colValues = cv2}
-    where   cv2 :: TerryTable RegionId Double 
+    where   -- cv2 :: TerryTable RegionId Double 
             cv2 = map  (\rv -> rv { tvValue = fmap (* k) (tvValue rv) }) (colValues ct) 
 
 -- | combine two MdColumns t v with a functioin 
-combineRegionTables :: Operation -> MdColumn RegionId Double -> MdColumn RegionId Double -> MdColumn RegionId Double
+combineRegionTables :: (Ord t, Show t, Eq t) => Operation -> MdColumn t Double -> MdColumn t Double -> MdColumn t Double
 combineRegionTables f xs ys = MdColumn{colValues = xyt
         , colTitle = colTitle xs <> colTitle ys  --
         , colDecimals = min (colDecimals xs) (colDecimals ys)
@@ -162,10 +162,10 @@ combineRegionTables f xs ys = MdColumn{colValues = xyt
         -- xyScale =  min (colScale xs)   (colScale ys)
 
 combineTerryTables
-    :: (Double -> Double -> Double)
-    -> (TerryTable RegionId Double)
-    -> (TerryTable RegionId Double)
-    -> (TerryTable RegionId Double)
+    :: (Ord t, Show t, Eq t) => (Double -> Double -> Double)
+    -> (TerryTable t Double)
+    -> (TerryTable t Double)
+    -> (TerryTable t Double)
 -- | combine two tables with function 
 combineTerryTables f xs ys = 
     [ TerryValue

@@ -2,6 +2,7 @@
 --
 -- Module      :   experiments with Terry data 
 -- especially small countries 
+-- but all on countries 
 
 -----------------------------------------------------------------------------
 
@@ -28,7 +29,7 @@ import R4C.Import.Database
 -- import R4C.Export.CountryTable
 import R4C.Export.Table 
 import R4C.Export.CountnryCodeNames
-
+import R4C.Region3 
 
 
 regionMembersSmall :: RegionMembers  -- [(RegionId, CountryId)]
@@ -40,13 +41,13 @@ regionMembersSmall =
     mk :: Text -> [Text] -> (RegionId, [CountryId])
     mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
 
-tableOutputDirectory :: FilePath
-tableOutputDirectory =   "/home/frank/CountryExperiments"
+tableOutputDirectoryExp :: FilePath
+tableOutputDirectoryExp =   "/home/frank/CountryExperiments"
 
 writeTab1Table :: FilePath -> String -> IO ()
 writeTab1Table filename contents = do
-    createDirectoryIfMissing True tableOutputDirectory
-    writeFile (  tableOutputDirectory </> filename) contents
+    createDirectoryIfMissing True tableOutputDirectoryExp
+    writeFile (  tableOutputDirectoryExp </> filename) contents
 
 
 
@@ -68,7 +69,7 @@ exp2 = do
         gnp = aggregateTable (aggregationFunction $ dsAggregation grossNatProd) regionMembersSmall tabGNP
         -- gnpPCwb =  aggregateTable (aggregationFunction $ dsAggregation gnpPPpc) regionMembersSmall tabGNPpcwb
 
-        gnpPC = combineRegionTables (/) gnp pops
+        gnpPC = combineRegionTables Divide gnp pops
     
     close conn
 
@@ -85,7 +86,7 @@ exp2 = do
             -- , MdColumn "Nutzbares Land per capita (ha/person)" 
             --         Centi 0 surAgrarfPerCap 
             ]
-    let sortedRegions = sortTerryByColumn Descending  pops :: [RegionId]
+    let sortedRegions = sortTerryByColumn Descending  pops  
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames2 sortedRegions mdCols
@@ -104,17 +105,17 @@ exp1 = do
 
     close conn
 
-    let mdCols = 
-            [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  tabPop
-            , MdColumn "Flaeche 2023 (Kilo km²)" Kilo 0  tabSurf
-            , MdColumn "GNP pro Kopf (kilo PP)" Kilo 0 tabGNPpc 
+    -- let mdCols = 
+    --         [ MdColumn "Bevoelkerung 2024 (Mega)" Mega 6  tabPop
+    --         , MdColumn "Flaeche 2023 (Kilo km²)" Kilo 0  tabSurf
+    --         , MdColumn "GNP pro Kopf (kilo PP)" Kilo 0 tabGNPpc 
              
-            ]
+    --         ]
     -- let  less1m = map CountryId less1Mcountries :: [CountryId]
     let sort = sortTerryByColumn Descending  tabGNPpc --surfPerCap
     let sort2 = filter (\c -> elem c less1m) sort
 
-    let md = markdownTable allCodeNames sort2 mdCols
+    let md = markdownTable allCodeNames sort2 [tabPop, tabGNP, tabGNPpc, tabSurf]
     putStrLn md 
     putStrLn . show . map unCountryId $ sort2
     writeTab1Table "exp1" md
