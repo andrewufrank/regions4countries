@@ -7,10 +7,11 @@ import Test.Tasty.HUnit
 import R4C.Aggregate
 import R4C.Import.Database
 -- import BaseTest.Indicator
-import R4C.Region3
+-- import R4C.Region3
 import R4C.Model
 import Study.Dataset
 import Study.Region2 
+import BaseTest.Region
 
 tests :: TestTree
 tests =
@@ -30,7 +31,7 @@ testAggregateG7 = do
         , Observation (CountryId "AUT") (dsIndicator population) (Year 2024) (Value 999)
         ]
 
-    result1 <- aggregate  regionMembers2 conn population (Year 2024) -- (RegionId "G7")
+    result1 <- aggregate  regionMembers conn population (Year 2024) -- (RegionId "G7")
     let result = show . colValues $ result1
     close conn
 

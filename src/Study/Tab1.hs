@@ -58,14 +58,14 @@ getData11 = do
     netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
     -- fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
     agrar <-  (aggregate regionMembers conn agriculturalLand (Year 2023))  
-    agrarPC <-  (aggregate regionMembers conn agriculturalLandPC (Year 2023))  
-
+    -- agrarPC <-  (aggregate regionMembers conn agriculturalLandPC (Year 2023))  
+            -- wheigted!
     close conn
 
     let mdCols = 
             [ pops3
             , surfs3
-            , agrarPC
+            -- , agrarPC
             , agrar
             ]
     let md = markdownTable regionNames2 regionOrder mdCols

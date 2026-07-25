@@ -343,7 +343,7 @@ surfaceArea :: Dataset
 surfaceArea =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "AG.SRF.TOTL.K2"}
-        , dsShortName = "Surface area"
+        , dsShortName = "Flaeche"
         , dsName = "Surface area (sq. km)"
         , dsDefinition =
             "Surface area is a country's total area, including areas"

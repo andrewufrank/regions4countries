@@ -19,3 +19,7 @@ filesUsed =
     "/home/frank/Desktop/buecher/WorldBankData/archivesUsed"
 
 buch= "/home/frank/Workspace12/regions4countries/test/testbuch"
+
+tableOutputDirectory :: FilePath
+tableOutputDirectory =
+    buch ++ "/figures"
