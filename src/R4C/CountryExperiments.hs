@@ -31,6 +31,7 @@ import R4C.Export.CountnryCodeNames
 import qualified R4C.Region3 as R3 
 import qualified BaseTest.Region as RBT 
 import BaseTest.Region (regionOrder)
+import Data.List
 
 valuesInTable
     :: [CountryId]
@@ -115,8 +116,26 @@ exp4 = do
 -- the operations on the tables must be with the mdcol data! 
 
     let md = markdownTable RBT.regionNames regionOrder [mdC]
+
     putStrLn md 
+    --extract one region and show the country data 
+    let mbeuCountries = find ((RegionId "EU" ==). fst) rct  -- [(RegionId, CountryTable)]
+    case mbeuCountries of 
+        Nothing -> putIOwords ["region EU not found"]
+        Just (_, ctTab) -> do
+        
+            let  mdC =  wrapMdCol ( population)  ctTab:: MdColumn CountryId Double
+-- the operations on the tables must be with the mdcol data! 
+            let sortedRegions = sortTerryByColumn Descending  ctTab  
+            let md = markdownTable allCodeNames sortedRegions [mdC]  --less1m mdC
+            putStrLn md 
+
     return ()
+
+
+euCountries = ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
+        ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
+        ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
 
 sumCountryTables :: [(RegionId, CountryTable)] -> [TerryValue RegionId Double ] 
 -- sum the values (must be extensional) in the country table 
