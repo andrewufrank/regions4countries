@@ -119,21 +119,47 @@ exp4 = do
 
     putStrLn md 
     --extract one region and show the country data 
-    let mbeuCountries = find ((RegionId "EU" ==). fst) rct  -- [(RegionId, CountryTable)]
-    case mbeuCountries of 
-        Nothing -> putIOwords ["region EU not found"]
-        Just (_, ctTab) -> do
+    let regid = RegionId "EU"
+    let euMdC = getOneRegionMany  [population] [rct] regid::   [MdColumn CountryId Double]
+
+    -- let mbeuCountries = find ((RegionId "EU" ==). fst) rct  -- [(RegionId, CountryTable)]
+    -- case mbeuCountries of 
+    --     Nothing -> putIOwords ["region EU not found"]
+    --     Just (_, ctTab) -> do
         
-            let  mdC =  wrapMdCol ( population)  ctTab:: MdColumn CountryId Double
--- the operations on the tables must be with the mdcol data! 
-            let sortedRegions = sortTerryByColumn Descending  ctTab  
-            let md = markdownTable allCodeNames sortedRegions [mdC]  --less1m mdC
-            putStrLn md 
+    --         let  mdC =  wrapMdCol ( population)  ctTab:: MdColumn CountryId Double
+    -- the operations on the tables must be with the mdcol data! 
+    -- case euMdC of 
+    --     Nothing ->  putIOwords ["region", showT regid, "not found"]      
+    --   let sortedRegions = sortTerryByColumn Descending  ctTab  
+    --     Just mdC ->     let 
+    -- let sortedRegions = sortTerryByColumn Descending  ctTab  
+    let md =  (markdownTable allCodeNames euCountries)    euMdC--less1m mdC
+    putStrLn  md 
 
     return ()
 
+getOneRegionMany :: [Dataset] -> [RegionTable2] -> RegionId -> [MdColumn CountryId Double]
+-- pack multiple regionTable from different datasets in MdColumn to convert to Md 
+getOneRegionMany req rct regid  = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct
+  where
+    getOneRegion :: RegionId -> Dataset -> [(RegionId, CountryTable)] -> Maybe (MdColumn CountryId Double)
+    -- extract one country from a regionTable 
+    getOneRegion  regid dataset regtab = 
+        case mbCountries of 
+            Nothing -> Nothing -- putIOwords ["region", showT regid, "not found"]
+            Just (_, ctTab) ->  Just $  wrapMdCol ( dataset)  ctTab -- :: MdColumn CountryId Double 
+        where
+            mbCountries = find ((regid ==). fst) regtab  -- [(RegionId, CountryTable)]
+    
+-- the operations on the tables must be with the mdcol data! 
+            -- let sortedRegions = sortTerryByColumn Descending  ctTab  
+            -- let md = markdownTable allCodeNames sortedRegions [mdC]  --less1m mdC
+            -- putStrLn md 
 
-euCountries = ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
+
+
+euCountries = map CountryId ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
         ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
         ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
 
@@ -174,6 +200,26 @@ exp3 = do
 
     let md = markdownTable RBT.regionNames regionOrder mdC
     putStrLn md 
+
+    -- get OneCountry 
+    let regid = RegionId "EU"
+    -- let euMdC = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct  :: [MdColumn CountryId Double]
+    let euMdC = getOneRegionMany req rct regid
+    let md =  (markdownTable allCodeNames euCountries) $   euMdC --less1m mdC
+    putStrLn  md 
+
+    -- let mbeuCountries = find ((RegionId "EU" ==). fst) rct  -- [(RegionId, CountryTable)]
+    -- case mbeuCountries of 
+    --     Nothing -> putIOwords ["region EU not found"]
+    --     Just (_, ctTab) -> do
+        
+    --         let  mdC =  wrapMdCol ( population)  ctTab:: MdColumn CountryId Double
+-- the operations on the tables must be with the mdcol data! 
+    -- case euMdC of 
+    --     Nothing ->  putIOwords ["region", showT regid, "not found"]        let sortedRegions = sortTerryByColumn Descending  ctTab  
+    --     Just mdC ->     let 
+    -- let sortedRegions = sortTerryByColumn Descending  ctTab  
+
 
     return ()
 
