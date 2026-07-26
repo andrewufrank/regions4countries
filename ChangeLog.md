@@ -1,9 +1,9 @@
 # ChangeLog for EconomyDiffEq
 
+0.0.5 changed the organisation of the region table to include the data and summmarize later 
+
 0.0.4 add the country name etc. to the database 
     all tables have (Maybe Double) to indicate where observations are missing
-
-
 0.0.3 separate folder for each study. (baseTest, pt)
     produce md table (which can be sorted)
     add makedb to create a new db 

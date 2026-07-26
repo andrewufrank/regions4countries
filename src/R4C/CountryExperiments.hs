@@ -69,25 +69,28 @@ aggregateTery2 op table  = TerryValue (fst table) ( op . catMaybes . map tvValue
 --     values =  map tvValue  table 
 
 aggregateTerry3    :: ([Double] -> Maybe Double)
-    -> [(RegionId, CountryTable)]
+    -> RegionTable3
     -- -> RegionId
     -> [RegionValue ] 
-aggregateTerry3 op regionTab = map (aggregateTery2 op) regionTab 
-
--- aggregateTerry4    :: ([Double] -> Maybe Double)
---     -> [(RegionId, CountryTable)] -> [TerryValue RegionId Double]  
--- aggregateTerry4 op regionTab = map   (aggregateTery2 op) regionTab 
--- -- aggregateTerry4 op regionTab = map (\r -> TerryValue {(fst r) (aggregateTery2 op)}) regionTab 
-
-type RegionTable2 = [(RegionId, CountryTable)]
+aggregateTerry3 op regionTab = map (aggregateTery2 op) (snd regionTab) 
 
 -- lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> IO [(RegionId,  [CountryTable])]
-lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> IndicatorId -> Year -> IO [(RegionId, CountryTable)]
+lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO [(RegionId, CountryTable)]
 -- fill for each region a countryTable with only its countries 
-lookupRegionTable2 conn regionDef id yr = do 
-        worldTab <- lookupTable conn id yr  
+lookupRegionTable2 conn regionDef ds yr = do 
+        worldTab <- lookupTable conn (dsIndicator ds) yr  
         let regTab = map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef
         return regTab 
+
+
+-- lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> IO [(RegionId,  [CountryTable])]
+lookupRegionTable3 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO RegionTable3
+-- fill for each region a countryTable with only its countries 
+lookupRegionTable3 conn regionDef ds yr = do 
+        worldTab <- lookupTable conn (dsIndicator ds) yr  
+        let regTab = (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
+        return regTab 
+
 
 countryTable :: CountryTable -> [CountryId] -> CountryTable 
 countryTable worldTab cts = valuesInTable cts worldTab 
@@ -99,7 +102,7 @@ exp4 = do
         regionDef = RBT.regionMembers -- g7, eu, russia 
 
     conn <- open dbPath 
-    regionCountryTable :: [(RegionId, CountryTable)]  <- lookupRegionTable2 conn regionDef (dsIndicator population) (Year 2024)
+    regionCountryTable :: RegionTable3  <- lookupRegionTable3 conn regionDef ( population) (Year 2024)
     close conn
 
     -- let aggs = map (\op -> aggregateTerry3 op regionCountryTable) [min1, median1, max1, mean1, stdDev1] 
@@ -107,7 +110,7 @@ exp4 = do
     
     -- convert to regionTable 
     -- make a single val for each country 
-    let rct = regionCountryTable :: [(RegionId, CountryTable)]
+    let rct = snd regionCountryTable :: [(RegionId, CountryTable)]
         rct2  :: [TerryValue RegionId Double ]
         rct2 =  sumCountryTables rct 
 
@@ -120,37 +123,26 @@ exp4 = do
     putStrLn md 
     --extract one region and show the country data 
     let regid = RegionId "EU"
-    let euMdC = getOneRegionMany  [population] [rct] regid::   [MdColumn CountryId Double]
-
-    -- let mbeuCountries = find ((RegionId "EU" ==). fst) rct  -- [(RegionId, CountryTable)]
-    -- case mbeuCountries of 
-    --     Nothing -> putIOwords ["region EU not found"]
-    --     Just (_, ctTab) -> do
-        
-    --         let  mdC =  wrapMdCol ( population)  ctTab:: MdColumn CountryId Double
-    -- the operations on the tables must be with the mdcol data! 
-    -- case euMdC of 
-    --     Nothing ->  putIOwords ["region", showT regid, "not found"]      
-    --   let sortedRegions = sortTerryByColumn Descending  ctTab  
-    --     Just mdC ->     let 
-    -- let sortedRegions = sortTerryByColumn Descending  ctTab  
+    let euMdC = getOneRegionMany3  [regionCountryTable] regid::   [MdColumn CountryId Double]
+  
     let md =  (markdownTable allCodeNames euCountries)    euMdC--less1m mdC
     putStrLn  md 
 
     return ()
 
-getOneRegionMany :: [Dataset] -> [RegionTable2] -> RegionId -> [MdColumn CountryId Double]
+getOneRegionMany3 ::   [RegionTable3] -> RegionId -> [MdColumn CountryId Double]
 -- pack multiple regionTable from different datasets in MdColumn to convert to Md 
-getOneRegionMany req rct regid  = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct
+getOneRegionMany3 rct regid  = catMaybes $ map (\tab -> getOneRegion regid (fst tab)  (snd tab))  rct
   where
-    getOneRegion :: RegionId -> Dataset -> [(RegionId, CountryTable)] -> Maybe (MdColumn CountryId Double)
-    -- extract one country from a regionTable 
-    getOneRegion  regid dataset regtab = 
-        case mbCountries of 
-            Nothing -> Nothing -- putIOwords ["region", showT regid, "not found"]
-            Just (_, ctTab) ->  Just $  wrapMdCol ( dataset)  ctTab -- :: MdColumn CountryId Double 
-        where
-            mbCountries = find ((regid ==). fst) regtab  -- [(RegionId, CountryTable)]
+
+getOneRegion :: RegionId -> Dataset -> RegionTable2 -> Maybe (MdColumn CountryId Double)
+-- extract one country from a regionTable 
+getOneRegion  regid dataset regtab = 
+    case mbCountries of 
+        Nothing -> Nothing -- putIOwords ["region", showT regid, "not found"]
+        Just (_, ctTab) ->  Just $  wrapMdCol ( dataset)  ctTab -- :: MdColumn CountryId Double 
+    where
+        mbCountries = find ((regid ==). fst) regtab  -- [(RegionId, CountryTable)]
     
 -- the operations on the tables must be with the mdcol data! 
             -- let sortedRegions = sortTerryByColumn Descending  ctTab  
@@ -181,8 +173,8 @@ exp3 = do
     conn <- open dbPath 
     let req = [population, gnpPPpc, surfaceArea]
         years = map Year [2024, 2024, 2023]
-        reqYears = zip (map dsIndicator req) years-- :: [(Dataset, Year)]
-    regionCountryTables :: [[(RegionId, CountryTable)]]  <- mapM (\(d,y) -> lookupRegionTable2 conn regionDef d y) reqYears
+        reqYears = zip ( req) years-- :: [(Dataset, Year)]
+    regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
     close conn
 
     let aggs = map (\a -> map (aggregateTerry3 a ) regionCountryTables) [min1, median1, max1, mean1, stdDev1] 
@@ -190,12 +182,15 @@ exp3 = do
     
     -- convert to regionTable 
     -- make a single val for each country 
-    let rct = regionCountryTables :: [[(RegionId, CountryTable)]]
-        rct2  :: [[TerryValue RegionId Double ]]
-        rct2 = map sumCountryTables rct
+    let rct = regionCountryTables :: [RegionTable3] -- (Dataset, [(RegionId, CountryTable)]) 
+        rct2  :: [(Dataset, [TerryValue RegionId Double ])]
+        rct2 = map xone rct
+        xone :: (Dataset, [(RegionId, CountryTable)]) -> (Dataset, [TerryValue RegionId Double ]) 
+        xone (ds, tab) = (ds,  sumCountryTables tab)
 
 
-    let  mdC = map (\(t,d) -> wrapMdCol d t) $ zip rct2 req
+    let  mdC = wrapMdCol3 rct2
+    -- let  mdC = map (\(t,d) -> wrapMdCol d t) t2 req
 -- the operations on the tables must be with the mdcol data! 
 
     let md = markdownTable RBT.regionNames regionOrder mdC
@@ -204,24 +199,18 @@ exp3 = do
     -- get OneCountry 
     let regid = RegionId "EU"
     -- let euMdC = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct  :: [MdColumn CountryId Double]
-    let euMdC = getOneRegionMany req rct regid
+    let euMdC = getOneRegionMany3  rct regid
     let md =  (markdownTable allCodeNames euCountries) $   euMdC --less1m mdC
     putStrLn  md 
-
-    -- let mbeuCountries = find ((RegionId "EU" ==). fst) rct  -- [(RegionId, CountryTable)]
-    -- case mbeuCountries of 
-    --     Nothing -> putIOwords ["region EU not found"]
-    --     Just (_, ctTab) -> do
-        
-    --         let  mdC =  wrapMdCol ( population)  ctTab:: MdColumn CountryId Double
--- the operations on the tables must be with the mdcol data! 
-    -- case euMdC of 
-    --     Nothing ->  putIOwords ["region", showT regid, "not found"]        let sortedRegions = sortTerryByColumn Descending  ctTab  
-    --     Just mdC ->     let 
-    -- let sortedRegions = sortTerryByColumn Descending  ctTab  
-
-
     return ()
+
+wrapMdCol3 ::   [(Dataset, [(TerryValue t v)])] -> [MdColumn t v]
+wrapMdCol3 rt3s = map oneRT3 rt3s
+
+oneRT3 :: (Dataset, (TerryTable t v)) -> MdColumn t v
+oneRT3 (ds , (t)) = wrapMdCol ds t 
+    -- map (\(t,d) -> wrapMdCol d t) $ zip rct2 req
+
 
 wrapMdCol :: Dataset -> TerryTable t v -> MdColumn t v
 wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName dataset 
@@ -253,7 +242,7 @@ exp1 = do
 
     let  mdC = map (\(t,d) -> wrapMdCol d t) $ zip countryTables req :: [MdColumn CountryId Double]
 -- the operations on the tables must be with the mdcol data! 
-    let sortedRegions = sortTerryByColumn Descending  (head countryTables) 
+    let sortedRegions = sortTerryByColumn Descending  (headNote "wewer" countryTables) 
     let md = markdownTable allCodeNames sortedRegions mdC  --less1m mdC
     putStrLn md 
     -- putStrLn . show . map unCountryId $ less1m
