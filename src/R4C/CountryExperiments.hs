@@ -162,10 +162,13 @@ sumCountryTables rct = map oneRow rct
     where 
         oneRow :: (RegionId, TerryTable CountryId Double) -> TerryValue RegionId Double
         oneRow (r, ct) =  TerryValue {tvCode = r, tvValue =  sum1 . catMaybes . map tvValue $ ct }
-    
-exp3 :: IO ()  
+
+exp3 = do 
+    _ <- exp3a regionOrder   threeCountries  
+    return ()
+-- exp3 :: IO ()  
 -- | show all countries with popuplation surface and GNP
-exp3 = do
+exp3a regOrder countriesOrder = do
     let
         countries = less1m  -- countries included 
         regionDef = RBT.regionMembers -- g7, eu, russia 
@@ -193,16 +196,17 @@ exp3 = do
     -- let  mdC = map (\(t,d) -> wrapMdCol d t) t2 req
 -- the operations on the tables must be with the mdcol data! 
 
-    let md = markdownTable RBT.regionNames regionOrder mdC
-    putStrLn md 
+    let md1 = markdownTable RBT.regionNames regOrder mdC
+    putStrLn md1 
 
     -- get OneCountry 
     let regid = RegionId "EU"
     -- let euMdC = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct  :: [MdColumn CountryId Double]
     let euMdC = getOneRegionMany3  rct regid
-    let md =  (markdownTable allCodeNames euCountries) $   euMdC --less1m mdC
-    putStrLn  md 
-    return ()
+    let md2 =  (markdownTable allCodeNames countriesOrder) $   euMdC --less1m mdC
+    putStrLn  md2 
+    return (md1, md2)
+
 
 wrapMdCol3 ::   [(Dataset, [(TerryValue t v)])] -> [MdColumn t v]
 wrapMdCol3 rt3s = map oneRT3 rt3s
@@ -224,11 +228,11 @@ less1m = map CountryId R3.less1mTax
 -- break was 60k$ GNP 2024 and less 1 mio P 
 
 
-exp1 :: IO ()  
+-- exp1a :: IO ()  
 -- | show all countries with popuplation surface and GNP
 -- fig11 
-exp1 = do
-    let countries = less1m  -- countries included 
+exp1a countries= do
+    -- let countries = less1m  -- countries included 
     conn <- open dbPath 
     let req = [population, gnpPPpc, surfaceArea]
         years = map Year [2024, 2024, 2023]
@@ -242,16 +246,19 @@ exp1 = do
 
     let  mdC = map (\(t,d) -> wrapMdCol d t) $ zip countryTables req :: [MdColumn CountryId Double]
 -- the operations on the tables must be with the mdcol data! 
-    let sortedRegions = sortTerryByColumn Descending  (headNote "wewer" countryTables) 
-    let md = markdownTable allCodeNames sortedRegions mdC  --less1m mdC
+    -- let sortedRegions = sortTerryByColumn Descending  (headNote "wewer" countryTables) 
+    let md = markdownTable allCodeNames countries mdC  --less1m mdC
     putStrLn md 
     -- putStrLn . show . map unCountryId $ less1m
     -- writeTab1Table "exp1" md
+    -- putStrLn . show $ sortedRegions
+    return (md)
+
+threeCountries = [CountryId "MAF",CountryId "PLW",CountryId "NRU",CountryId "TUV"]
+exp1 = do 
+    _ <- exp1a less1m 
     return ()
-
-
-
-
+exp1t = exp1a threeCountries
 
 -- exp2 :: IO ()
 -- -- } show the totals for the small, and very small countries
