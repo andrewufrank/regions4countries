@@ -4,7 +4,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import R4C.Model
-import Study.Dataset2
+import           Study.Descriptor2
 
 tests :: TestTree
 tests = testGroup "Dataset synchronization"

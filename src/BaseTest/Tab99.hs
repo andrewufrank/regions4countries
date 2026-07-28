@@ -22,7 +22,7 @@ import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import BaseTest.Config 
 -- import BaseTest.Dataset1
-import Study.Dataset
+import Study.Descriptor
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
@@ -30,7 +30,7 @@ import System.FilePath ((</>))
 import BaseTest.Region
 -- import R4C.Region3
 -- import Study.Region2 
-import R4C.DatasetVirtual
+-- import R4C.DatasetVirtual
 
 
 
@@ -69,31 +69,31 @@ usableAreaPerCapita1 conn = do
     let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
     return surfpc2 
 
-getData12 :: IO ()
--- fig12 
-getData12 = do
-    conn <- open dbPath 
-    (pops3, surfs3) <- popsSurf conn
-    surfpc2 <- surfacePerCapita conn
-    arablpc <- usableAreaPerCapita1 conn
+-- getData12 :: IO ()
+-- -- fig12 
+-- getData12 = do
+--     conn <- open dbPath 
+--     (pops3, surfs3) <- popsSurf conn
+--     -- surfpc2 <- surfacePerCapita conn
+--     -- arablpc <- usableAreaPerCapita1 conn
 
-    close conn
-    -- let surfPerCap = combineRegionTables Divide surfs3 pops3
-    --     -- surfPerCapM = scaleRegionTable (10**6) surfPerCap -- convert km2 to m2
+--     close conn
+--     -- let surfPerCap = combineRegionTables Divide surfs3 pops3
+--     --     -- surfPerCapM = scaleRegionTable (10**6) surfPerCap -- convert km2 to m2
 
-    -- let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
-    let md = markdownTable regionNames regionOrder [pops3, surfs3, surfpc2, arablpc]
-    putStrLn md 
-    writeTab1Table "tab12" md
+--     -- let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
+--     let md = markdownTable regionNames regionOrder [pops3, surfs3, surfpc2, arablpc]
+--     putStrLn md 
+--     writeTab1Table "tab12" md
 
-fertilityPperyear conn = do 
--- | compute an exensional indicator for fertility  
---   multiply with number of woman (replace with 1/2 pop )
-    pops <-  (aggregate regionMembers conn population (Year 2024)) 
-    fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
-    let women = scaleRegionTable (0.5) pops
-        fertilityCount  = combineRegionTables Multiply women fertility 
-    return (fertilityCount)
+-- fertilityPperyear conn = do 
+-- -- | compute an exensional indicator for fertility  
+-- --   multiply with number of woman (replace with 1/2 pop )
+--     pops <-  (aggregate regionMembers conn population (Year 2024)) 
+--     fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
+--     let women = scaleRegionTable (0.5) pops
+--         fertilityCount  = combineRegionTables Multiply women fertility 
+--     return (fertilityCount)
 
 -- agrarlandPC :: Connection -> IO (MdColumn RegionId Double)
 -- issue with weighted
@@ -110,28 +110,28 @@ fertilityPperyear conn = do
 --     return surfpc2 
 
 
-getData13 = do
-    conn <- open dbPath 
-    (pops3, surfs3) <- popsSurf conn
+-- getData13 = do
+--     conn <- open dbPath 
+--     (pops3, surfs3) <- popsSurf conn
 
-    usablePC <- usableAreaPerCapita conn
-    -- agrarPC <- agrarlandPC conn  -- TODO 
+--     -- usablePC <- usableAreaPerCapita conn
+--     -- agrarPC <- agrarlandPC conn  -- TODO 
 
-    -- netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
-    -- fertilityPyear <-  fertilityPperyear conn 
-    -- agrar <-  (aggregate regionMembers conn agrarland (Year 2023))    -- nur ackerland!
-    -- agrarPC <-  (aggregate regionMembers conn agriculturalLandPC (Year 2023))  
-            -- wheigted!
-    close conn
+--     -- netmigration <-  (aggregate regionMembers conn migrationNet (Year 2024))  
+--     -- fertilityPyear <-  fertilityPperyear conn 
+--     -- agrar <-  (aggregate regionMembers conn agrarland (Year 2023))    -- nur ackerland!
+--     -- agrarPC <-  (aggregate regionMembers conn agriculturalLandPC (Year 2023))  
+--             -- wheigted!
+--     close conn
 
-    let mdCols = 
-            [ pops3
-            , surfs3
-            , usablePC 
-            -- , agrarPC
-            ]
-    let md = markdownTable regionNames regionOrder mdCols
-    putStrLn md 
+    -- let mdCols = 
+    --         [ pops3
+    --         , surfs3
+    --         , usablePC 
+    --         -- , agrarPC
+    --         ]
+    -- let md = markdownTable regionNames regionOrder mdCols
+    -- putStrLn md 
 
 
 
@@ -139,7 +139,7 @@ storeTables :: IO ()
 -- | Regenerate all Tab1 output files and update the book markdown files.
 storeTables = do
     getData11
-    getData12
+    -- getData12
     let filename = buch </> "p99Tableaux" </> "099test.md"
     let tables = ["tab11", "tab12" ]
     mapM_ (\tab -> writeMarkdownBlock filename filename tab (tableOutputDirectory </> tab)) tables

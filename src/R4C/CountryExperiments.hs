@@ -18,7 +18,7 @@ import R4C.Import.Query
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import Study.Config 
-import Study.Dataset 
+import Study.Descriptor
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
@@ -91,6 +91,11 @@ lookupRegionTable3 conn regionDef ds yr = do
         let regTab = (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
         return regTab 
 
+-- lookupCountryTable :: Connection -> (Dataset, Year) -> IO CountryTable
+lookupCountryTable :: Connection -> (Dataset, Year) -> IO (MdColumn CountryId Double)
+lookupCountryTable conn (d, y) = do
+    tab <-  lookupTable conn (dsIndicator d) y
+    return $ wrapMdCol d tab
 
 countryTable :: CountryTable -> [CountryId] -> CountryTable 
 countryTable worldTab cts = valuesInTable cts worldTab 

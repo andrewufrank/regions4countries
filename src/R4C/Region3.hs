@@ -18,7 +18,7 @@ import R4C.Import.Query
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import Study.Config 
-import Study.Dataset 
+import           Study.Descriptor
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)

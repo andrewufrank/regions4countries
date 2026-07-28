@@ -16,6 +16,8 @@ import R4C.Aggregate
 import Study.Dataset 
 import BaseTest.Region
 import R4C.Export.Table 
+import R4C.CountryExperiments
+import R4C.Import.Database
 
 surfacePerCapita :: Connection -> IO (MdColumn RegionId Double)
 -- | a virtual dataset for surface per capita (per region)
@@ -25,6 +27,18 @@ surfacePerCapita conn = do
     let surfPerCap = combineRegionTables Divide surfs pops
     let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
     return surfpc2 
+
+-- surfacePerCapita2 :: Connection -> IO (MdColumn country Double)
+-- -- | a virtual dataset for surface per capita (per region)
+-- surfacePerCapita2 conn = do 
+--     let req = [population, gnpPPpc, surfaceArea]
+--         years = map Year [2024, 2024, 2023]
+--     [pops, _, surfs]  <- mapM  (lookupCountryTable conn ) $ zip req years
+--     -- pops <-  (aggregate regionMembers conn population (Year 2024)) 
+--     -- surfs <-  (aggregate regionMembers conn surfaceArea (Year 2023)) 
+--     let surfPerCap = combineRegionTables Divide surfs pops
+--     let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
+--     return surfpc2 
 
 usableAreaPerCapita :: Connection -> IO (MdColumn RegionId Double)
 -- | a virtual dataset for the useful area ha per capita (per region)

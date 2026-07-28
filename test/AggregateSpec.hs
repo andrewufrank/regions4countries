@@ -9,7 +9,7 @@ import R4C.Import.Database
 -- import BaseTest.Indicator
 -- import R4C.Region3
 import R4C.Model
-import Study.Dataset
+import           Study.Descriptor
 import Study.Region2 
 import BaseTest.Region
 

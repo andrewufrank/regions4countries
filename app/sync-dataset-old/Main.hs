@@ -10,8 +10,8 @@ import System.IO (hClose, hPutStr, openTempFile)
 import R4C.Import.Database (closeDB, indicators4db, openDB)
 import R4C.Model
     ( Dataset, dsIndicator, dsName, dsDefinition, dsSourceOrganization )
-import Study.Dataset (namedDatasets)
-import Study.Dataset2
+import           Study.Descriptor  (namedDatasets)
+import           Study.Descriptor2
     ( DatasetWarning(..), reconcileDatasets, renderDatasetTemplate
     , renderNamedDataset, renderWarning )
 import Study.Config

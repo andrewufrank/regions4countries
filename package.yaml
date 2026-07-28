@@ -45,12 +45,12 @@ executables:
       - sqlite-simple
       - text
       - uniformBase
-  sync-datasets:
-    main: Main.hs
-    source-dirs: app/sync-datasets
-    dependencies:
-      - Regions4Countries
-      - sqlite-simple
+  # sync-datasets:
+  #   main: Main.hs
+  #   source-dirs: app/sync-datasets
+  #   dependencies:
+  #     - Regions4Countries
+  #     - sqlite-simple
 
 tests:
   r4c-test:
@@ -63,7 +63,7 @@ tests:
       - RegionSpec
       - WorldBankSpec
       - AggregateSpec
-      - DatasetSyncSpec
+      # - DatasetSyncSpec
     dependencies:
       - Regions4Countries
       - tasty

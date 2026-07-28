@@ -1,0 +1,24 @@
+-- | The editable, generated registry for this study.
+module Study.Dataset where
+
+import Data.List (find)
+
+import R4C.Model
+-- import qualified Study.Dataset2 as Previous
+
+-- BEGIN GENERATED DATASETS
+
+
+-- END GENERATED DATASETS
+
+namedDatasets :: [(String, Dataset)]
+namedDatasets =
+    [ ]
+
+datasets :: [Dataset]
+datasets =
+    [ 
+    ]  -- how to keep this current? 
+
+lookupDataset :: IndicatorId -> Maybe Dataset
+lookupDataset iid = find ((== iid) . dsIndicator) datasets

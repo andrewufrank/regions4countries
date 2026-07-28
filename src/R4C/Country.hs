@@ -12,7 +12,7 @@ import R4C.Model
 import R4C.Import.Instances
 import R4C.Import.Database
 import Study.Config 
-import Study.Dataset
+import Study.Descriptor
 import Data.List 
 import UniformBase
 
