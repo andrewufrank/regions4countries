@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 --
--- Module      :   Tables for test 
+-- Module      :   Tables for test   -- used in countrySpec test !
 -- for each region: 
 -- the population, the surface, gnp . 
 -- compare gnpPC with gnp/pop 
@@ -61,73 +61,64 @@ exp1a countries= do
     countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
     close conn
 
-    -- let aggs = map (\a -> map (aggregateTery a countries) countryTables) [sum1, min1, median1, max1, mean1, stdDev1] 
-    -- putIOwords ["the sums are", showT aggs]
-
-    -- let  mdC = map (\(t,d) -> wrapMdCol d t) $ zip countryTables req :: [MdColumn CountryId Double]
     let mdC = wrapMdCol3 countryTables
 -- the operations on the tables must be with the mdcol data! 
     let md = markdownTable allCodeNames countries mdC  --less1m mdC
     putStrLn md 
-    -- writeTab1Table "exp1" md
-    -- putStrLn . show $ sortedRegions
+    print md
     return (md)
 
 threeCountries = [CountryId "MAF",CountryId "PLW",CountryId "NRU",CountryId "TUV"]
 less1m = map CountryId R3.less1mTax
 
 
+exp3 :: IO ()
 exp3 = do 
-    _ <- exp3a regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
+    _ <- exp3b regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
     return ()
 
 -- exp3 :: IO ()  
 -- | show all countries with popuplation surface and GNP
-exp3a :: [RegionId] -> [CountryId] -> IO (String, String)
+-- exp3a :: [RegionId] -> [CountryId] -> IO (String, String)
 -- regOrder and countries list what is include in result
+exp3a :: [RegionId] -> p -> IO String
 exp3a regOrder countries = do
     let regionDef = RBT.regionMembers -- g7, eu, russia 
 
     conn <- open dbPath 
     let reqYears = [(population, Year 2024), (gnp, Year 2021), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
-        -- years = map Year [2024, 2024, 2023, 2021]
-        -- reqYears = zip ( req) years-- :: [(Dataset, Year)]
     regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
     close conn
 
-    -- let aggs = map (\a -> map (aggregateTerry3 a ) regionCountryTables) [min1, median1, max1, mean1, stdDev1] 
-    -- putIOwords ["the sums are", showT aggs]
-    
-    -- convert to regionTable 
-    -- make a single val for each country 
-    -- let rct = regionCountryTables ::    [(Dataset, [(RegionId, CountryTable)])]  -- = [RegionTable3] --
-    --     -- rct2  :: [(Dataset, [TerryValue RegionId Double ])] 
-    --     -- rct2 ::  [(Dataset, TerryTable RegionId Double)]
-    --     rct2 ::  [(Dataset, RegionTable1)]
-    --     --   falsch rct2 :: [MdColumn RegionId Double]
-    --     rct2 = map xone rct
-    --     xone :: (Dataset, [(RegionId, CountryTable)]) -> (Dataset, [TerryValue RegionId Double ]) 
-    --     xone (ds, tab) = (ds,  sumCountryTables tab)
-
-    -- let  mdC = wrapMdCol3 rct2 :: [MdColumn RegionId Double]
     let mdC :: [MdColumn RegionId Double]
         mdC = wrapMdCol3 . regtab3_regtab1 $ regionCountryTables 
-                    -- map (second sumCountryTables) $ rct 
-    -- let  mdC = map (\(t,d) -> wrapMdCol d t) t2 req
--- the operations on the tables must be with the mdcol data! 
+    let md1 = markdownTable RBT.regionNames regOrder mdC
+    putStrLn md1 
+    print md1
+    return md1
 
+exp3b :: [RegionId] -> [CountryId] -> IO String
+exp3b regOrder countries = do
+    let regionDef = RBT.regionMembers -- g7, eu, russia 
+
+    conn <- open dbPath 
+    let reqYears = [(population, Year 2024), (gnp, Year 2021), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
+    regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
+    close conn
+
+    let mdC :: [MdColumn RegionId Double]
+        mdC = wrapMdCol3 . regtab3_regtab1 $ regionCountryTables 
     let md1 = markdownTable RBT.regionNames regOrder mdC
     putStrLn md1 
 
     -- get OneCountry 
     let regid = RegionId "EU"
-    -- let euMdC = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct  :: [MdColumn CountryId Double]
     let euMdC = getOneRegionMany3  regionCountryTables regid
-    -- putStrLn . show $ euMdC 
     let md2 =  (markdownTable allCodeNames countries) $   euMdC --less1m mdC
     putStrLn  md2 
-    return (md1, md2)
-
+    print md1 
+    print md2
+    return md2
 
 
 -- usableAreaPerCapita1 :: Connection -> IO (MdColumn RegionId Double)

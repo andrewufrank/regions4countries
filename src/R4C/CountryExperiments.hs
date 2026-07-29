@@ -119,7 +119,7 @@ exp3a regOrder countriesOrder = do
         regionDef = RBT.regionMembers -- g7, eu, russia 
 
     conn <- open dbPath 
-    let req = [population, gnpPPpc, surfaceArea]
+    let req = [population, gnpPP, surfaceArea]
         years = map Year [2024, 2024, 2023]
         reqYears = zip ( req) years-- :: [(Dataset, Year)]
     regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
@@ -166,7 +166,7 @@ less1m = map CountryId R3.less1mTax
 exp1a countries= do
     -- let countries = less1m  -- countries included 
     conn <- open dbPath 
-    let req = [population, gnpPPpc, surfaceArea]
+    let req = [population, gnpPP, surfaceArea]
         years = map Year [2024, 2024, 2023]
         reqYears = zip (map dsIndicator req) years-- :: [(Dataset, Year)]
     countryTables :: [TerryTable CountryId ( Double)] <- mapM (\(d,y) -> lookupTable conn ( d) y) reqYears

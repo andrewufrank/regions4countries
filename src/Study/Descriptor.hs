@@ -112,7 +112,7 @@ gnp =
         , dsName = "GNI, Atlas method (current US$)"
         , dsDefinition =
             "Gross national income  "
-        , dsUnit = "TODO"
+        , dsUnit = "Giga"
         , dsAggregation = Sum
         , dsDecimals = 0
         , dsScale = Unit
@@ -123,8 +123,7 @@ gnp =
         }
 
 
--- gnpPP :: Dataset
-gnpPPpc =
+gnpPP =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "NY.GNP.MKTP.PP.KD"}  --NY.GDP.PCAP.PP.CD"}
         , dsShortName = "GNP PP  "

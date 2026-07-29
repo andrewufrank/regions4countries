@@ -32,13 +32,10 @@ testAggregateG7 = do
         ]
 
     result1 <- aggregate  regionMembers conn population (Year 2024) -- (RegionId "G7")
-    let result = show . colValues $ result1
+    let result = show . colValues $ result1 :: String 
     close conn
 
-    result @?= "[TerryValue {tvCode = RegionId \"G7\", tvValue = Just 130.0},TerryValue {tvCode = RegionId \"EU\", tvValue = Just 1019.0},TerryValue {tvCode = RegionId \"RUSSIA\", tvValue = Nothing}]"
-    
-    -- "[TerryValue {tvCode = RegionId \"G7\", tvValue = Just 130.0},TerryValue {tvCode = RegionId \"EU\", tvValue = Just 1019.0}]"
-
+    result @?= "[TerryValue {tvCode = RegionId \"G7\", tvValue = Just 130.0},TerryValue {tvCode = RegionId \"EU\", tvValue = Just 1019.0},TerryValue {tvCode = RegionId \"EUROPE\", tvValue = Just 1019.0},TerryValue {tvCode = RegionId \"RUSSIA\", tvValue = Nothing}]"
 
 -- testPop = do 
 --     conn <- open "test.sqlite"
