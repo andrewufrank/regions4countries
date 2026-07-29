@@ -2,7 +2,8 @@
 --
 -- Module      :   Tables for test 
 -- for each region: 
--- the population, the surface, surface per person, 
+-- the population, the surface, gnp . 
+-- compare gnpPC with gnp/pop 
 -- within the region: standard dev. for surface per person
 
 -----------------------------------------------------------------------------
@@ -13,61 +14,135 @@ module BaseTest.Tab99
 import R4C.Model 
 import qualified Data.Text as T
 import Database.SQLite.Simple  -- for debug
--- import Study.Indicator 
--- import R4C.Region3 
-import R4C.Aggregate 
 import R4C.Import.Query
 import R4C.Export.Table 
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
-import BaseTest.Config 
--- import BaseTest.Dataset1
+import Study.Config 
 import Study.Descriptor
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 import BaseTest.Region
--- import R4C.Region3
--- import Study.Region2 
--- import R4C.DatasetVirtual
+import qualified BaseTest.Region as RBT 
+import R4C.Import.Database 
+import R4C.Territory 
+import R4C.Export.CountnryCodeNames
+import qualified R4C.Region3 as R3 
 
+import UniformBase 
 
+-- writeTab1Table :: FilePath -> String -> IO ()
+-- writeTab1Table filename contents = do
+--     createDirectoryIfMissing True tableOutputDirectory
+--     writeFile (tableOutputDirectory </> filename) contents
 
-writeTab1Table :: FilePath -> String -> IO ()
-writeTab1Table filename contents = do
-    createDirectoryIfMissing True tableOutputDirectory
-    writeFile (tableOutputDirectory </> filename) contents
+-- popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
+-- popsSurf conn =  do 
+--     conn <- open dbPath 
+--     pops <-  (aggregate regionMembers conn population (Year 2024)) 
+--     surfs <-  (aggregate regionMembers conn surfaceArea (Year 2023)) 
 
-popsSurf :: p -> IO (RegionTable, RegionTable) -- ([(RegionId, Maybe Double)], [(RegionId, Maybe Double)])
-popsSurf conn =  do 
+--     return (pops,surfs)
+
+exp1 = do 
+    _ <- exp1a less1m 
+    return ()
+exp1t = exp1a threeCountries
+
+exp1a countries= do
+    -- let countries = less1m  -- countries included 
     conn <- open dbPath 
-    pops <-  (aggregate regionMembers conn population (Year 2024)) 
-    surfs <-  (aggregate regionMembers conn surfaceArea (Year 2023)) 
-
-    return (pops,surfs)
-
-getData11 :: IO ()
-getData11 = do
-    conn <- open dbPath 
-    (pops3, surfs3) <- popsSurf conn
+    let req = [population, gdpPPpc, surfaceArea]  -- gnpPPpc is not extensional 
+        years = map Year [2024, 2021, 2023]
+        reqYears = zip ( req) years-- :: [(Dataset, Year)]
+    countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
     close conn
 
-    let surfPC = combineRegionTables Divide surfs3 pops3 
-    let md = markdownTable regionNames regionOrder [pops3, surfs3, surfPC]
+    -- let aggs = map (\a -> map (aggregateTery a countries) countryTables) [sum1, min1, median1, max1, mean1, stdDev1] 
+    -- putIOwords ["the sums are", showT aggs]
+
+    -- let  mdC = map (\(t,d) -> wrapMdCol d t) $ zip countryTables req :: [MdColumn CountryId Double]
+    let mdC = wrapMdCol3 countryTables
+-- the operations on the tables must be with the mdcol data! 
+    -- let sortedRegions = sortTerryByColumn Descending  (headNote "wewer" countryTables) 
+    let md = markdownTable allCodeNames countries mdC  --less1m mdC
     putStrLn md 
-    writeTab1Table "tab11" md
+    -- putStrLn . show . map unCountryId $ less1m
+    -- writeTab1Table "exp1" md
+    -- putStrLn . show $ sortedRegions
+    return (md)
 
-usableAreaPerCapita1 :: Connection -> IO (MdColumn RegionId Double)
--- | a virtual dataset for the useful area ha per capita (per region)
-usableAreaPerCapita1 conn = do 
-    pops <-  (aggregate regionMembers conn population (Year 2024)) 
-    arabl <-  (aggregate regionMembers conn arableLand (Year 2023))  -- add pastures, forest, urban 
-            -- ersetzt durch agrarlandPart
+x1 = do 
+    conn <- open dbPath 
+    t <- lookupTable conn (IndicatorId "NY.GNP.MKTP.PP.KD") (Year 2023)
+    putIOwords [showT t]
+x2 = do 
+    conn <- open dbPath 
+    t <- lookupTable conn (IndicatorId "NY.GDP.PCAP.PP.CD") (Year 2023)
+    putIOwords [showT t]
 
-    let surfPerCap = combineRegionTables Divide arabl pops
-    let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
-    return surfpc2 
+threeCountries = [CountryId "MAF",CountryId "PLW",CountryId "NRU",CountryId "TUV"]
+less1m = map CountryId R3.less1mTax
+
+
+exp3 = do 
+    _ <- exp3a regionOrder   threeCountries  
+    return ()
+-- exp3 :: IO ()  
+-- | show all countries with popuplation surface and GNP
+exp3a :: [RegionId] -> [CountryId] -> IO (String, String)
+exp3a regOrder countriesOrder = do
+    let
+        countries = less1m  -- countries included 
+        regionDef = RBT.regionMembers -- g7, eu, russia 
+
+    conn <- open dbPath 
+    let req = [population, gnpPPpc, surfaceArea]
+        years = map Year [2024, 2024, 2023]
+        reqYears = zip ( req) years-- :: [(Dataset, Year)]
+    regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
+    close conn
+
+    let aggs = map (\a -> map (aggregateTerry3 a ) regionCountryTables) [min1, median1, max1, mean1, stdDev1] 
+    putIOwords ["the sums are", showT aggs]
+    
+    -- convert to regionTable 
+    -- make a single val for each country 
+    let rct = regionCountryTables :: [RegionTable3] -- (Dataset, [(RegionId, CountryTable)]) 
+        rct2  :: [(Dataset, [TerryValue RegionId Double ])]
+        rct2 = map xone rct
+        xone :: (Dataset, [(RegionId, CountryTable)]) -> (Dataset, [TerryValue RegionId Double ]) 
+        xone (ds, tab) = (ds,  sumCountryTables tab)
+
+    let  mdC = wrapMdCol3 rct2
+    -- let  mdC = map (\(t,d) -> wrapMdCol d t) t2 req
+-- the operations on the tables must be with the mdcol data! 
+
+    let md1 = markdownTable RBT.regionNames regOrder mdC
+    putStrLn md1 
+
+    -- get OneCountry 
+    let regid = RegionId "EU"
+    -- let euMdC = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct  :: [MdColumn CountryId Double]
+    let euMdC = getOneRegionMany3  rct regid
+    let md2 =  (markdownTable allCodeNames countriesOrder) $   euMdC --less1m mdC
+    putStrLn  md2 
+    return (md1, md2)
+
+
+
+-- usableAreaPerCapita1 :: Connection -> IO (MdColumn RegionId Double)
+-- -- | a virtual dataset for the useful area ha per capita (per region)
+-- usableAreaPerCapita1 conn = do 
+--     pops <-  (aggregate regionMembers conn population (Year 2024)) 
+--     arabl <-  (aggregate regionMembers conn arableLand (Year 2023))  -- add pastures, forest, urban 
+--             -- ersetzt durch agrarlandPart
+
+--     let surfPerCap = combineRegionTables Divide arabl pops
+--     let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
+--     return surfpc2 
 
 -- getData12 :: IO ()
 -- -- fig12 
@@ -135,22 +210,22 @@ usableAreaPerCapita1 conn = do
 
 
 
-storeTables :: IO ()
--- | Regenerate all Tab1 output files and update the book markdown files.
-storeTables = do
-    getData11
-    -- getData12
-    let filename = buch </> "p99Tableaux" </> "099test.md"
-    let tables = ["tab11", "tab12" ]
-    mapM_ (\tab -> writeMarkdownBlock filename filename tab (tableOutputDirectory </> tab)) tables
+-- storeTables :: IO ()
+-- -- | Regenerate all Tab1 output files and update the book markdown files.
+-- storeTables = do
+--     getData11
+--     -- getData12
+--     let filename = buch </> "p99Tableaux" </> "099test.md"
+--     let tables = ["tab11", "tab12" ]
+--     mapM_ (\tab -> writeMarkdownBlock filename filename tab (tableOutputDirectory </> tab)) tables
 
  
 
 -- move later somewhere 
 testlatest :: IO () 
 testlatest = do 
-    conn <- open "test.sqlite" 
-    mObs <- latestObservation conn (CountryId "AUT") (dsIndicator surfaceArea)
+    conn <- open dbPath 
+    mObs <- latestObservation conn (CountryId "AUT") (IndicatorId "NY.GDP.PCAP.PP.CD")
     case mObs of
         Nothing ->
             print "nothing found" 
@@ -158,4 +233,18 @@ testlatest = do
 
         Just obs ->
             print  $ obsYear obs 
+            -- @?= Year 2023
+
+
+testObs :: IO () 
+testObs = do 
+    conn <- open dbPath
+    mObs <- allObservation conn (CountryId "AUT") (Year 2023)  --- IndicatorId "NY.GDP.PCAP.PP.CD")
+    case mObs of
+        Nothing ->
+            print "nothing found" 
+            --assertFailure "No surface area found"
+
+        Just obs ->
+              print . map obsIndicator  $   obs 
             -- @?= Year 2023

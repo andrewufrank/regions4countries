@@ -8,7 +8,7 @@ import Test.Tasty.HUnit
 
 import R4C.Model 
 import R4C.Export.Markdown
-import R4C.CountryExperiments
+import BaseTest.Tab99
 
 tests :: TestTree
 tests =

@@ -32,47 +32,15 @@ import qualified R4C.Region3 as R3
 import qualified BaseTest.Region as RBT 
 import BaseTest.Region (regionOrder)
 import Data.List
-
-valuesInTable
-    :: [CountryId]
-    -> CountryTable
-    -> TerryTable CountryId ( Double)
--- | filter the code/value pairs for the countries 
-valuesInTable countries table  =
-    filter belongs table
-  where
-    belongs row = tvCode row `elem` countries
+import R4C.Territory
 
 
-aggregateTery
-    :: ([Double] -> Maybe Double)
-    -> [CountryId] -- what is to be included ? RegionMembers -- [(RegionId, [CountryId])]
-    -> TerryTable CountryId ( Double)
-    -- -> RegionId
-    -> Maybe Double
--- | aggregation of a table lowest level
-aggregateTery op memberships table  = op (catMaybes values)
-  where
-    values =  map tvValue $
-            valuesInTable memberships table  
 
-aggregateTery2
-    :: ([Double] -> Maybe Double)
-    -- -> [CountryId] -- what is to be included ? RegionMembers -- [(RegionId, [CountryId])]
-    -- include all 
-    -> (RegionId, CountryTable)
-    -- -> RegionId
-    -> TerryValue RegionId  Double
--- | aggregation of a table lowest level
-aggregateTery2 op table  = TerryValue (fst table) ( op . catMaybes . map tvValue . snd $ table)
---   where
+
+
 --     values =  map tvValue  table 
 
-aggregateTerry3    :: ([Double] -> Maybe Double)
-    -> RegionTable3
-    -- -> RegionId
-    -> [RegionValue ] 
-aggregateTerry3 op regionTab = map (aggregateTery2 op) (snd regionTab) 
+
 
 -- lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> IO [(RegionId,  [CountryTable])]
 lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO [(RegionId, CountryTable)]
@@ -83,13 +51,7 @@ lookupRegionTable2 conn regionDef ds yr = do
         return regTab 
 
 
--- lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> IO [(RegionId,  [CountryTable])]
-lookupRegionTable3 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO RegionTable3
--- fill for each region a countryTable with only its countries 
-lookupRegionTable3 conn regionDef ds yr = do 
-        worldTab <- lookupTable conn (dsIndicator ds) yr  
-        let regTab = (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
-        return regTab 
+
 
 -- lookupCountryTable :: Connection -> (Dataset, Year) -> IO CountryTable
 lookupCountryTable :: Connection -> (Dataset, Year) -> IO (MdColumn CountryId Double)
@@ -97,8 +59,7 @@ lookupCountryTable conn (d, y) = do
     tab <-  lookupTable conn (dsIndicator d) y
     return $ wrapMdCol d tab
 
-countryTable :: CountryTable -> [CountryId] -> CountryTable 
-countryTable worldTab cts = valuesInTable cts worldTab 
+
 
 exp4:: IO ()  
 -- | show only one indicator 
@@ -135,20 +96,6 @@ exp4 = do
 
     return ()
 
-getOneRegionMany3 ::   [RegionTable3] -> RegionId -> [MdColumn CountryId Double]
--- pack multiple regionTable from different datasets in MdColumn to convert to Md 
-getOneRegionMany3 rct regid  = catMaybes $ map (\tab -> getOneRegion regid (fst tab)  (snd tab))  rct
-  where
-
-getOneRegion :: RegionId -> Dataset -> RegionTable2 -> Maybe (MdColumn CountryId Double)
--- extract one country from a regionTable 
-getOneRegion  regid dataset regtab = 
-    case mbCountries of 
-        Nothing -> Nothing -- putIOwords ["region", showT regid, "not found"]
-        Just (_, ctTab) ->  Just $  wrapMdCol ( dataset)  ctTab -- :: MdColumn CountryId Double 
-    where
-        mbCountries = find ((regid ==). fst) regtab  -- [(RegionId, CountryTable)]
-    
 -- the operations on the tables must be with the mdcol data! 
             -- let sortedRegions = sortTerryByColumn Descending  ctTab  
             -- let md = markdownTable allCodeNames sortedRegions [mdC]  --less1m mdC
@@ -160,13 +107,6 @@ euCountries = map CountryId ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FI
         ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
         ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
 
-sumCountryTables :: [(RegionId, CountryTable)] -> [TerryValue RegionId Double ] 
--- sum the values (must be extensional) in the country table 
--- and produce the sinle region value 
-sumCountryTables rct = map oneRow rct 
-    where 
-        oneRow :: (RegionId, TerryTable CountryId Double) -> TerryValue RegionId Double
-        oneRow (r, ct) =  TerryValue {tvCode = r, tvValue =  sum1 . catMaybes . map tvValue $ ct }
 
 exp3 = do 
     _ <- exp3a regionOrder   threeCountries  
@@ -213,20 +153,7 @@ exp3a regOrder countriesOrder = do
     return (md1, md2)
 
 
-wrapMdCol3 ::   [(Dataset, [(TerryValue t v)])] -> [MdColumn t v]
-wrapMdCol3 rt3s = map oneRT3 rt3s
 
-oneRT3 :: (Dataset, (TerryTable t v)) -> MdColumn t v
-oneRT3 (ds , (t)) = wrapMdCol ds t 
-    -- map (\(t,d) -> wrapMdCol d t) $ zip rct2 req
-
-
-wrapMdCol :: Dataset -> TerryTable t v -> MdColumn t v
-wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName dataset 
-                    , colScale = dsScale dataset
-                    , colUnit =  dsUnit dataset 
-                    , colDecimals =  dsDecimals dataset
-                    , colValues = ct}
 
 
 less1m = map CountryId R3.less1mTax

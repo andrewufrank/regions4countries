@@ -16,7 +16,6 @@ import qualified Data.Scientific as Sc
 import R4C.Model
 import qualified Data.Map.Strict as Map 
 import UniformBase 
-import R4C.Region3
 
 
 -- type Column a = [(RegionId, Maybe a)]
@@ -93,6 +92,8 @@ lookupTerry
     -> Maybe (TerryValue t v)
 lookupTerry r =
     find (\rv -> tvCode rv == r)
+
+
 
 title_units :: MdColumn t v -> [Char]
 title_units col = colTitle col ++ "(" ++ (show1scale  . colScale $ col) ++ (t2s . colUnit $ col) ++ ")"

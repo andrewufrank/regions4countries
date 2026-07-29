@@ -16,6 +16,7 @@ import Study.Descriptor
 import Data.List 
 import UniformBase
 
+
 lookupCountries :: Connection -> IO [Country]
 lookupCountries conn =
     query_ conn

@@ -176,6 +176,7 @@ type RegionName = TerryName RegionId
 
 type CountryValue = TerryValue CountryId Double 
 type CountryTable = TerryTable CountryId ( Double)
+type CountryTable3 = (Dataset, TerryTable CountryId ( Double))
 
 type RegionValue = TerryValue RegionId Double  -- RegionValueX Double 
 type RegionTable  = MdColumn RegionId Double  -- TerryTable RegionId ( Double) -- [RegionValue]

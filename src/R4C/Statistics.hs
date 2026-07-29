@@ -19,7 +19,7 @@ import qualified Statistics.Correlation as C
 -- import R4C.Aggregate
     -- ( CountryPairs, valuesInRegion, matchCountryTables )
 -- import Data.List  
-import R4C.Territory 
+-- import R4C.Territory 
 import Data.List (sort)
 --------------------------- statistics on list of [Doubles] or [(Double,Double)]
 --  returns nothing on empty list (or other reasons noe computable )

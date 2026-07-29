@@ -12,7 +12,10 @@ module R4C.Import.Query where
 
 import Database.SQLite.Simple
 import R4C.Model
-import R4C.Import.Instances
+import R4C.Territory 
+-- import R4C.Import.Instances
+-- import R4C.Export.Table
+import R4C.Import.Database 
 
 latestObservation
     :: Connection
@@ -33,6 +36,23 @@ latestObservation conn cid iid = do
             []    -> Nothing
             (x:_) -> Just x
 
+allObservation
+    :: Connection
+    -> CountryId
+    -> Year 
+    -> IO (Maybe [Observation])
+allObservation conn cid yr = do
+    rows <- query conn
+        "SELECT country, indicator, year, value \
+        \FROM observation \
+        \WHERE country = ? AND year = ?"
+        (cid, yr)
+
+    return $
+        case rows of
+            []    -> Nothing
+            (x:xs) ->  Just (x:xs) 
+
 latestCountryValue
     :: Connection
     -> CountryId
@@ -46,3 +66,17 @@ latestCountryValue conn cid iid =
             (obsYear obs)
             (obsValue obs)
 
+
+lookupRegionTable3 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO RegionTable3
+-- fill for each region a countryTable with only its countries 
+lookupRegionTable3 conn regionDef ds yr = do 
+        worldTab <- lookupTable conn (dsIndicator ds) yr  
+        let regTab = (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
+        return regTab 
+
+lookupCountryTable3 :: Connection ->   Dataset -> Year -> IO CountryTable3
+-- fill for each region a countryTable with only its countries 
+lookupCountryTable3 conn  ds yr = do 
+        worldTab <- lookupTable conn (dsIndicator ds) yr  
+        let ctTab = (ds, worldTab) 
+        return ctTab 

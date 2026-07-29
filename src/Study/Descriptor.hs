@@ -116,40 +116,40 @@ grossNatProd =
         , dsAggregation = Sum
         , dsDecimals = 0
         , dsScale = Unit
-        , dsExtensive = False
+        , dsExtensive = True
         , dsLastYear = Nothing
         , dsSourceOrganization =
             " World Bank (WB)"
         }
 
 
-gnpPPpc :: Dataset
+-- gnpPP :: Dataset
 gnpPPpc =
     Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "NY.GDP.PCAP.PP.CD"}
-        , dsShortName = "GNP PP per Capita"
-        , dsName = "GDP per capita, PPP (current international $)"
+        { dsIndicator = IndicatorId {unIndicatorId = "NY.GNP.MKTP.PP.KD"}  --NY.GDP.PCAP.PP.CD"}
+        , dsShortName = "GNP PP  "
+        , dsName = "GDP  PPP (current international $)"
         , dsDefinition =   ""
-        , dsUnit = "TODO"
-        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
+        , dsUnit = "PP$"
+        , dsAggregation = Sum  
         , dsDecimals = 0
-        , dsScale = Unit
-        , dsExtensive = False
+        , dsScale = Mega
+        , dsExtensive = True  
         , dsLastYear = Nothing
         , dsSourceOrganization =
             "International Comparison Program (ICP), World Bank (WB "
          }
 
-xxx1 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+gdpPPpc = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "NY.GDP.PCAP.PP.CD"}
+        , dsShortName = "GDP per capita"
+        , dsName = "GDP_PP per capita"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsUnit = "PP$/P"
+        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
         , dsDecimals = 0
-        , dsScale = Unit
+        , dsScale = Kilo
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =

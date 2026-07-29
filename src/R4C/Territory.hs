@@ -19,6 +19,7 @@ import R4C.Model
 import Data.List  
 import UniformBase
 import qualified Data.List.NonEmpty as NE 
+import R4C.Statistics
 
 valuesInRegion
     :: RegionMembers
@@ -34,6 +35,88 @@ valuesInRegion memberships table region =
     belongs row =
         tvCode row `elem` countries
 
+valuesInTable
+    :: Eq t => [t]
+    -> TerryTable t v
+    -> TerryTable t v
+-- | filter the code/value pairs for the countries 
+valuesInTable countries table  =
+    filter belongs table
+  where
+    belongs row = tvCode row `elem` countries
+    
+countryTable :: Eq t => TerryTable t v -> [t] -> TerryTable t v 
+countryTable worldTab cts = valuesInTable cts worldTab 
+
+aggregateTery
+    :: ([Double] -> Maybe Double)
+    -> [CountryId] -- what is to be included ? RegionMembers -- [(RegionId, [CountryId])]
+    -> TerryTable CountryId ( Double)
+    -- -> RegionId
+    -> Maybe Double
+-- | aggregation of a table lowest level
+aggregateTery op memberships table  = op (catMaybes values)
+  where
+    values =  map tvValue $
+            valuesInTable memberships table  
+
+
+wrapMdCol3 ::   [(Dataset, [(TerryValue t v)])] -> [MdColumn t v]
+wrapMdCol3 rt3s = map oneRT3 rt3s
+
+oneRT3 :: (Dataset, (TerryTable t v)) -> MdColumn t v
+oneRT3 (ds , (t)) = wrapMdCol ds t 
+    -- map (\(t,d) -> wrapMdCol d t) $ zip rct2 req
+
+
+wrapMdCol :: Dataset -> TerryTable t v -> MdColumn t v
+wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName dataset 
+                    , colScale = dsScale dataset
+                    , colUnit =  dsUnit dataset 
+                    , colDecimals =  dsDecimals dataset
+                    , colValues = ct}
+
+aggregateTery2
+    :: ([Double] -> Maybe Double)
+    -- -> [CountryId] -- what is to be included ? RegionMembers -- [(RegionId, [CountryId])]
+    -- include all 
+    -> (RegionId, CountryTable)
+    -- -> RegionId
+    -> TerryValue RegionId  Double
+-- | aggregation of a table lowest level
+aggregateTery2 op table  = TerryValue (fst table) ( op . catMaybes . map tvValue . snd $ table)
+--   where
+
+aggregateTerry3    :: ([Double] -> Maybe Double)
+    -> RegionTable3
+    -- -> RegionId
+    -> [RegionValue ] 
+aggregateTerry3 op regionTab = map (aggregateTery2 op) (snd regionTab) 
+
+sumCountryTables :: [(RegionId, CountryTable)] -> [TerryValue RegionId Double ] 
+-- sum the values (must be extensional) in the country table 
+-- and produce the sinle region value 
+sumCountryTables rct = map oneRow rct 
+    where 
+        oneRow :: (RegionId, TerryTable CountryId Double) -> TerryValue RegionId Double
+        oneRow (r, ct) =  TerryValue {tvCode = r, tvValue =  sum1 . catMaybes . map tvValue $ ct }
+
+
+  
+getOneRegionMany3 ::   [RegionTable3] -> RegionId -> [MdColumn CountryId Double]
+-- pack multiple regionTable from different datasets in MdColumn to convert to Md 
+getOneRegionMany3 rct regid  = catMaybes $ map (\tab -> getOneRegion regid (fst tab)  (snd tab))  rct
+  where
+
+getOneRegion :: RegionId -> Dataset -> RegionTable2 -> Maybe (MdColumn CountryId Double)
+-- extract one country from a regionTable 
+getOneRegion  regid dataset regtab = 
+    case mbCountries of 
+        Nothing -> Nothing -- putIOwords ["region", showT regid, "not found"]
+        Just (_, ctTab) ->  Just $  wrapMdCol ( dataset)  ctTab -- :: MdColumn CountryId Double 
+    where
+        mbCountries = find ((regid ==). fst) regtab  -- [(RegionId, CountryTable)]
+          
 -- RegionValue is a a record {id, maybe value}, could be a map 
 -- a version with map 
 -- matchTerryTables
