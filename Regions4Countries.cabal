@@ -20,7 +20,6 @@ build-type:     Simple
 
 library
   exposed-modules:
-      BaseTest.Config
       BaseTest.Region
       BaseTest.Tab99
       R4C.Aggregate
@@ -141,11 +140,13 @@ test-suite r4c-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      AggregateSpec
+      CountrySpec
       MarkdownSpec
       OrchestratorSpec
       RegionSpec
       WorldBankSpec
-      AggregateSpec
+      Paths_Regions4Countries
   hs-source-dirs:
       test
   default-extensions:

@@ -104,8 +104,8 @@ fertilityRate =
             "World Population Prospects, United Nations (UN) (ESTAT)"
         }
 
-grossNatProd :: Dataset
-grossNatProd =
+-- grossNatProd :: Dataset
+gnp =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "NY.GNP.ATLS.CD"}
         , dsShortName = "GNP"

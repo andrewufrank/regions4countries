@@ -1,10 +1,10 @@
-module DatasetSyncSpec (tests) where
+module XXXDatasetSyncSpec (tests) where
 
-import Test.Tasty
-import Test.Tasty.HUnit
+-- import Test.Tasty
+-- import Test.Tasty.HUnit
 
-import R4C.Model
-import           Study.Descriptor2
+-- import R4C.Model
+-- import           Study.Descriptor2
 
 tests :: TestTree
 tests = testGroup "Dataset synchronization"

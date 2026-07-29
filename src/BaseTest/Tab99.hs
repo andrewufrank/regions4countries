@@ -51,8 +51,9 @@ exp1 = do
     return ()
 exp1t = exp1a threeCountries
 
+exp1a :: [CountryId] -> IO String
+-- countries is what is included in printed list 
 exp1a countries= do
-    -- let countries = less1m  -- countries included 
     conn <- open dbPath 
     let req = [population, gdpPPpc, surfaceArea]  -- gnpPPpc is not extensional 
         years = map Year [2024, 2021, 2023]
@@ -66,57 +67,52 @@ exp1a countries= do
     -- let  mdC = map (\(t,d) -> wrapMdCol d t) $ zip countryTables req :: [MdColumn CountryId Double]
     let mdC = wrapMdCol3 countryTables
 -- the operations on the tables must be with the mdcol data! 
-    -- let sortedRegions = sortTerryByColumn Descending  (headNote "wewer" countryTables) 
     let md = markdownTable allCodeNames countries mdC  --less1m mdC
     putStrLn md 
-    -- putStrLn . show . map unCountryId $ less1m
     -- writeTab1Table "exp1" md
     -- putStrLn . show $ sortedRegions
     return (md)
-
-x1 = do 
-    conn <- open dbPath 
-    t <- lookupTable conn (IndicatorId "NY.GNP.MKTP.PP.KD") (Year 2023)
-    putIOwords [showT t]
-x2 = do 
-    conn <- open dbPath 
-    t <- lookupTable conn (IndicatorId "NY.GDP.PCAP.PP.CD") (Year 2023)
-    putIOwords [showT t]
 
 threeCountries = [CountryId "MAF",CountryId "PLW",CountryId "NRU",CountryId "TUV"]
 less1m = map CountryId R3.less1mTax
 
 
 exp3 = do 
-    _ <- exp3a regionOrder   threeCountries  
+    _ <- exp3a regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
     return ()
+
 -- exp3 :: IO ()  
 -- | show all countries with popuplation surface and GNP
 exp3a :: [RegionId] -> [CountryId] -> IO (String, String)
-exp3a regOrder countriesOrder = do
-    let
-        countries = less1m  -- countries included 
-        regionDef = RBT.regionMembers -- g7, eu, russia 
+-- regOrder and countries list what is include in result
+exp3a regOrder countries = do
+    let regionDef = RBT.regionMembers -- g7, eu, russia 
 
     conn <- open dbPath 
-    let req = [population, gnpPPpc, surfaceArea]
-        years = map Year [2024, 2024, 2023]
-        reqYears = zip ( req) years-- :: [(Dataset, Year)]
+    let reqYears = [(population, Year 2024), (gnp, Year 2021), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
+        -- years = map Year [2024, 2024, 2023, 2021]
+        -- reqYears = zip ( req) years-- :: [(Dataset, Year)]
     regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
     close conn
 
-    let aggs = map (\a -> map (aggregateTerry3 a ) regionCountryTables) [min1, median1, max1, mean1, stdDev1] 
-    putIOwords ["the sums are", showT aggs]
+    -- let aggs = map (\a -> map (aggregateTerry3 a ) regionCountryTables) [min1, median1, max1, mean1, stdDev1] 
+    -- putIOwords ["the sums are", showT aggs]
     
     -- convert to regionTable 
     -- make a single val for each country 
-    let rct = regionCountryTables :: [RegionTable3] -- (Dataset, [(RegionId, CountryTable)]) 
-        rct2  :: [(Dataset, [TerryValue RegionId Double ])]
-        rct2 = map xone rct
-        xone :: (Dataset, [(RegionId, CountryTable)]) -> (Dataset, [TerryValue RegionId Double ]) 
-        xone (ds, tab) = (ds,  sumCountryTables tab)
+    -- let rct = regionCountryTables ::    [(Dataset, [(RegionId, CountryTable)])]  -- = [RegionTable3] --
+    --     -- rct2  :: [(Dataset, [TerryValue RegionId Double ])] 
+    --     -- rct2 ::  [(Dataset, TerryTable RegionId Double)]
+    --     rct2 ::  [(Dataset, RegionTable1)]
+    --     --   falsch rct2 :: [MdColumn RegionId Double]
+    --     rct2 = map xone rct
+    --     xone :: (Dataset, [(RegionId, CountryTable)]) -> (Dataset, [TerryValue RegionId Double ]) 
+    --     xone (ds, tab) = (ds,  sumCountryTables tab)
 
-    let  mdC = wrapMdCol3 rct2
+    -- let  mdC = wrapMdCol3 rct2 :: [MdColumn RegionId Double]
+    let mdC :: [MdColumn RegionId Double]
+        mdC = wrapMdCol3 . regtab3_regtab1 $ regionCountryTables 
+                    -- map (second sumCountryTables) $ rct 
     -- let  mdC = map (\(t,d) -> wrapMdCol d t) t2 req
 -- the operations on the tables must be with the mdcol data! 
 
@@ -126,8 +122,9 @@ exp3a regOrder countriesOrder = do
     -- get OneCountry 
     let regid = RegionId "EU"
     -- let euMdC = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct  :: [MdColumn CountryId Double]
-    let euMdC = getOneRegionMany3  rct regid
-    let md2 =  (markdownTable allCodeNames countriesOrder) $   euMdC --less1m mdC
+    let euMdC = getOneRegionMany3  regionCountryTables regid
+    -- putStrLn . show $ euMdC 
+    let md2 =  (markdownTable allCodeNames countries) $   euMdC --less1m mdC
     putStrLn  md2 
     return (md1, md2)
 

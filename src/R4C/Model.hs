@@ -182,7 +182,8 @@ type RegionValue = TerryValue RegionId Double  -- RegionValueX Double
 type RegionTable  = MdColumn RegionId Double  -- TerryTable RegionId ( Double) -- [RegionValue]
             -- depreciate 
 
-type RegionTable2 = [(RegionId, CountryTable)] -- new format
+type RegionTable1 = TerryTable RegionId Double   
+-- type RegionTable2 = [(RegionId, CountryTable)] -- not used except territry
 type RegionTable3 = (Dataset, [(RegionId, CountryTable)]) -- new format
 
 type TerryTable t v = [TerryValue t v]

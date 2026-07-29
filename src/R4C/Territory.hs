@@ -76,6 +76,12 @@ wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName dataset
                     , colDecimals =  dsDecimals dataset
                     , colValues = ct}
 
+-- convert RegionTable3 = (Dataset, [(RegionId, CountryTable)]) to (Dataset, RegionTable1)
+-- regtab3_regtab1 (ds, tab) = (ds, sumCountryTables tab)
+regtab3_regtab1 :: [(a, [(RegionId, CountryTable)])] -> [(a, [TerryValue RegionId Double])]
+-- sum the countrytables to produce region lines 
+regtab3_regtab1 = map (second sumCountryTables)
+
 aggregateTery2
     :: ([Double] -> Maybe Double)
     -- -> [CountryId] -- what is to be included ? RegionMembers -- [(RegionId, [CountryId])]
@@ -107,6 +113,9 @@ getOneRegionMany3 ::   [RegionTable3] -> RegionId -> [MdColumn CountryId Double]
 -- pack multiple regionTable from different datasets in MdColumn to convert to Md 
 getOneRegionMany3 rct regid  = catMaybes $ map (\tab -> getOneRegion regid (fst tab)  (snd tab))  rct
   where
+
+type RegionTable2 = [(RegionId, CountryTable)] -- nur hier gebraucht
+
 
 getOneRegion :: RegionId -> Dataset -> RegionTable2 -> Maybe (MdColumn CountryId Double)
 -- extract one country from a regionTable 

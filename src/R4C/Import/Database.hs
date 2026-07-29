@@ -240,3 +240,13 @@ observationsForIndicator conn i =
       \WHERE indicator=?"
       (Only i)
       
+-- test examples, move to where used
+
+-- x1 = do 
+--     conn <- open dbPath 
+--     t <- lookupTable conn (IndicatorId "NY.GNP.MKTP.PP.KD") (Year 2023)
+--     putIOwords [showT t]
+-- x2 = do 
+--     conn <- open dbPath 
+--     t <- lookupTable conn (IndicatorId "NY.GDP.PCAP.PP.CD") (Year 2023)
+--     putIOwords [showT t]

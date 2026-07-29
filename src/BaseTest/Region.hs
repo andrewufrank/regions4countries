@@ -22,13 +22,13 @@ regionMembers =
         ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
         ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
         ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
---   , mk "EUROPE"
---       [ "ALB","AND","AUT","BLR","BEL","BIH","BGR","HRV","CYP","CZE"
---       , "DNK","EST","FIN","FRA","DEU","GRC","HUN","ISL","IRL","ITA"
---       , "XKX","LVA","LIE","LTU","LUX","MLT","MDA","MCO","MNE","NLD"
---       , "MKD","NOR","POL","PRT","ROU","SMR","SRB","SVK","SVN","ESP"
---       , "SWE","CHE","TUR","UKR","GBR","VAT"
---       ]
+  , mk "EUROPE"
+      [ "ALB","AND","AUT","BLR","BEL","BIH","BGR","HRV","CYP","CZE"
+      , "DNK","EST","FIN","FRA","DEU","GRC","HUN","ISL","IRL","ITA"
+      , "XKX","LVA","LIE","LTU","LUX","MLT","MDA","MCO","MNE","NLD"
+      , "MKD","NOR","POL","PRT","ROU","SMR","SRB","SVK","SVN","ESP"
+      , "SWE","CHE","TUR","UKR","GBR","VAT"
+      ]
 
   , mk "RUSSIA"
       ["RUS"]

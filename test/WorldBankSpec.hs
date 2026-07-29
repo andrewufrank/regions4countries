@@ -9,7 +9,8 @@ import Test.Tasty.HUnit
 import R4C.Model
 import R4C.Import.WorldBank 
 import R4C.Import.Database
-import BaseTest.Config
+-- import BaseTest.Config
+import UniformBase 
 
 tests :: TestTree
 tests =
@@ -84,7 +85,7 @@ testIndicatorMeta = do
     length stored @?= 1
 
     let actual =
-            head stored
+            headNote "werqw221q" stored
 
     indicatorId actual @?= indicatorId indicator
 
