@@ -35,31 +35,101 @@ import Data.List
 import R4C.Territory
 
 
+exp5 = do   -- get regions from exp1a
+    _ <- exp5a euCountries RBT.regionMembers  -- EU, G7
+    return ()
+
+-- exp5 :: [CountryId] -> IO String
+-- countries is what is included in printed list 
+exp5a :: [CountryId] -> [(RegionId, [CountryId])] -> IO String
+exp5a countries regionDef = do
+    conn <- open dbPath 
+    let  reqYears =  [(population, Year 2024), (gnpPP, Year 2021),  (gdpPPpc, Year 2021)]
+
+    countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+    close conn
+    let mdC = wrapMdCol3 countryTables
+    let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
+
+    let gpc4 = (combineMdTables Divide g3  pop3){colScale=Kilo}
+        diff4 = (combineMdTables (Subtract) gpc3 gpc4)
+        mdC4 = mdC ++ [gpc4, diff4]  -- the countries with difference between GDP and GNP (cyprus, ireland, luxemburg, malta)
+-- the operations on the tables must be with the mdcol data! 
+    let md = markdownTable allCodeNames countries mdC4  --less1m mdC
+    putStrLn md 
+
+    -- now for the regions
+    let [popt, gt, gpct]= countryTables
+        gt:: (Dataset, TerryTable CountryId Double) 
+        gnct = (ds1, combineTerryTables (/) (snd gt) (snd popt)) 
+        ds1 = Dataset{dsName = "gnpPP per cap"
+                    , dsShortName ="gnpPP per cap"
+                    , dsScale = Kilo
+                    , dsUnit = "PP$/P"
+                    , dsDecimals = 0 }
+        -- gpc4 = MdColumn { colValues = combineTerryTables (/) (snd gt) (snd popt) 
+        --                 , colTitle = "gnpPP per cap"
+        --                 , colScale = Kilo
+        --                 , colUnit = "PP$"
+        --                 , colDecimals = 0
+        --                 }   
+
+        -- gt4 = [pop3, g3, gpc3] ++ [gpc4]
+        -- -- reg3CountryTable4 regionDef mdC
+        gt4 = countryTables ++ [gnct] :: [CountryTable3]
+        reg4:: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
+        reg4 = reg3CountryTable4 regionDef gt4 :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
+        reg4tot =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
+        -- reg4tot = map (second sumCountryTables) reg4 
+        md4 = wrapMdCol3 reg4tot :: [MdColumn RegionId Double]
+    let md2 = markdownTable RBT.regionNames RBT.regionOrder md4  --less1m mdC
+    putStrLn md2 
+
+    -- print md
+    return (md)
+
+regTab1pop :: (Eq ct) => TerryTable ct v  -> (rg, [ct]) -> (rg, TerryTable ct v )
+-- make a single region  taboe 
+regTab1pop tab (reg, cts) =   (reg, countryTable tab cts) 
+
+reg2 :: (Eq ct) => Dataset ->    [(rg, [ct])] -> TerryTable ct v  ->   (Dataset, [(rg, TerryTable ct v)] )
+-- make all regions for a dataset  -> RegionTable3 
+reg2  ds regionMembers tab = (ds, map (regTab1pop tab) regionMembers)
+
+reg3CountryTable3 :: (Eq ct) => [(rg, [ct])] -> (Dataset, TerryTable ct ( v)) -> (Dataset, [(rg, TerryTable ct v)] )
+reg3CountryTable3 regionMembers (ds, tab)  = reg2 ds regionMembers tab 
+
+reg3CountryTable4 :: (Eq ct) => [(rg, [ct])] -> [(Dataset, TerryTable ct ( v))] -> [(Dataset, [(rg, TerryTable ct v)] )]
+-- multiple datasets
+reg3CountryTable4 regionMembers tabs   = map (\(ds,tab) -> reg2 ds regionMembers tab) tabs
+
+ 
 
 
+exp1 = do 
+    _ <- exp1a euCountries 
+    return ()
+exp1t = exp1a threeCountries
 
---     values =  map tvValue  table 
+exp1a :: [CountryId] -> IO String
+-- countries is what is included in printed list 
+exp1a countries= do
+    conn <- open dbPath 
+    let  reqYears =  [(population, Year 2024), (gnpPP, Year 2021),  (gdpPPpc, Year 2021)]
 
+    countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+    close conn
+    let mdC = wrapMdCol3 countryTables
+    let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
 
-
--- lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> IO [(RegionId,  [CountryTable])]
-lookupRegionTable2 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO [(RegionId, CountryTable)]
--- fill for each region a countryTable with only its countries 
-lookupRegionTable2 conn regionDef ds yr = do 
-        worldTab <- lookupTable conn (dsIndicator ds) yr  
-        let regTab = map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef
-        return regTab 
-
-
-
-
--- lookupCountryTable :: Connection -> (Dataset, Year) -> IO CountryTable
-lookupCountryTable :: Connection -> (Dataset, Year) -> IO (MdColumn CountryId Double)
-lookupCountryTable conn (d, y) = do
-    tab <-  lookupTable conn (dsIndicator d) y
-    return $ wrapMdCol d tab
-
-
+    let gpc4 = (combineMdTables Divide g3  pop3){colScale=Kilo}
+        diff4 = (combineMdTables (Subtract) gpc3 gpc4)
+        mdC4 = mdC ++ [gpc4, diff4]  -- the countries with difference between GDP and GNP (cyprus, ireland, luxemburg, malta)
+-- the operations on the tables must be with the mdcol data! 
+    let md = markdownTable allCodeNames countries mdC4  --less1m mdC
+    putStrLn md 
+    -- print md
+    return (md)
 
 exp4:: IO ()  
 -- | show only one indicator 
@@ -101,57 +171,46 @@ exp4 = do
             -- let md = markdownTable allCodeNames sortedRegions [mdC]  --less1m mdC
             -- putStrLn md 
 
-
-
 euCountries = map CountryId ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
         ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
         ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
 
 
 exp3 = do 
-    _ <- exp3a regionOrder   threeCountries  
+    _ <- exp3b regionOrder (map CountryId ["FIN", "CYP", "PRT"])   -- european!
     return ()
 -- exp3 :: IO ()  
 -- | show all countries with popuplation surface and GNP
-exp3a regOrder countriesOrder = do
-    let
-        countries = less1m  -- countries included 
-        regionDef = RBT.regionMembers -- g7, eu, russia 
+exp3b :: [RegionId] -> [CountryId] -> IO String
+exp3b regOrder countries = do
+    let regionDef = RBT.regionMembers -- g7, eu, russia 
 
     conn <- open dbPath 
-    let req = [population, gnpPP, surfaceArea]
-        years = map Year [2024, 2024, 2023]
-        reqYears = zip ( req) years-- :: [(Dataset, Year)]
+    let reqYears = [(population, Year 2024),  (gdpPPpc, Year 2021)]
     regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
+    let req2 = [(gnp, Year 2021), (surfaceArea, Year 2023)]
+
+    [reg3gnp, reg3surf] <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) req2 
+
     close conn
 
-    let aggs = map (\a -> map (aggregateTerry3 a ) regionCountryTables) [min1, median1, max1, mean1, stdDev1] 
-    putIOwords ["the sums are", showT aggs]
-    
-    -- convert to regionTable 
-    -- make a single val for each country 
-    let rct = regionCountryTables :: [RegionTable3] -- (Dataset, [(RegionId, CountryTable)]) 
-        rct2  :: [(Dataset, [TerryValue RegionId Double ])]
-        rct2 = map xone rct
-        xone :: (Dataset, [(RegionId, CountryTable)]) -> (Dataset, [TerryValue RegionId Double ]) 
-        xone (ds, tab) = (ds,  sumCountryTables tab)
+    -- combineMdTables
+    -- let [gnp3, surf3] = map wrapMdCol3 [reg3gnp, reg3surf] 
 
 
-    let  mdC = wrapMdCol3 rct2
-    -- let  mdC = map (\(t,d) -> wrapMdCol d t) t2 req
--- the operations on the tables must be with the mdcol data! 
-
+    let mdC :: [MdColumn RegionId Double]
+        mdC = wrapMdCol3 . regtab3_regtab1 $ regionCountryTables 
     let md1 = markdownTable RBT.regionNames regOrder mdC
     putStrLn md1 
 
     -- get OneCountry 
     let regid = RegionId "EU"
-    -- let euMdC = catMaybes $ zipWith (\pop tab -> getOneRegion regid pop  tab) req rct  :: [MdColumn CountryId Double]
-    let euMdC = getOneRegionMany3  rct regid
-    let md2 =  (markdownTable allCodeNames countriesOrder) $   euMdC --less1m mdC
+    let euMdC = getOneRegionMany3  regionCountryTables regid
+    let md2 =  (markdownTable allCodeNames countries) $   euMdC --less1m mdC
     putStrLn  md2 
-    return (md1, md2)
-
+    print md1 
+    print md2
+    return md2
 
 
 
@@ -160,10 +219,12 @@ less1m = map CountryId R3.less1mTax
 -- break was 60k$ GNP 2024 and less 1 mio P 
 
 
--- exp1a :: IO ()  
+
+
+-- exp1a :: IO ()  -- countries only 
 -- | show all countries with popuplation surface and GNP
 -- fig11 
-exp1a countries= do
+exp1a_ countries= do
     -- let countries = less1m  -- countries included 
     conn <- open dbPath 
     let req = [population, gnpPP, surfaceArea]
@@ -187,68 +248,3 @@ exp1a countries= do
     return (md)
 
 threeCountries = [CountryId "MAF",CountryId "PLW",CountryId "NRU",CountryId "TUV"]
-exp1 = do 
-    _ <- exp1a less1m 
-    return ()
-exp1t = exp1a threeCountries
-
--- exp2 :: IO ()
--- -- } show the totals for the small, and very small countries
--- exp2 = do 
---     conn <- open dbPath 
-
-
---     tabPop :: CountryTable  <- lookupTable conn (dsIndicator population)(Year 2024)
---     tabGNP :: CountryTable <- lookupTable conn (dsIndicator grossNatProd) (Year 2024)
---     tabSurf :: CountryTable <- lookupTable conn (dsIndicator surfaceArea) (Year 2023)
---     -- for weighted values aggregateTable does not work
---     -- tabGNPpcwb <- lookupTable conn (dsIndicator gnpPPpc) (Year 2024)
---     -- gnpPCwb <-  (aggregate regionMembersSmall conn gnpPPpc (Year 2024))  
-
---     let 
---         pops = aggregateTable (aggregationFunction $ dsAggregation population) regionMembersSmall  tabPop
---         surfs = aggregateTable (aggregationFunction $ dsAggregation surfaceArea) regionMembersSmall tabSurf 
---         gnp = aggregateTable (aggregationFunction $ dsAggregation grossNatProd) regionMembersSmall tabGNP
---         -- gnpPCwb =  aggregateTable (aggregationFunction $ dsAggregation gnpPPpc) regionMembersSmall tabGNPpcwb
-
---         gnpPC = combineRegionTables Divide gnp pops
-    
---     close conn
-
---     let mdCols = 
---             [ pops, surfs, gnp, gnpPC
---             -- , gnpcWB 
-            
---             -- MdColumn "Bevoelkerung 2024 (Mega)" Mega 0  pops
---             -- , MdColumn "Flaeche 2023 (Mega km²)" Mega 2  surfs
---             -- , MdColumn "GNP (Mega $)" Giga 0 gnp
---             -- , MdColumn "GNP pc (Kilo $)" Kilo 0 gnpPC  
---             -- , MdColumn "GNP pc WorldBank cal (Kilo $)" Kilo 0 gnpPCwb 
---             --         Centi 1 surfPerCap
---             -- , MdColumn "Nutzbares Land per capita (ha/person)" 
---             --         Centi 0 surAgrarfPerCap 
---             ]
---     let sortedRegions = sortTerryByColumn Descending  pops  
-
---     -- let md = markdownTable regionsList mdCols
---     let md = markdownTable regionNames2 sortedRegions mdCols
---     putStrLn md 
---     writeTab1Table "tab11" md
-
-
--- regionMembersSmall :: RegionMembers  -- [(RegionId, CountryId)]
--- regionMembersSmall = 
---   [ mk "less10mio" less10Mcountries 
---     , mk "less1mio" less1Mcountries
---   ]
---   where
---     mk :: Text -> [Text] -> (RegionId, [CountryId])
---     mk r cs = (RegionId r, map (\c -> (CountryId c)) cs)
-
--- tableOutputDirectoryExp :: FilePath
--- tableOutputDirectoryExp =   "/home/frank/CountryExperiments"
-
--- writeTab1Table :: FilePath -> String -> IO ()
--- writeTab1Table filename contents = do
---     createDirectoryIfMissing True tableOutputDirectoryExp
---     writeFile (  tableOutputDirectoryExp </> filename) contents

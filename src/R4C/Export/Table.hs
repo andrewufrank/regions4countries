@@ -38,8 +38,8 @@ scale2divisor s = case s of
 
 
 
-markdownTable ::  (Eq id, Show id,   ShowTerryId id) 
-    => [TerryName id] -> [id] -> [MdColumn id Double] -> String
+markdownTable ::  (Eq id, Show id,   ShowTerryId id, ShowCell v) 
+    => [TerryName id] -> [id] -> [MdColumn id v] -> String
 -- markdownTable :: [TerryName RegionId] -> [RegionId] -> [MdColumn RegionId Double] -> String
 markdownTable names regions cols =
     unlines (header : separator : map row regions)
@@ -145,8 +145,8 @@ scaleRegionTable k ct = ct{colValues = cv2}
             cv2 = map  (\rv -> rv { tvValue = fmap (* k) (tvValue rv) }) (colValues ct) 
 
 -- | combine two MdColumns t v with a functioin 
-combineRegionTables :: (Ord t, Show t, Eq t) => Operation -> MdColumn t Double -> MdColumn t Double -> MdColumn t Double
-combineRegionTables f xs ys = MdColumn{colValues = xyt
+combineMdTables :: (Ord t, Show t, Eq t) => Operation -> MdColumn t Double -> MdColumn t Double -> MdColumn t Double
+combineMdTables f xs ys = MdColumn{colValues = xyt
         , colTitle = colTitle xs <> colTitle ys  --
         , colDecimals = min (colDecimals xs) (colDecimals ys)
         -- , colUnit = colUnit xs <> show f <>  colUnit ys

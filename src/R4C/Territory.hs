@@ -78,7 +78,7 @@ wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName dataset
 
 -- convert RegionTable3 = (Dataset, [(RegionId, CountryTable)]) to (Dataset, RegionTable1)
 -- regtab3_regtab1 (ds, tab) = (ds, sumCountryTables tab)
-regtab3_regtab1 :: [(a, [(RegionId, CountryTable)])] -> [(a, [TerryValue RegionId Double])]
+-- regtab3_regtab1 :: [(a, [(rt, TerryTable ct v)])] -> [(a, [TerryValue rt v])]
 -- sum the countrytables to produce region lines 
 regtab3_regtab1 = map (second sumCountryTables)
 
@@ -99,13 +99,14 @@ aggregateTerry3    :: ([Double] -> Maybe Double)
     -> [RegionValue ] 
 aggregateTerry3 op regionTab = map (aggregateTery2 op) (snd regionTab) 
 
-sumCountryTables :: [(RegionId, CountryTable)] -> [TerryValue RegionId Double ] 
+-- sumCountryTables :: [(rt, TerryTable ct v)] -> [TerryValue rt v ] 
 -- sum the values (must be extensional) in the country table 
 -- and produce the sinle region value 
 sumCountryTables rct = map oneRow rct 
-    where 
-        oneRow :: (RegionId, TerryTable CountryId Double) -> TerryValue RegionId Double
-        oneRow (r, ct) =  TerryValue {tvCode = r, tvValue =  sum1 . catMaybes . map tvValue $ ct }
+    where
+
+-- oneRow :: (rt, TerryTable ct v) -> TerryValue rt v
+oneRow (r, ct) =  TerryValue {tvCode = r, tvValue =  sum1 . catMaybes . map tvValue $ ct }
 
 
   

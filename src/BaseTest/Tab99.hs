@@ -128,7 +128,7 @@ exp3b regOrder countries = do
 --     arabl <-  (aggregate regionMembers conn arableLand (Year 2023))  -- add pastures, forest, urban 
 --             -- ersetzt durch agrarlandPart
 
---     let surfPerCap = combineRegionTables Divide arabl pops
+--     let surfPerCap = combineMdTables Divide arabl pops
 --     let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
 --     return surfpc2 
 
@@ -141,7 +141,7 @@ exp3b regOrder countries = do
 --     -- arablpc <- usableAreaPerCapita1 conn
 
 --     close conn
---     -- let surfPerCap = combineRegionTables Divide surfs3 pops3
+--     -- let surfPerCap = combineMdTables Divide surfs3 pops3
 --     --     -- surfPerCapM = scaleRegionTable (10**6) surfPerCap -- convert km2 to m2
 
 --     -- let surfpc2 = surfPerCap {colScale=Unit, colDecimals=6}  -- Mega/Mega
@@ -155,7 +155,7 @@ exp3b regOrder countries = do
 --     pops <-  (aggregate regionMembers conn population (Year 2024)) 
 --     fertility <-  (aggregate regionMembers conn fertilityRate (Year 2024))  
 --     let women = scaleRegionTable (0.5) pops
---         fertilityCount  = combineRegionTables Multiply women fertility 
+--         fertilityCount  = combineMdTables Multiply women fertility
 --     return (fertilityCount)
 
 -- agrarlandPC :: Connection -> IO (MdColumn RegionId Double)
@@ -166,8 +166,8 @@ exp3b regOrder countries = do
 --     surf <- aggregate regionMembers conn surfaceArea (Year 2023)
 --     agrarPart <-  (aggregate regionMembers conn agrarlandPart (Year 2023))  -- non-extensional
 --     let agrarPerc = scaleRegionTable (0.01) agrarPart  -- convert % to factor
---         agrarTotal = combineRegionTables Multiply agrarPerc surf
---         agrarsurfPerCap = combineRegionTables Divide agrarTotal pops
+--         agrarTotal = combineMdTables Multiply agrarPerc surf
+--         agrarsurfPerCap = combineMdTables Divide agrarTotal pops
 --     let surfpc2 = agrarsurfPerCap {colScale=Unit, colDecimals=6}
 
 --     return surfpc2 

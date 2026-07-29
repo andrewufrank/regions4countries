@@ -317,19 +317,19 @@ weightedMean2 pairs =   wAverage1 . terryValues $ pairs
 --             then Nothing
 --             else Just (sx / sw)
 
--- combineRegionTables
+-- combineMdTables
 -- -- probably not needed anymore
 --     :: (a -> b -> c)
 --     -> [(RegionId, Maybe a)]
 --     -> [(RegionId, Maybe b)]
 --     -> [(RegionId, Maybe c)]
--- combineRegionTables f =
+-- combineMdTables f =
 --     zipWith combine
 --   where
 --     combine (r1, mx) (r2, my)
 --         | r1 /= r2 =
 --             error $
---                 "combineRegionTables: region mismatch: "
+--                 "combineMdTables: region mismatch: "
 --                 ++ show r1 ++ " /= " ++ show r2
 
 --         | otherwise =
