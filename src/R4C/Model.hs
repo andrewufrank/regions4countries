@@ -172,6 +172,8 @@ countriesInRegion memberships region =
         Just cs -> cs
         Nothing -> []
 
+type Pak t v = (Dataset, TerryTable t v)
+
 type RegionName = TerryName RegionId
 
 type CountryValue = TerryValue CountryId Double 
@@ -198,8 +200,15 @@ data Scale = Kilo | Mega | Giga | Tera | Centi | Unit | Milli| Micro | Nano | Pi
 show1scale s = case s of 
     Kilo -> "k"
     Mega -> "M"
+    Giga -> "G"
+    Tera -> "T"
+    Centi -> "c"
+    Milli -> "milli"
+    Micro -> "micro"
+    Nano -> "nano"
+    Pico -> "pico"
     Unit -> ""
-    _ -> ""
+    -- _ -> ""
 
 data MdColumn t v =   MdColumn
     { colTitle    :: String

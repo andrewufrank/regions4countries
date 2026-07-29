@@ -80,7 +80,15 @@ wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName dataset
 -- regtab3_regtab1 (ds, tab) = (ds, sumCountryTables tab)
 -- regtab3_regtab1 :: [(a, [(rt, TerryTable ct v)])] -> [(a, [TerryValue rt v])]
 -- sum the countrytables to produce region lines 
-regtab3_regtab1 = map (second sumCountryTables)
+-- must not be used for intensional values
+regtab3_regtab1 :: [(Dataset, [(t1, [TerryValue t2 Double])])] -> [(Dataset, [TerryValue t1 Double])]
+regtab3_regtab1 dstabs = map  oneTab3 dstabs
+
+oneTab3 :: (Dataset, [(t1, [TerryValue t2 Double])]) -> (Dataset, [TerryValue t1 Double])
+oneTab3 (ds, tab) = (ds, sumCountryTables2 isExtensive tab) 
+-- (\(ds,tab) -> (ds, val) dstabs
+    where   isExtensive   = dsExtensive ds 
+            -- val = if dsExtensive then sumCountryTables tab else tNothing 
 
 aggregateTery2
     :: ([Double] -> Maybe Double)
@@ -102,11 +110,16 @@ aggregateTerry3 op regionTab = map (aggregateTery2 op) (snd regionTab)
 -- sumCountryTables :: [(rt, TerryTable ct v)] -> [TerryValue rt v ] 
 -- sum the values (must be extensional) in the country table 
 -- and produce the sinle region value 
-sumCountryTables rct = map oneRow rct 
+sumCountryTables2 :: Bool -> [(t1, [TerryValue t2 Double])] -> [TerryValue t1 Double]
+sumCountryTables2 ext rct = map (oneRow ext) rct 
     where
 
 -- oneRow :: (rt, TerryTable ct v) -> TerryValue rt v
-oneRow (r, ct) =  TerryValue {tvCode = r, tvValue =  sum1 . catMaybes . map tvValue $ ct }
+oneRow :: Bool -> (t1, [TerryValue t2 Double]) -> TerryValue t1 Double
+oneRow ext (r, ct) =  TerryValue {tvCode = r, tvValue =  if ext 
+                then sum1 . catMaybes . map tvValue $ ct 
+                else Nothing 
+                }
 
 
   
