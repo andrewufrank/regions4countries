@@ -28,7 +28,9 @@ import R4C.Model
 -- import R4C.Import.Database
 
 
-
+euCountries = map CountryId ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
+        ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
+        ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
 
 allCodeNames :: [TerryName CountryId]
 allCodeNames =

@@ -1,9 +1,12 @@
+-- {-# ANN myFunction ("HLint: ignore Use fewer guards" :: String) #-}
+-- {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 -----------------------------------------------------------------------------
 --
 -- Module      :   experiments with Terry data  for counries 
 -- especially small countries 
 
 -----------------------------------------------------------------------------
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module R4C.CountryExperiments
     where
@@ -12,9 +15,6 @@ import R4C.Model
 import qualified Data.Text as T
 import Database.SQLite.Simple  -- for debug
 -- import Study.Indicator 
-import Study.Region2 
-import R4C.Aggregate 
-import R4C.Import.Query
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
 import Study.Config 
@@ -31,8 +31,9 @@ import R4C.Export.CountnryCodeNames
 import qualified R4C.Region3 as R3 
 import qualified BaseTest.Region as RBT 
 import BaseTest.Region (regionOrder)
-import Data.List
 import R4C.Territory
+import R4C.Pak 
+
 
 dreiEu = map CountryId ["FIN", "CYP", "PRT"]
 
@@ -52,8 +53,6 @@ exp7a countries regionDef = do
 
     c3@[pop3, surf3, gdp3] :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
     close conn
-    -- let mdC = wrapMdCol3 countryTables
-    -- let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
 
     let gpc4 :: CountryTable3 
         gpc4 = (ds1, combineTerryTables (*) (snd gdp3) (snd pop3))
@@ -62,44 +61,16 @@ exp7a countries regionDef = do
                     , dsUnit = "PP$"
                     , dsDecimals = 0 
                     , dsExtensive = True}        
-        --     -- (combineMdTables Multiply gdp3  pop3){colScale=Kilo}
-        -- diff4 = (combineMdTables (Subtract) gdp3 pop3)
         c4 = c3 ++ [gpc4]  -- the countries with difference between GDP and GNP (cyprus, ireland, luxemburg, malta)
 -- the operations on the tables must be with the mdcol data!
         mc4 = wrapMdCol3 c4
     let md = markdownTable allCodeNames countries mc4  --less1m mdC
     putStrLn md 
--- 
-    -- -- now combines
-    -- let [popt, gt, gpct]= countryTables
-    --     gt:: (Dataset, TerryTable CountryId Double) 
-    --     gnct = (ds1, combineTerryTables (/) (snd gt) (snd popt)) 
-    --     difft = (ds2, combineTerryTables (-) (snd gnct) (snd gpct))
-    --     ds1 = Dataset{dsName = "gnpPP per cap"
-    --                 , dsShortName ="gnpPP per cap"
-    --                 , dsScale = Kilo
-    --                 , dsUnit = "PP$/P"
-    --                 , dsDecimals = 0 }
-    --     ds2 = Dataset{dsName = "diff"
-    --                 , dsShortName ="diff"
-    --                 , dsScale = Kilo
-    --                 , dsUnit = "PP$/P"
-    --                 , dsDecimals = 0 }        -- gpc4 = MdColumn { colValues = combineTerryTables (/) (snd gt) (snd popt) 
-    --     --                 , colTitle = "gnpPP per cap"
-    --     --                 , colScale = Kilo
-    --     --                 , colUnit = "PP$"
-    --     --                 , colDecimals = 0
-    --     --                 }   
 
-    --     -- gt4 = [pop3, g3, gpc3] ++ [gpc4]
-    --     -- -- reg3CountryTable4 regionDef mdC
-    --     gt4 = countryTables ++ [gnct, difft] :: [CountryTable3]
-    --     reg4:: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
     let reg4 = reg3CountryTable4 regionDef c4 :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
-        reg4tot =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
-    --     -- reg4tot = map (second sumCountryTables) reg4 
-        [pop4, surf4, _, gnp4] = reg4tot 
-        gnpPC4 = (ds2, combineTerryTables (/) (snd gnp4) (snd pop4))
+        reg4tot@[pop4, surf4, _, gnp4] =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
+        -- gnpPC4 = (ds2, combineTerryTables (/) (snd gnp4) (snd pop4))
+        gnpPC4 = combinesCountryTable3 ds2 (/)  gnp4 pop4
         ds2 = Dataset{dsExtensive = False
             , dsShortName ="gnp per cap."
             , dsScale = Kilo
@@ -109,24 +80,12 @@ exp7a countries regionDef = do
         md4 = wrapMdCol3 (reg4tot ++ [gnpPC4]) :: [MdColumn RegionId Double]
     let md2 = markdownTable RBT.regionNames RBT.regionOrder md4  --less1m mdC
     putStrLn md2 
-
-    -- print md
+    -- print md2
     return (md)
 
-regTab1pop :: (Eq ct) => TerryTable ct v  -> (rg, [ct]) -> (rg, TerryTable ct v )
--- make a single region  taboe 
-regTab1pop tab (reg, cts) =   (reg, countryTable tab cts) 
 
-reg2 :: (Eq ct) => Dataset ->    [(rg, [ct])] -> TerryTable ct v  ->   (Dataset, [(rg, TerryTable ct v)] )
--- make all regions for a dataset  -> RegionTable3 
-reg2  ds regionMembers tab = (ds, map (regTab1pop tab) regionMembers)
 
--- reg3CountryTable3 :: (Eq ct) => [(rg, [ct])] -> (Dataset, TerryTable ct ( v)) -> (Dataset, [(rg, TerryTable ct v)] )
--- reg3CountryTable3 regionMembers (ds, tab)  = reg2 ds regionMembers tab 
-
-reg3CountryTable4 :: (Eq ct) => [(rg, [ct])] -> [(Dataset, TerryTable ct ( v))] -> [(Dataset, [(rg, TerryTable ct v)] )]
--- multiple datasets
-reg3CountryTable4 regionMembers tabs   = map (\(ds,tab) -> reg2 ds regionMembers tab) tabs
+                    
 
 
 -- -- produce country tables then extract the extensionl columns to region
@@ -215,63 +174,63 @@ exp3b regOrder countries = do
     return md2
 
 
--- exp5 = do   -- get regions from exp1a
---     _ <- exp5a euCountries RBT.regionMembers  -- EU, G7
---     return ()
+exp5 = do   -- get regions from exp1a
+    _ <- exp5a euCountries RBT.regionMembers  -- EU, G7
+    return ()
 
--- -- exp5 :: [CountryId] -> IO String
--- -- countries is what is included in printed list 
--- exp5a :: [CountryId] -> [(RegionId, [CountryId])] -> IO String
--- exp5a countries regionDef = do
---     conn <- open dbPath 
---     let  reqYears =  [(population, Year 2024), (gnpPP, Year 2021),  (gdpPPpc, Year 2021)]
+-- exp5 :: [CountryId] -> IO String
+-- countries is what is included in printed list 
+exp5a :: [CountryId] -> [(RegionId, [CountryId])] -> IO String
+exp5a countries regionDef = do
+    conn <- open dbPath 
+    let  reqYears =  [(population, Year 2024), (gnpPP, Year 2021),  (gdpPPpc, Year 2021)]
 
---     countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
---     close conn
---     let mdC = wrapMdCol3 countryTables
---     let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
+    countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+    close conn
+    let mdC = wrapMdCol3 countryTables
+    let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
 
---     let gpc4 = (combineMdTables Divide g3  pop3){colScale=Kilo}
---         diff4 = (combineMdTables (Subtract) gpc3 gpc4)
---         mdC4 = mdC ++ [gpc4, diff4]  -- the countries with difference between GDP and GNP (cyprus, ireland, luxemburg, malta)
--- -- the operations on the tables must be with the mdcol data! 
---     let md = markdownTable allCodeNames countries mdC4  --less1m mdC
---     putStrLn md 
--- 
-    -- -- now for the regions
-    -- let [popt, gt, gpct]= countryTables
-    --     gt:: (Dataset, TerryTable CountryId Double) 
-    --     gnct = (ds1, combineTerryTables (/) (snd gt) (snd popt)) 
-    --     difft = (ds2, combineTerryTables (-) (snd gnct) (snd gpct))
-    --     ds1 = Dataset{dsName = "gnpPP per cap"
-    --                 , dsShortName ="gnpPP per cap"
-    --                 , dsScale = Kilo
-    --                 , dsUnit = "PP$/P"
-    --                 , dsDecimals = 0 }
-    --     ds2 = Dataset{dsName = "diff"
-    --                 , dsShortName ="diff"
-    --                 , dsScale = Kilo
-    --                 , dsUnit = "PP$/P"
-    --                 , dsDecimals = 0 }        -- gpc4 = MdColumn { colValues = combineTerryTables (/) (snd gt) (snd popt) 
-    --     --                 , colTitle = "gnpPP per cap"
-    --     --                 , colScale = Kilo
-    --     --                 , colUnit = "PP$"
-    --     --                 , colDecimals = 0
-    --     --                 }   
+    let gpc4 = (combineMdTables Divide g3  pop3){colScale=Kilo}
+        diff4 = (combineMdTables (Subtract) gpc3 gpc4)
+        mdC4 = mdC ++ [gpc4, diff4]  -- the countries with difference between GDP and GNP (cyprus, ireland, luxemburg, malta)
+-- the operations on the tables must be with the mdcol data! 
+    let md = markdownTable allCodeNames countries mdC4  --less1m mdC
+    putStrLn md 
 
-    --     -- gt4 = [pop3, g3, gpc3] ++ [gpc4]
-    --     -- -- reg3CountryTable4 regionDef mdC
-    --     gt4 = countryTables ++ [gnct, difft] :: [CountryTable3]
-    --     reg4:: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
-    --     reg4 = reg3CountryTable4 regionDef gt4 :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
-    --     reg4tot =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
-    --     -- reg4tot = map (second sumCountryTables) reg4 
-    --     md4 = wrapMdCol3 reg4tot :: [MdColumn RegionId Double]
-    -- let md2 = markdownTable RBT.regionNames RBT.regionOrder md4  --less1m mdC
-    -- putStrLn md2 
+    -- now for the regions
+    let [popt, gt, gpct]= countryTables
+        gt:: (Dataset, TerryTable CountryId Double) 
+        gnct = (ds1, combineTerryTables (/) (snd gt) (snd popt)) 
+        difft = (ds2, combineTerryTables (-) (snd gnct) (snd gpct))
+        ds1 = Dataset{dsName = "gnpPP per cap"
+                    , dsShortName ="gnpPP per cap"
+                    , dsScale = Kilo
+                    , dsUnit = "PP$/P"
+                    , dsDecimals = 0 }
+        ds2 = Dataset{dsName = "diff"
+                    , dsShortName ="diff"
+                    , dsScale = Kilo
+                    , dsUnit = "PP$/P"
+                    , dsDecimals = 0 }        -- gpc4 = MdColumn { colValues = combineTerryTables (/) (snd gt) (snd popt) 
+        --                 , colTitle = "gnpPP per cap"
+        --                 , colScale = Kilo
+        --                 , colUnit = "PP$"
+        --                 , colDecimals = 0
+        --                 }   
 
-    -- print md
-    -- return (md)
+        -- gt4 = [pop3, g3, gpc3] ++ [gpc4]
+        -- -- reg3CountryTable4 regionDef mdC
+        gt4 = countryTables ++ [gnct, difft] :: [CountryTable3]
+        reg4:: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
+        reg4 = reg3CountryTable4 regionDef gt4 :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
+        reg4tot =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
+        -- reg4tot = map (second sumCountryTables) reg4 
+        md4 = wrapMdCol3 reg4tot :: [MdColumn RegionId Double]
+    let md2 = markdownTable RBT.regionNames RBT.regionOrder md4  --less1m mdC
+    putStrLn md2 
+
+    print md
+    return (md)
 
 
  
@@ -342,9 +301,9 @@ exp3b regOrder countries = do
             -- let md = markdownTable allCodeNames sortedRegions [mdC]  --less1m mdC
             -- putStrLn md 
 
-euCountries = map CountryId ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
-        ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
-        ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
+-- euCountries = map CountryId ["AUT","BEL","BGR","HRV","CYP","CZE","DNK","EST","FIN","FRA"
+--         ,"DEU","GRC","HUN","IRL","ITA","LVA","LTU","LUX","MLT","NLD"
+--         ,"POL","PRT","ROU","SVK","SVN","ESP","SWE"]
 
 
 

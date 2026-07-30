@@ -66,17 +66,3 @@ latestCountryValue conn cid iid =
             (obsYear obs)
             (obsValue obs)
 
-
-lookupRegionTable3 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO RegionTable3
--- fill for each region a countryTable with only its countries 
-lookupRegionTable3 conn regionDef ds yr = do 
-        worldTab <- lookupTable conn (dsIndicator ds) yr  
-        let regTab = (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
-        return regTab 
-
-lookupCountryTable3 :: Connection ->   Dataset -> Year -> IO CountryTable3
--- fill for each region a countryTable with only its countries 
-lookupCountryTable3 conn  ds yr = do 
-        worldTab <- lookupTable conn (dsIndicator ds) yr  
-        let ctTab = (ds, worldTab) 
-        return ctTab 

@@ -34,12 +34,14 @@ library
       R4C.Import.Query
       R4C.Import.WorldBank
       R4C.Model
+      R4C.Pak
       R4C.Region3
       R4C.Statistics
       R4C.Territory
       Study.Config
       Study.Descriptor
       Study.Region2
+      Study.Tab7gdp_gnp
   other-modules:
       Paths_Regions4Countries
   hs-source-dirs:

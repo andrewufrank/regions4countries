@@ -30,7 +30,7 @@ import R4C.Import.Database
 import R4C.Territory 
 import R4C.Export.CountnryCodeNames
 import qualified R4C.Region3 as R3 
-
+import R4C.Pak
 import UniformBase 
 
 -- writeTab1Table :: FilePath -> String -> IO ()
