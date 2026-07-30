@@ -88,6 +88,7 @@ ghc-options:
     -Wno-missing-fields
     -Wno-name-shadowing  
     -Wno-incomplete-record-updates
+    #-Wno-incomplete-uni-patterns
     # no-warn-missing-fields perhpas not a good idea for always?
     # -Wunused-packages  # only useful for clean (after deleting dist)
     

@@ -16,7 +16,8 @@ import qualified Data.Scientific as Sc
 import R4C.Model
 import qualified Data.Map.Strict as Map 
 import UniformBase 
-
+import qualified Data.Map.Strict as Map
+import Data.List (foldl')
 
 -- type Column a = [(RegionId, Maybe a)]
 
@@ -186,6 +187,17 @@ combineTerryTables f xs ys =
 
     lift2 g (Just a) (Just b) = Just (g a b)
     lift2 _ _ _               = Nothing
+
+
+sumTerryTables
+    :: (Ord t, Eq t, Show t)
+    => [TerryTable t Double]
+    -> TerryTable t Double
+sumTerryTables []       = []
+sumTerryTables [t]      = t
+sumTerryTables (t:u:ts) =
+    sumTerryTables (combineTerryTables (+) t u : ts)
+
 
 data Operation = Add | Subtract | Multiply | Divide
 

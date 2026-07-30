@@ -41,6 +41,7 @@ library
       Study.Config
       Study.Descriptor
       Study.Region2
+      Study.Tab1
       Study.Tab7gdp_gnp
   other-modules:
       Paths_Regions4Countries

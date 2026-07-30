@@ -5,11 +5,13 @@ import Data.List (find)
 
 import R4C.Model
 
+sqkm = "km\178"
+
 population :: Dataset
 population =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "SP.POP.TOTL"}
-        , dsShortName = "Population"
+        , dsShortName = "Bevölkerung"
         , dsName = "Population, total"
         , dsDefinition = "Total population  "
         , dsUnit = "P"
@@ -68,14 +70,14 @@ arableLand :: Dataset
 arableLand =
     Dataset
         { dsIndicator = IndicatorId "zzz"
-        , dsShortName = "Landwirtschaftsland"
+        , dsShortName = "Landwirtschaft"
         , dsName = "Surface area (sq. km)"
         , dsDefinition =
             " ."
         , dsUnit = "km\178"
         , dsAggregation = Sum
         , dsDecimals = 0
-        , dsScale = Unit
+        , dsScale = Kilo
         , dsExtensive = True
         , dsLastYear = Nothing
         , dsSourceOrganization =
@@ -155,15 +157,15 @@ gdpPPpc = Dataset
             "xxx"
         }
 
-xxx2 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+agriPercent = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.AGRI.ZS"}
+        , dsShortName = "Landwirtschaft"
+        , dsName = "Agriculturall land percent"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
-        , dsDecimals = 0
+        , dsUnit = "%"
+        , dsAggregation = Sum -- WeightedBy (IndicatorId "xxx")
+        , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
@@ -172,7 +174,55 @@ xxx2 = Dataset
         }
 
 xxx3 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.FRST.ZS"}
+        , dsShortName = "Wald Anteil"
+        , dsName = "Forest area percent"
+        , dsDefinition =
+            "Txxx"
+        , dsUnit = "%"
+        , dsAggregation = Sum -- WeightedBy (IndicatorId "xxx")
+        , dsDecimals = 2
+        , dsScale = Unit
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "xxx"
+        }
+
+forest = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.FRST.K2"}
+        , dsShortName = "Wald"
+        , dsName = "Forest area"
+        , dsDefinition =
+            "Txxx"
+        , dsUnit = sqkm
+        , dsAggregation = Sum
+        , dsDecimals = 0
+        , dsScale = Kilo
+        , dsExtensive = True
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "xxx"
+        }
+
+urban = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.TOTL.UR.K2"}
+        , dsShortName = "Urban"
+        , dsName = "Urban land area"
+        , dsDefinition =
+            "Txxx"
+        , dsUnit = sqkm
+        , dsAggregation = Sum
+        , dsDecimals = 0
+        , dsScale = Kilo
+        , dsExtensive = True
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "xxx"
+        }
+
+usableArxeaPerCapita = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
         , dsShortName = "xxx"
         , dsName = "xxx"
         , dsDefinition =
@@ -187,8 +237,8 @@ xxx3 = Dataset
             "xxx"
         }
 
-xxx4 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
+surfaxc1ePerCapita = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
         , dsShortName = "xxx"
         , dsName = "xxx"
         , dsDefinition =
@@ -203,8 +253,53 @@ xxx4 = Dataset
             "xxx"
         }
 
+usableAxreaPerCapita1 = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
+        , dsShortName = "xxx"
+        , dsName = "xxx"
+        , dsDefinition =
+            "Txxx"
+        , dsUnit = "xxx"
+        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsDecimals = 0
+        , dsScale = Unit
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "xxx"
+        }
+xxx6 = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
+        , dsShortName = "xxx"
+        , dsName = "xxx"
+        , dsDefinition =
+            "Txxx"
+        , dsUnit = "xxx"
+        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsDecimals = 0
+        , dsScale = Unit
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "xxx"
+        }
 xxx5 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
+        , dsShortName = "xxx"
+        , dsName = "xxx"
+        , dsDefinition =
+            "Txxx"
+        , dsUnit = "xxx"
+        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsDecimals = 0
+        , dsScale = Unit
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "xxx"
+        }
+xxx4 = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
         , dsShortName = "xxx"
         , dsName = "xxx"
         , dsDefinition =
@@ -219,8 +314,8 @@ xxx5 = Dataset
             "xxx"
         }
 
-usableAreaPerCapita = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
+xxx33 = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
         , dsShortName = "xxx"
         , dsName = "xxx"
         , dsDefinition =
@@ -234,9 +329,8 @@ usableAreaPerCapita = Dataset
         , dsSourceOrganization =
             "xxx"
         }
-
-surfacePerCapita = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.xxx.IN"}
+xxx2 = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
         , dsShortName = "xxx"
         , dsName = "xxx"
         , dsDefinition =
@@ -250,4 +344,3 @@ surfacePerCapita = Dataset
         , dsSourceOrganization =
             "xxx"
         }
-

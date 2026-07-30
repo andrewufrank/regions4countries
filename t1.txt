@@ -1,0 +1,20 @@
+Build profile: -w ghc-9.10.3 -O1
+In order, the following will be built (use -v for more details):
+ - Regions4Countries-0.0.5 (lib) (first run)
+ - Regions4Countries-0.0.5 (exe:makedb) (first run)
+ - Regions4Countries-0.0.5 (exe:show-indicator) (first run)
+Preprocessing library for Regions4Countries-0.0.5...
+Preprocessing executable 'show-indicator' for Regions4Countries-0.0.5...
+Building library for Regions4Countries-0.0.5...
+Building executable 'show-indicator' for Regions4Countries-0.0.5...
+Preprocessing executable 'makedb' for Regions4Countries-0.0.5...
+Building executable 'makedb' for Regions4Countries-0.0.5...
+[1 of 2] Compiling Main             ( app/makedb/Main.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/x/makedb/build/makedb/makedb-tmp/Main.o )
+[1 of 2] Compiling Main             ( app/show-indicator/Main.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/x/show-indicator/build/show-indicator/show-indicator-tmp/Main.o )
+[2 of 2] Compiling Paths_Regions4Countries ( dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/x/makedb/build/makedb/autogen/Paths_Regions4Countries.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/x/makedb/build/makedb/makedb-tmp/Paths_Regions4Countries.o )
+[2 of 2] Compiling Paths_Regions4Countries ( dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/x/show-indicator/build/show-indicator/autogen/Paths_Regions4Countries.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/x/show-indicator/build/show-indicator/show-indicator-tmp/Paths_Regions4Countries.o )
+[ 1 of 24] Compiling Paths_Regions4Countries ( dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/autogen/Paths_Regions4Countries.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/Paths_Regions4Countries.o, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/Paths_Regions4Countries.dyn_o )
+[ 2 of 24] Compiling R4C.Export.Markdown ( src/R4C/Export/Markdown.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/R4C/Export/Markdown.o, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/R4C/Export/Markdown.dyn_o )
+[ 3 of 24] Compiling R4C.Model        ( src/R4C/Model.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/R4C/Model.o, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/R4C/Model.dyn_o )
+[11 of 24] Compiling R4C.Statistics   ( src/R4C/Statistics.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/R4C/Statistics.o, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/R4C/Statistics.dyn_o )
+[15 of 24] Compiling Study.Config     ( src/Study/Config.hs, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/Study/Config.o, dist-newstyle/build/x86_64-linux/ghc-9.10.3/Regions4Countries-0.0.5/build/Study/Config.dyn_o )

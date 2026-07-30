@@ -85,22 +85,22 @@ regionMembers2 =
  
 regionNames2 :: [TerryName RegionId] --  [Region]
 regionNames2 =
-  [ Terry (RegionId "SAMERICA")      "Südamerika"
-  , Terry (RegionId "USCAN")         "USA & Kanada"
+  [ Terry (RegionId "USCAN")         "USA & Kanada"
+  , Terry (RegionId "SAMERICA")      "Südamerika"
   , Terry (RegionId "EUROPE")        "Europa"
   , Terry (RegionId "RUSSIA")        "Russland"
-  , Terry (RegionId "CHINA")         "China"
-  , Terry (RegionId "INDIA")         "Indien"
-  , Terry (RegionId "JAPAN")         "Japan"
-  , Terry (RegionId "FAREAST")       "Fernost"
-  , Terry (RegionId "CENTRAL_ASIA")  "Zentralasien"
-  , Terry (RegionId "SOUTH_ASIA")    "Südasien"
   , Terry (RegionId "NORTH_AFRICA")  "Nordafrika"
   , Terry (RegionId "SUBSAHARA")     "Subsahara-Afrika"
-  , Terry (RegionId "ANZ")           "Australien & Neuseeland"
   , Terry (RegionId "GULF")          "Golfstaaten"
+  , Terry (RegionId "CENTRAL_ASIA")  "Zentralasien"
+  , Terry (RegionId "INDIA")         "Indien"
+  , Terry (RegionId "FAREAST")       "Fernost"
+  , Terry (RegionId "CHINA")         "China"
+  , Terry (RegionId "JAPAN")         "Japan"
+  , Terry (RegionId "SOUTH_ASIA")    "Südasien"
+  , Terry (RegionId "ANZ")           "Australien & Neuseeland"
   ]
  
 
-
+regionOrder2 = map terryId regionNames2 
 
