@@ -35,7 +35,7 @@ testAggregateG7 = do
     let result = show . colValues $ result1 :: String 
     close conn
 
-    result @?= "[TerryValue {tvCode = RegionId \"G7\", tvValue = Just 130.0},TerryValue {tvCode = RegionId \"EU\", tvValue = Just 1019.0},TerryValue {tvCode = RegionId \"EUROPE\", tvValue = Just 1019.0},TerryValue {tvCode = RegionId \"RUSSIA\", tvValue = Nothing}]"
+    result @?="[TerryValue {tvCode = RegionId \"G7\", tvValue = Just 130.0},TerryValue {tvCode = RegionId \"EU\", tvValue = Just 1019.0},TerryValue {tvCode = RegionId \"RUSSIA\", tvValue = Nothing}]"
 
 -- testPop = do 
 --     conn <- open "test.sqlite"

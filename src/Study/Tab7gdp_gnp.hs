@@ -1,5 +1,4 @@
--- {-# ANN myFunction ("HLint: ignore Use fewer guards" :: String) #-}
--- {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
+
 
 -----------------------------------------------------------------------------
 --

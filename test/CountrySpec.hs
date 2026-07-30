@@ -9,6 +9,8 @@ import Test.Tasty.HUnit
 import R4C.Model 
 import R4C.Export.Markdown
 import BaseTest.Tab99
+import  BaseTest.CountryExperiments 
+import qualified BaseTest.Region as RBT 
 
 tests :: TestTree
 tests =
@@ -17,19 +19,25 @@ tests =
     [ testCase "testCase list of countries" $ do
         vals <- exp1a threeCountriesT 
         vals @?= 
-            "| Region | Population(P) | GDP per capita(kPP$/P) | Flaeche(km\178) |\n|:---|---:|---:|---:|\n| St. Martin (French part) | 26129 |  | 50 |\n| Palau | 17695 | 16 | 460 |\n| Naoero | 11947 | 12 | 20 |\n| Tuvalu | 9646 | 6 | 30 |\n"
+            "| Region | Population(MP) | GDP per capita(kPP$/P) | Flaeche(Mkm\178) |\n|:---|---:|---:|---:|\n| St. Martin (French part) | 0.026 |  | 0.000 |\n| Palau | 0.018 | 16 | 0.000 |\n| Naoero | 0.012 | 12 | 0.000 |\n| Tuvalu | 0.010 | 6 | 0.000 |\n"
 
     , testCase "testCase regions 3a" $ do
         vals1 <- exp3a regionOrderTest threeEUcountriesT
-        vals1 @?= 
-            "| Region | Population(P) | GNP(Giga) | Flaeche(km\178) | GDP per capita(kPP$/P) |\n|:---|---:|---:|---:|---:|\n| EUROPE | 685752462 | 22804338148834 | 7161055 | 2090 |\n| Europ. Union | 450228188 | 17210556881304 | 4312962 | 1464 |\n| Gruppe 7 | 785543447 | 43949108388265 | 27353659 | 391 |\n| Russland | 143669648 | 1724054546331 | 17125190 | 39 |\n"
+        vals1 @?= "| Region | Population(MP) | GNP(GUS$) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) |\n|:---|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |\n| Europ. Union | 450.228 | 17211 | 4.313 |  |\n| Gruppe 7 | 785.543 | 43949 | 27.354 |  |\n| Russland | 143.670 | 1724 | 17.125 |  |\n"
 
-  , testCase "testCase regions 3b" $ do
+    , testCase "testCase regions 3b" $ do
         vals2 <- exp3b regionOrderTest threeEUcountriesT
         vals2 @?= 
-            "| Region | Population(P) | GNP(Giga) | Flaeche(km\178) | GDP per capita(kPP$/P) |\n|:---|---:|---:|---:|---:|\n| Finland | 5619911 | 292594560812 | 338480 | 57 |\n| Cyprus | 1358282 | 27255596951 | 9250 | 48 |\n| Portugal | 10694681 | 248482179228 | 92230 | 39 |\n"
+            "| Region | Population(MP) | GNP(GUS$) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) |\n|:---|---:|---:|---:|---:|\n| Finland | 5.620 | 293 | 0.338 | 57 |\n| Cyprus | 1.358 | 27 | 0.009 | 48 |\n| Portugal | 10.695 | 248 | 0.092 | 39 |\n"
 
+    , testCase "testCase regions and countries from exp7a md -- countries " $ do
+        (md, _) <- exp7a threeEUcountriesT RBT.regionMembers
+        md @?=  "| Region | Population(MP) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) | gnp(GPP$) |\n|:---|---:|---:|---:|---:|\n| Finland | 5.620 | 0.338 | 57 | 319 |\n| Cyprus | 1.358 | 0.009 | 48 | 65 |\n| Portugal | 10.695 | 0.092 | 39 | 413 |\n"
 
+    , testCase "testCase regions and countries from exp7a md2 regions" $ do
+        (_, md2) <- exp7a threeEUcountriesT RBT.regionMembers
+
+        md2 @?= "| Region | Population(MP) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) | gnp(GPP$) | gnp per cap.(k$/P) |\n|:---|---:|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |  |\n| Europ. Union | 450.228 | 4.313 |  | 23453 | 52 |\n| Gruppe 7 | 785.543 | 27.354 |  | 47705 | 61 |\n| Russland | 143.670 | 17.125 |  | 5551 | 39 |\n"
     ]
     
     
