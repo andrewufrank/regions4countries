@@ -63,7 +63,7 @@ exp1 = do
 
     close conn
 
-    let c3 :: _ 
+    let c3 :: [(Dataset, [TerryValue CountryId (WObs Double)])] 
         c3 = [pop3, surf3, fert3]
         c4 = c3 :: [(Dataset, [TerryValue CountryId (WObs Double)])]
 

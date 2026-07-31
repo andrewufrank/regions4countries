@@ -53,6 +53,16 @@ executables:
       - sqlite-simple
       - text
       - uniformBase
+
+  study: 
+    main: Study.hs
+    source-dirs: app/Study 
+    dependencies:
+      - Regions4Countries
+      - sqlite-simple
+      - text
+      - uniformBase
+      
   # sync-datasets:
   #   main: Main.hs
   #   source-dirs: app/sync-datasets

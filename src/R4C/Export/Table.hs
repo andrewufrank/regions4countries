@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeFamilies #-}
 -----------------------------------------------------------------------------
 --
 -- Module      :   R4C.Table
@@ -173,19 +175,72 @@ combineMdTables f xs ys = MdColumn{colValues = xyt
         -- xyScale =  min (colScale xs)   (colScale ys)
 
 -- combineTerryTables
---     :: (Ord t, Show t, Eq t) => (Double -> Double -> Double)
---     -> (TerryTable t v)
---     -> (TerryTable t v)
---     -> (TerryTable t v)
--- | combine two tables with function 
-combineTerryTables f xs ys = 
+--     :: Ord t
+--     => (Double -> Double -> Double)
+--     -> TerryTable t (WObs Double)
+--     -> TerryTable t (WObs Double)
+--     -> TerryTable t (WObs Double)
+-- combineTerryTables f xs ys =
+--     [ TerryValue
+--         { tvCode  = tvCode x
+--         , tvValue = combineMaybe f (tvValue x) (tvValue y)
+--         }
+--     | x <- xs
+--     , Just y <- [Map.lookup (tvCode x) yMap]
+--     ]
+--   where
+--     yMap =
+--         Map.fromList
+--             [ (tvCode y, y)
+--             | y <- ys
+--             ]
+
+-- -------------
+
+
+class CombineVal v where
+    type CombineBase v
+
+    combineMaybe
+        :: (CombineBase v -> CombineBase v -> CombineBase v)
+        -> Maybe v
+        -> Maybe v
+        -> Maybe v
+
+instance CombineVal Double where
+    type CombineBase Double = Double
+
+    combineMaybe f (Just x) (Just y) =
+        Just (f x y)
+
+    combineMaybe _ _ _ =
+        Nothing
+
+instance Eq v => CombineVal (WObs v) where
+    type CombineBase (WObs v) = v
+
+    combineMaybe f
+        (Just (WObs x wx))
+        (Just (WObs y wy))
+      | wx == wy =
+            Just (WObs (f x y) wx)
+
+    combineMaybe _ _ _ =
+        Nothing
+        
+combineTerryTables
+    :: (Ord t, CombineVal v)
+    => (CombineBase v -> CombineBase v -> CombineBase v)
+    -> TerryTable t v
+    -> TerryTable t v
+    -> TerryTable t v
+combineTerryTables f xs ys =
     [ TerryValue
-        { tvCode = r
-        , tvValue  = lift2 f (tvValue x) (tvValue y)
+        { tvCode  = tvCode x
+        , tvValue = combineMaybe f (tvValue x) (tvValue y)
         }
     | x <- xs
     , Just y <- [Map.lookup (tvCode x) yMap]
-    , let r = tvCode x
     ]
   where
     yMap =
@@ -194,14 +249,32 @@ combineTerryTables f xs ys =
             | y <- ys
             ]
 
-    lift2 g (Just a) (Just b) = Just (g a b)
-    lift2 _ _ _               = Nothing
+-- combineTerryTables
+--     :: (Ord t, CombineVal v)
+--     => (CombineBase v -> CombineBase v -> CombineBase v)
+--     -> TerryTable t v
+--     -> TerryTable t v
+--     -> TerryTable t v
+-- combineTerryTables f xs ys =
+--     [ TerryValue
+--         { tvCode  = tvCode x
+--         , tvValue = combineMaybe f (tvValue x) (tvValue y)
+--         }
+--     | x <- xs
+--     , Just y <- [Map.lookup (tvCode x) yMap]
+--     ]
+--   where
+--     yMap =
+--         Map.fromList
+--             [ (tvCode y, y)
+--             | y <- ys
+--             ]
 
-
-sumTerryTables
-    :: (Ord t, Eq t, Show t)
-    => [TerryTable t Double]
-    -> TerryTable t Double
+-- sumTerryTables
+--     :: (Ord t, Eq t, Show t)
+--     => [TerryTable t v]
+--     -> TerryTable t v
+sumTerryTables :: Ord t => [TerryTable t (WObs Double)] -> [TerryValue t (WObs Double)]
 sumTerryTables []       = []
 sumTerryTables [t]      = t
 sumTerryTables (t:u:ts) =

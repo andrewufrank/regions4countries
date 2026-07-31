@@ -74,9 +74,9 @@ mkWeighted valueTable weightTable =
                 Just weight ->
                     WObs <$> value <*> weight
 
-combinesCountryTable3 :: (Ord t, Show t) 
-    => Dataset -> (Double -> Double -> Double) -> (Dataset, TerryTable t Double) -> (Dataset, TerryTable t Double) 
-    -> (Dataset, TerryTable t Double)
+-- combinesCountryTable3 :: (Ord t, Show t) 
+--     => Dataset -> (Double -> Double -> Double) -> (Dataset, TerryTable t Double) -> (Dataset, TerryTable t Double) 
+--     -> (Dataset, TerryTable t Double)
 combinesCountryTable3 dsx f tab1 tab2 = (dsx, combineTerryTables f (snd tab1) (snd tab2))
 
 
