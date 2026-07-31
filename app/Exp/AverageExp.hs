@@ -33,7 +33,7 @@ import R4C.Export.CountnryCodeNames
 import R4C.Export.Table
 import R4C.Pak
 -- import Study.Tab1
-import R4C.Region
+-- import Eins.Region
 import R4C.Territory (regtab3_regtab1, wrapMdCol3)
 
 regionMembersSmall :: RegionMembers  -- [(RegionId, CountryId)]
@@ -63,7 +63,8 @@ exp1 = do
 
     close conn
 
-    let c3 = [pop3, surf3, fert3]
+    let c3 :: _ 
+        c3 = [pop3, surf3, fert3]
         c4 = c3 :: [(Dataset, [TerryValue CountryId (WObs Double)])]
 
         mCountry4 = wrapMdCol3 c4

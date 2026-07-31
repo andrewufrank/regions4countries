@@ -18,7 +18,7 @@ import UniformBase
 import R4C.Country
 import R4C.Territory 
 import R4C.Export.Table 
-
+import qualified Data.Map.Strict as M
 
 lookupRegionTable3 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO RegionTable3
 -- fill for each region a countryTable with only its countries 
@@ -56,22 +56,23 @@ mkUnitWeight =
     convert (TerryValue c mv) =
         TerryValue c (fmap (\v -> WObs v 1) mv)
 
-mkWeighted
-    :: TerryTable CountryId Double
-    -> TerryTable CountryId Double
-    -> TerryTable CountryId (WObs Double)
-mkWeighted =
-    zipWith combine
+mkWeighted valueTable weightTable =
+    map addWeight valueTable
   where
-    combine
-        (TerryValue c1 mv)
-        (TerryValue c2 mw)
-      | c1 /= c2 =
-            error $
-                "mkWeighted: country mismatch: "
-                ++ show c1 ++ " vs " ++ show c2
-      | otherwise =
-            TerryValue c1 (WObs <$> mv <*> mw)
+    weights =
+        M.fromList
+            [ (country, weight)
+            | TerryValue country weight <- weightTable
+            ]
+
+    addWeight (TerryValue country value) =
+        TerryValue country $
+            case M.lookup country weights of
+                Nothing ->
+                    Nothing
+
+                Just weight ->
+                    WObs <$> value <*> weight
 
 combinesCountryTable3 :: (Ord t, Show t) 
     => Dataset -> (Double -> Double -> Double) -> (Dataset, TerryTable t Double) -> (Dataset, TerryTable t Double) 
@@ -79,15 +80,19 @@ combinesCountryTable3 :: (Ord t, Show t)
 combinesCountryTable3 dsx f tab1 tab2 = (dsx, combineTerryTables f (snd tab1) (snd tab2))
 
 
-reg3CountryTable4 :: (Eq ct) => [(rg, [ct])] -> [(Dataset, TerryTable ct (v))] -> [(Dataset, [(rg, TerryTable ct v)] )]
--- construct region tables from country tables 
-reg3CountryTable4 regionMembers tabs   = map (\(ds,tab) -> reg2 ds regionMembers tab) tabs
+reg3CountryTable4 :: (Eq ct) => [(rg, [ct])] -> [(Dataset, TerryTable ct (v))] 
+        -> [(Dataset, [(rg, TerryTable ct v)] )]
+-- construct region tables from country tables, does not aggregate values 
+reg3CountryTable4 regionMembers tabs   = 
+    map (\(ds,tab) -> reg2 ds regionMembers tab) tabs
   where 
-    regTab1pop :: (Eq ct) => TerryTable ct v  -> (rg, [ct]) -> (rg, TerryTable ct v )
+    regTab1pop :: (Eq ct) => TerryTable ct v  -> (rg, [ct]) 
+        -> (rg, TerryTable ct v )
     -- make a single region  taboe 
     regTab1pop tab (reg, cts) =   (reg, countryTable tab cts) 
 
-    reg2 :: (Eq ct) => Dataset ->    [(rg, [ct])] -> TerryTable ct v  ->   (Dataset, [(rg, TerryTable ct v)] )
+    reg2 :: (Eq ct) => Dataset ->    [(rg, [ct])] -> TerryTable ct v  
+        ->   (Dataset, [(rg, TerryTable ct v)] )
     -- make all regions for a dataset  -> RegionTable3 
     reg2  ds regionMembers tab = (ds, map (regTab1pop tab) regionMembers)
 

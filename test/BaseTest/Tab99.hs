@@ -32,6 +32,8 @@ import R4C.Export.CountnryCodeNames
 import qualified Eins.Region3 as R3 
 import R4C.Pak
 import UniformBase 
+import Eins.Region2
+import R4C.Country (lookupCountries)
 
 -- writeTab1Table :: FilePath -> String -> IO ()
 -- writeTab1Table filename contents = do
@@ -73,6 +75,9 @@ threeCountries = [CountryId "MAF",CountryId "PLW",CountryId "NRU",CountryId "TUV
 less1m = map CountryId R3.less1mTax
 
 
+avcountries = map CountryId ["FIN", "CYP", "PRT"] -- "AUT", "BRA", "BGD", "RUS"]
+avregionOrder2 = take 2 $ map terryId regionNames2
+
 exp3 :: IO ()
 exp3 = do 
     _ <- exp3b regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
@@ -87,41 +92,70 @@ exp3a regOrder countries = do
     let regionDef = RBT.regionMembers -- g7, eu, russia 
 
     conn <- open dbPath 
-    let reqYears = [(population, Year 2024), (gnp, Year 2021), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
-    regionCountryTables  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
+    -- let reqYears = [(population, Year 2024), (gnp, Year 2021), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
+     
+    pop3  <- lookupCountryTable3 conn (population)(Year 2024)
+    surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
+    gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
+    gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
     close conn
 
+    let c3 = [pop3, surf3, gdp3, gnp3]  
+        c4 = c3
+    -- type RegionTable3 = (Dataset, [(RegionId, CountryTable)]) -- new format
+
     let 
-        -- mdC :: [MdColumn RegionId Double]
-        mdC = wrapMdCol3 . regtab3_regtab1 $ regionCountryTables 
-    let md1 = markdownTable RBT.regionNames regOrder mdC
-    putStrLn md1 
-    print md1
-    return md1
+        reg4:: [(Dataset, [(RegionId, TerryTable CountryId (WObs Double))])]
+        reg4  = reg3CountryTable4 regionMembers2 c4
+        reg4tot :: [(Dataset, [TerryValue RegionId Double])]
+        reg4tot = regtab3_regtab1 reg4
+
+        mdRegion4 = wrapMdCol3 reg4tot
+        mdRegion = markdownTable regionNames2 avregionOrder2  mdRegion4
+    putStrLn mdRegion
+    print mdRegion
+    return mdRegion
+
+
+    -- mdC :: [MdColumn RegionId Double]
+    --     mdC = wrapMdCol3 c4 
+    -- let md1 = markdownTable RBT.regionNames regOrder mdC
+    -- putStrLn md1 
+    -- print md1
+    -- return md1
+
+exp3bb :: IO ()
+exp3bb = do 
+    _ <- exp3b regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
+    return ()
 
 exp3b :: [RegionId] -> [CountryId] -> IO String
 exp3b regOrder countries = do
     let regionDef = RBT.regionMembers -- g7, eu, russia 
 
     conn <- open dbPath 
-    let reqYears = [(population, Year 2024), (gnp, Year 2021), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
-    regionCountryTables   <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
+    pop3  <- lookupCountryTable3 conn (population)(Year 2024)
+    surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
+    gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
+    gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
     close conn
 
-    let 
-        -- mdC :: [MdColumn RegionId Double]
-        mdC = wrapMdCol3 . regtab3_regtab1 $ regionCountryTables 
-    let md1 = markdownTable RBT.regionNames regOrder mdC
-    putStrLn md1 
+    let c3 = [pop3, surf3, gdp3, gnp3]  
 
-    -- get OneCountry 
-    let regid = RegionId "EU"
-    let euMdC = getOneRegionMany3  regionCountryTables regid
-    let md2 =  (markdownTable allCodeNames countries) $   euMdC --less1m mdC
-    putStrLn  md2 
-    print md1 
-    print md2
-    return md2
+        mdC = wrapMdCol3  c3 
+    let md1 = markdownTable allCodeNames countries mdC
+    putStrLn md1 
+    -- print md1
+    return md1
+
+    -- -- get OneCountry 
+    -- let regid = RegionId "EU"
+    -- let euMdC = getOneRegionMany3  c3 regid
+    -- let md2 =  (markdownTable allCodeNames countries) $   euMdC --less1m mdC
+    -- putStrLn  md2 
+    -- print md1 
+    -- print md2
+    -- return md2
 
 
 -- usableAreaPerCapita1 :: Connection -> IO (MdColumn RegionId Double)

@@ -39,7 +39,7 @@ import R4C.Country (lookupCountries)
 dreiEu = map CountryId ["FIN", "CYP", "PRT"]
 
 exp7 = do   -- get regions from exp1a
-    _ <- exp7a euCountries RBT.regionMembers  -- EU, G7
+    _ <- exp7a dreiEu RBT.regionMembers  -- EU, G7
     return ()
 
 -- exp7 :: [CountryId] -> IO String
@@ -52,7 +52,7 @@ exp7a countries regionDef = do
     conn <- open dbPath 
     -- let  reqYears =  [(population, Year 2024), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
     pop3 <- lookupCountryTable3 conn population (Year 2024)
-    surf3 <- lookupCountryTable3 conn surfaceArea (Year 2024)
+    surf3 <- lookupCountryTable3 conn surfaceArea (Year 2023)
     gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2024)  -- gdp per capita in PP 
 
     close conn
@@ -73,7 +73,7 @@ exp7a countries regionDef = do
     putStrLn md 
 
     let reg4 = reg3CountryTable4 regionDef c4 -- :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
-        reg4tot@[pop4, surf4, _, gnp4] =  regtab3_regtab1 reg4 -- :: [(Dataset, [TerryValue RegionId Double])]
+        reg4tot@[pop4, surf4, gnp4] =  regtab3_regtab1 reg4 -- :: [(Dataset, [TerryValue RegionId Double])]
         -- gnpPC4 = (ds2, combineTerryTables (/) (snd gnp4) (snd pop4))
         gnpPC4 = combinesCountryTable3 ds2 (/)  gnp4 pop4
         ds2 = Dataset{dsExtensive = False
