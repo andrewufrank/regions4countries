@@ -110,6 +110,15 @@ instance ShowCell Double where
             (x / scale2divisor (colScale col))
             ""
 
+instance ShowCell (WObs Double) where
+    showCell :: MdColumn i (WObs Double) -> (WObs Double) -> String
+    showCell col (WObs x _) =
+        showFFloat
+            (Just (colDecimals col))
+            (x / scale2divisor (colScale col))
+            ""
+
+
 instance ShowCell Text where
     showCell :: MdColumn i Text -> Text -> String
     showCell _ = T.unpack

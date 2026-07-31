@@ -110,6 +110,8 @@ lookupTable
     -> IndicatorId
     -> Year
     -> IO CountryTable
+-- lookupTable :: () => Connection -> IndicatorId -> Year -> IO [TerryTable CountryId v]
+-- lookupTable :: (ToField IndicatorId, ToField Year, Show a1, Show Year, Show v) => Connection -> IndicatorId -> Year -> IO [TerryTable CountryId v]
 lookupTable conn ind yr = do 
     res <- query conn
         "SELECT country, value \
@@ -119,7 +121,7 @@ lookupTable conn ind yr = do
     if length res == 0 
         then putStrLn ("lookupTable empty for " ++ show ind ++ show yr)
         else putStrLn ("lookupTable for " ++ show ind)
-    return res
+    return res -- :: IO [TerryTable CountryId v]
 ------------------------------------------------------Country record 
 insertCountry
     :: Connection

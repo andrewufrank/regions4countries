@@ -21,6 +21,7 @@ import qualified Statistics.Correlation as C
 -- import Data.List  
 -- import R4C.Territory 
 import Data.List (sort)
+import R4C.Model (WObs(..))
 --------------------------- statistics on list of [Doubles] or [(Double,Double)]
 --  returns nothing on empty list (or other reasons noe computable )
 
@@ -66,11 +67,27 @@ stdDev1 xs =
 
 wAverage1 :: [(Double, Double)] -> Maybe Double 
 -- weighted average of non empty list; weight is second!
-
 wAverage1 [] = Nothing 
 wAverage1 xsws = Just $ (sum . zipWith (*) 
          (map fst xsws) $ (map snd xsws)) / (sum . map snd $ xsws)
 
+wAverage2 :: [WObs Double] -> Maybe Double 
+-- weighted average of non empty list; weight is second!
+wAverage2 [] = Nothing 
+wAverage2 xsws = wAverage1 $ map  (\x -> (wobs x, wobs x * ww x)) xsws
+
+-- Just $ (sum . zipWith (*) 
+        --  (map wobs xsws) $ (map ww xsws)) / (sum . map ww $ xsws)
+
+class Average a v where 
+    avg :: [a ] -> Maybe v
+
+instance Average Double Double where
+    avg :: [Double] -> Maybe Double 
+    avg = mean1
+instance Average (WObs Double) Double where
+    avg :: [WObs Double] -> Maybe Double 
+    avg = wAverage2 
 
 toVectors
     :: [(Double, Double)]

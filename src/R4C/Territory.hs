@@ -80,14 +80,16 @@ wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName dataset
 -- regtab3_regtab1 (ds, tab) = (ds, sumCountryTables tab)
 -- regtab3_regtab1 :: [(a, [(rt, TerryTable ct v)])] -> [(a, [TerryValue rt v])]
 -- sum the countrytables to produce region lines 
--- must not be used for intensional values
-regtab3_regtab1 :: [(Dataset, [(t1, [TerryValue t2 Double])])] -> [(Dataset, [TerryValue t1 Double])]
+-- canbe use for weighted averge
+-- regtab3_regtab1 :: [(Dataset, [(t1, [TerryValue t2 v])])] -> [(Dataset, [TerryValue t1 v])]
+regtab3_regtab1 :: [(a, [(t1, [TerryValue t2 (WObs Double)])])] -> [(a, [TerryValue t1 Double])]
 regtab3_regtab1 dstabs = map  oneTab3 dstabs
 
-oneTab3 :: (Dataset, [(t1, [TerryValue t2 Double])]) -> (Dataset, [TerryValue t1 Double])
-oneTab3 (ds, tab) = (ds, sumCountryTables2 isExtensive tab) 
+-- oneTab3 :: (Dataset, [(t1, [TerryValue t2 Double])]) -> (Dataset, [TerryValue t1 Double])
+oneTab3 :: (a, [(t1, [TerryValue t2 (WObs Double)])]) -> (a, [TerryValue t1 Double])
+oneTab3 (ds, tab) = (ds, sumCountryTables2  tab) 
 -- (\(ds,tab) -> (ds, val) dstabs
-    where   isExtensive   = dsExtensive ds 
+    -- where   isExtensive   = dsExtensive ds 
             -- val = if dsExtensive then sumCountryTables tab else tNothing 
 
 aggregateTery2
@@ -98,7 +100,8 @@ aggregateTery2
     -- -> RegionId
     -> TerryValue RegionId  Double
 -- | aggregation of a table lowest level
-aggregateTery2 op table  = TerryValue (fst table) ( op . catMaybes . map tvValue . snd $ table)
+aggregateTery2 op table  = TerryValue 
+    { tvCode = (fst table), tvValue = (op . catMaybes . map tvValue . snd $ table) }
 --   where
 
 aggregateTerry3    :: ([Double] -> Maybe Double)
@@ -110,16 +113,16 @@ aggregateTerry3 op regionTab = map (aggregateTery2 op) (snd regionTab)
 -- sumCountryTables :: [(rt, TerryTable ct v)] -> [TerryValue rt v ] 
 -- sum the values (must be extensional) in the country table 
 -- and produce the sinle region value 
-sumCountryTables2 :: Bool -> [(t1, [TerryValue t2 Double])] -> [TerryValue t1 Double]
-sumCountryTables2 ext rct = map (oneRow ext) rct 
+-- sumCountryTables2 :: Bool -> [(t1, [TerryValue t2 Double])] -> [TerryValue t1 Double]
+sumCountryTables2 :: [(t1, [TerryValue t2 (WObs Double)])] -> [TerryValue t1 Double]
+sumCountryTables2  rct = map (oneRow ) rct 
     where
 
 -- oneRow :: (rt, TerryTable ct v) -> TerryValue rt v
-oneRow :: Bool -> (t1, [TerryValue t2 Double]) -> TerryValue t1 Double
-oneRow ext (r, ct) =  TerryValue {tvCode = r, tvValue =  if ext 
-                then sum1 . catMaybes . map tvValue $ ct 
-                else Nothing 
-                }
+-- oneRow :: Bool -> (t1, [TerryValue t2 Double]) -> TerryValue t1 Double
+oneRow :: (t1, [TerryValue t2 (WObs Double)]) -> TerryValue t1 Double
+oneRow (r, ct) =  TerryValue {tvCode = r, tvValue = wAverage2 . catMaybes . map tvValue $ ct }
+                
 
 
   

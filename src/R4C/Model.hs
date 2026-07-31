@@ -178,7 +178,7 @@ type RegionName = TerryName RegionId
 
 type CountryValue = TerryValue CountryId Double 
 type CountryTable = TerryTable CountryId ( Double)
-type CountryTable3 = (Dataset, TerryTable CountryId ( Double))
+type CountryTable3 = (Dataset, TerryTable CountryId (WObs Double))
 
 type RegionValue = TerryValue RegionId Double  -- RegionValueX Double 
 type RegionTable  = MdColumn RegionId Double  -- TerryTable RegionId ( Double) -- [RegionValue]
@@ -194,6 +194,10 @@ type CountryPairs = [(CountryValue, CountryValue)]
 type RegionPairs = [(RegionValue, RegionValue)]
 
 type TerryPairs t v  = [(TerryValue t v, TerryValue t v )]
+
+data WObs v = WObs {wobs :: v, ww :: v}
+    deriving (Eq, Ord, Show)
+-- | Weighted Observation 
 
 data Scale = Kilo | Mega | Giga | Tera | Centi | Unit | Milli| Micro | Nano | Pico deriving (Eq, Ord, Show )
 

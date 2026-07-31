@@ -20,10 +20,9 @@ build-type:     Simple
 
 library
   exposed-modules:
-      BaseTest.CountryExperiments
       BaseTest.Region
-      BaseTest.Tab99
       R4C.Aggregate
+      R4C.AverageExp
       R4C.Country
       R4C.Export.CountnryCodeNames
       R4C.Export.Markdown
@@ -41,8 +40,6 @@ library
       Study.Config
       Study.Descriptor
       Study.Region2
-      Study.Tab1
-      Study.Tab7gdp_gnp
   other-modules:
       Paths_Regions4Countries
   hs-source-dirs:

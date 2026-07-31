@@ -28,16 +28,16 @@ migrationNet :: Dataset
 migrationNet =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "SM.POP.NETM"}
-        , dsShortName = "Netto Migration (Persons)"
-        , dsName = "Net migration"
+        , dsShortName = "Netto Migration"
+        , dsName = "Net migration per Year"
         , dsDefinition =
             "Net migration is the net total of migrants during the"
             <> " period, that is, the number of immigrants minus the number"
             <> " of emigrants, including both citizens and noncitizens."
-        , dsUnit = "TODO"
+        , dsUnit = "P/y"
         , dsAggregation = Sum
         , dsDecimals = 0
-        , dsScale = Unit
+        , dsScale = Kilo
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
@@ -96,9 +96,9 @@ fertilityRate =
             <> " end of her childbearing years and bear children in"
             <> " accordance with age-specific fertility rates of the"
             <> " specified year."
-        , dsUnit = "TODO"
+        , dsUnit = "P/woman"
         , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
-        , dsDecimals = 0
+        , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
@@ -221,15 +221,15 @@ urban = Dataset
             "xxx"
         }
 
-usableArxeaPerCapita = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+populationGrowthRate = Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "SP.POP.GROW"}
+        , dsShortName = "Wachstum Bevoelkerung"
+        , dsName = "population growth annual "
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
+        , dsUnit = "%"
         , dsAggregation = WeightedBy (IndicatorId "xxx")
-        , dsDecimals = 0
+        , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
