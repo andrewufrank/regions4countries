@@ -17,8 +17,8 @@ import Database.SQLite.Simple  -- for debug
 -- import Study.Indicator 
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
-import Study.Config 
-import Study.Descriptor
+import Eins.Config 
+import Eins.Descriptor
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
@@ -28,11 +28,12 @@ import R4C.Import.Database
 -- import R4C.Export.CountryTable
 import R4C.Export.Table 
 import R4C.Export.CountnryCodeNames
-import qualified R4C.Region3 as R3 
-import qualified BaseTest.Region as RBT 
-import BaseTest.Region (regionOrder)
+import qualified Eins.Region3 as R3 
+import qualified Eins.Region as RBT 
+import Eins.Region (regionOrder)
 import R4C.Territory
 import R4C.Pak 
+import R4C.Country (lookupCountries)
 
 
 dreiEu = map CountryId ["FIN", "CYP", "PRT"]
@@ -49,26 +50,30 @@ exp7 = do   -- get regions from exp1a
 exp7a :: [CountryId] -> [(RegionId, [CountryId])] -> IO (String, String)
 exp7a countries regionDef = do
     conn <- open dbPath 
-    let  reqYears =  [(population, Year 2024), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
+    -- let  reqYears =  [(population, Year 2024), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
+    pop3 <- lookupCountryTable3 conn population (Year 2024)
+    surf3 <- lookupCountryTable3 conn surfaceArea (Year 2024)
+    gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2024)  -- gdp per capita in PP 
 
-    c3@[pop3, surf3, gdp3] :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
     close conn
+    let c3 = [pop3, surf3, gdp3] 
 
-    let gpc4 :: CountryTable3 
-        gpc4 = (ds1, combineTerryTables (*) (snd gdp3) (snd pop3))
-        ds1 = Dataset{dsShortName ="gnp"
-                    , dsScale = Giga
-                    , dsUnit = "PP$"
-                    , dsDecimals = 0 
-                    , dsExtensive = True}        
-        c4 = c3 ++ [gpc4]  -- the countries with difference between GDP and GNP (cyprus, ireland, luxemburg, malta)
+    -- let -- gpc4 :: CountryTable3 
+    --     gpc4 = (ds1, combineTerryTables (*) (snd gdp3) (snd pop3))
+    --     ds1 = Dataset{dsShortName ="gnp"
+    --                 , dsScale = Giga
+    --                 , dsUnit = "PP$"
+    --                 , dsDecimals = 0 
+    --                 , dsExtensive = True}        
+        c4 = c3 
+         -- ++ [gpc4]  -- the countries with difference between GDP and GNP (cyprus, ireland, luxemburg, malta)
 -- the operations on the tables must be with the mdcol data!
         mc4 = wrapMdCol3 c4
     let md = markdownTable allCodeNames countries mc4  --less1m mdC
     putStrLn md 
 
-    let reg4 = reg3CountryTable4 regionDef c4 :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
-        reg4tot@[pop4, surf4, _, gnp4] =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
+    let reg4 = reg3CountryTable4 regionDef c4 -- :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
+        reg4tot@[pop4, surf4, _, gnp4] =  regtab3_regtab1 reg4 -- :: [(Dataset, [TerryValue RegionId Double])]
         -- gnpPC4 = (ds2, combineTerryTables (/) (snd gnp4) (snd pop4))
         gnpPC4 = combinesCountryTable3 ds2 (/)  gnp4 pop4
         ds2 = Dataset{dsExtensive = False

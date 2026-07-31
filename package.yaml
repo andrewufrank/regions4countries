@@ -1,5 +1,5 @@
 name:  Regions4Countries         
-version: 0.0.5
+version: 0.0.6
 license:      GPL
 license-file: LICENSE
 #github:       andrewufrank/u4blog.git/daino
@@ -40,6 +40,14 @@ executables:
   show-indicator:
     main: Main.hs
     source-dirs: app/show-indicator
+    dependencies:
+      - Regions4Countries
+      - sqlite-simple
+      - text
+      - uniformBase
+  exp:
+    main: AverageExp.hs
+    source-dirs: app/Exp
     dependencies:
       - Regions4Countries
       - sqlite-simple

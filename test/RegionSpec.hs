@@ -4,10 +4,10 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import R4C.Model
-import R4C.Region3
+import Eins.Region3
 import R4C.Aggregate
 -- import Study.Region2 
-import BaseTest.Region
+import Eins.Region
 
 
 tests :: TestTree

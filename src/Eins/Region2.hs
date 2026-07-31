@@ -4,7 +4,7 @@
 -- the definitions of the regions 
 -----------------------------------------------------------------------------
 
-module Study.Region2
+module Eins.Region2
   where
 
 import R4C.Model

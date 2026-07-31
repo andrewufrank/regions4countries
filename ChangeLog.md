@@ -1,7 +1,9 @@
 # ChangeLog for EconomyDiffEq
+0.0.6 use app more
 
 0.0.5 changed the organisation of the region table to include the data and summmarize later 
     removed the automatic management of database descriptive records
+    braught back weighted average (as generalization, normal case is weght ==)
     
 0.0.4 add the country name etc. to the database 
     all tables have (Maybe Double) to indicate where observations are missing

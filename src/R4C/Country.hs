@@ -11,8 +11,8 @@ import Database.SQLite.Simple
 import R4C.Model
 import R4C.Import.Instances
 import R4C.Import.Database
-import Study.Config 
-import Study.Descriptor
+import Eins.Config 
+import Eins.Descriptor
 import Data.List 
 import UniformBase
 

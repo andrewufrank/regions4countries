@@ -4,7 +4,7 @@
 -- the definitions of the regions 
 -----------------------------------------------------------------------------
 
-module BaseTest.Region
+module Eins.Region
     where
 
 import R4C.Model

@@ -10,7 +10,7 @@ import R4C.Model
 import R4C.Export.Markdown
 import BaseTest.Tab99
 import  BaseTest.CountryExperiments 
-import qualified BaseTest.Region as RBT 
+import qualified Eins.Region as RBT 
 
 tests :: TestTree
 tests =

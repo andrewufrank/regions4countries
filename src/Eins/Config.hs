@@ -6,7 +6,7 @@
 
 -----------------------------------------------------------------------------
 
-module Study.Config  where
+module Eins.Config  where
 
 databaseFolder = "/home/frank/afWorldDB/"
 

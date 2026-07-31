@@ -18,18 +18,18 @@ import R4C.Import.Query
 import R4C.Export.Table 
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
-import Study.Config 
-import Study.Descriptor
+import Eins.Config 
+import Eins.Descriptor
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
-import BaseTest.Region
-import qualified BaseTest.Region as RBT 
+import Eins.Region
+import qualified Eins.Region as RBT 
 import R4C.Import.Database 
 import R4C.Territory 
 import R4C.Export.CountnryCodeNames
-import qualified R4C.Region3 as R3 
+import qualified Eins.Region3 as R3 
 import R4C.Pak
 import UniformBase 
 
@@ -53,6 +53,7 @@ exp1t = exp1a threeCountries
 
 exp1a :: [CountryId] -> IO String
 -- countries is what is included in printed list 
+-- the gdp should be averaged ok automatically 
 exp1a countries= do
     conn <- open dbPath 
     let req = [population, gdpPPpc, surfaceArea]  -- gnpPPpc is not extensional 
@@ -87,10 +88,11 @@ exp3a regOrder countries = do
 
     conn <- open dbPath 
     let reqYears = [(population, Year 2024), (gnp, Year 2021), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
-    regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
+    regionCountryTables  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
     close conn
 
-    let mdC :: [MdColumn RegionId Double]
+    let 
+        -- mdC :: [MdColumn RegionId Double]
         mdC = wrapMdCol3 . regtab3_regtab1 $ regionCountryTables 
     let md1 = markdownTable RBT.regionNames regOrder mdC
     putStrLn md1 
@@ -103,10 +105,11 @@ exp3b regOrder countries = do
 
     conn <- open dbPath 
     let reqYears = [(population, Year 2024), (gnp, Year 2021), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
-    regionCountryTables :: [RegionTable3]  <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
+    regionCountryTables   <- mapM (\(d,y) -> lookupRegionTable3 conn regionDef d y) reqYears
     close conn
 
-    let mdC :: [MdColumn RegionId Double]
+    let 
+        -- mdC :: [MdColumn RegionId Double]
         mdC = wrapMdCol3 . regtab3_regtab1 $ regionCountryTables 
     let md1 = markdownTable RBT.regionNames regOrder mdC
     putStrLn md1 

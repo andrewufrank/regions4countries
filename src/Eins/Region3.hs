@@ -5,20 +5,21 @@
 
 -----------------------------------------------------------------------------
 
-module R4C.Region3
+module Eins.Region3
     where
+
 
 import R4C.Model
 import qualified Data.Text as T
 import Database.SQLite.Simple  -- for debug
 -- import Study.Indicator 
-import Study.Region2 
+-- import Study.Region2 
 -- import R4C.Aggregate 
 import R4C.Import.Query
 import GHC.IO.Handle.Types (Handle__)
 import GHC.Generics (Generic1(to1))
-import Study.Config 
-import           Study.Descriptor
+-- import Study.Config 
+-- import           Study.Descriptor
 import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
@@ -30,7 +31,7 @@ import R4C.Import.Database
 import R4C.Export.CountnryCodeNames
 import qualified Data.Set as Set
 -- import R4C.CountryExperiments
-
+import Eins.Region2
 import Data.List (intercalate)
 import Data.Text (unpack)
 

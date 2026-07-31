@@ -1,5 +1,5 @@
 -- | The editable, generated registry for this study.
-module Study.Descriptor where
+module Eins.Descriptor where
 
 import Data.List (find)
 

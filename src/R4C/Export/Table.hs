@@ -172,11 +172,11 @@ combineMdTables f xs ys = MdColumn{colValues = xyt
         -- xyUnit = colUnit xs <> " op " <> colUnit ys
         -- xyScale =  min (colScale xs)   (colScale ys)
 
-combineTerryTables
-    :: (Ord t, Show t, Eq t) => (Double -> Double -> Double)
-    -> (TerryTable t Double)
-    -> (TerryTable t Double)
-    -> (TerryTable t Double)
+-- combineTerryTables
+--     :: (Ord t, Show t, Eq t) => (Double -> Double -> Double)
+--     -> (TerryTable t v)
+--     -> (TerryTable t v)
+--     -> (TerryTable t v)
 -- | combine two tables with function 
 combineTerryTables f xs ys = 
     [ TerryValue
