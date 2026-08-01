@@ -23,12 +23,15 @@ import UniformBase
 makePakExtensive ::
     Connection ->
     Pak CountryId (WObs Double) ->
-    Dataset -> Year ->
+    Dataset ->
+    Year ->
     IO ((Pak CountryId (WObs Double)))
--- | make the dataset ds1 extensive with the weightq
--- from the weightIndicator 
--- and the same year 
--- it will have the descriptor based on newDescriptor
+
+{- | make the dataset ds1 extensive with the weightq
+from the weightIndicator
+and the same year
+it will have the descriptor based on newDescriptor
+-}
 makePakExtensive conn pak1@(ds1, table) newDescriptor yearDs =
     case dsAggregation ds1 of
         Sum -> do
@@ -52,13 +55,16 @@ makePakExtensive conn pak1@(ds1, table) newDescriptor yearDs =
             makePakExtensive2
                 conn
                 pak1
-                newDescriptor yearDs weightIndicator
+                newDescriptor
+                yearDs
+                weightIndicator
 
 makePakExtensive2 ::
     Connection ->
     Pak CountryId (WObs Double) ->
-    Dataset -> Year -> 
-    IndicatorId -> 
+    Dataset ->
+    Year ->
+    IndicatorId ->
     IO ((Pak CountryId (WObs Double)))
 makePakExtensive2 conn p1@(ds1, tab1) newDescriptor year weightIndicatorId = do
     putIOwords
@@ -88,8 +94,8 @@ makePakExtensive2 conn p1@(ds1, tab1) newDescriptor year weightIndicatorId = do
                 , dsExtensive = True
                 , dsLastYear = Just year
                 }
-    -- let tab1double = dropUnitWeight tab1 
-    newTab <- createTableExtensive conn tab1  weightIndicatorId year
+    -- let tab1double = dropUnitWeight tab1
+    newTab <- createTableExtensive conn tab1 weightIndicatorId year
     -- let newPak = case newPak of
     --         Nothing ->
     --             putIOwords
@@ -97,22 +103,32 @@ makePakExtensive2 conn p1@(ds1, tab1) newDescriptor year weightIndicatorId = do
     --                     "new createTableExtensive"
     --                 , showT . dsIndicator $ intensiveDs
     --                 ]
-    --             return Nothing 
+    --             return Nothing
     --         Just n -> return $ Just (extensiveDs, n) -- TODO
     return (extensiveDs, newTab)
 
-lookupRegionTable3 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO RegionTable3
+lookupRegionTable3 ::
+    Connection ->
+    [(RegionId, [CountryId])] ->
+    Dataset ->
+    Year ->
+    IO RegionTable3
 -- fill for each region a countryTable with only its countries
 lookupRegionTable3 conn regionDef ds yr = do
     worldTab <- lookupTable conn (dsIndicator ds) yr
-    let regTab = (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
+    let regTab =
+            (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
     return regTab
 
 -- lookupCountryTable3 :: Connection ->   Dataset -> Year -> IO CountryTable3
 -- fill for each region a countryTable with only its countries
 -- lookupCountryTable3 :: Connection -> Dataset -> Year -> IO (Dataset, [TerryValue CountryId ( Double)])
 
-lookupCountryTable3 :: Connection -> Dataset -> Year -> IO (Dataset, [TerryValue CountryId (WObs Double)])
+lookupCountryTable3 ::
+    Connection ->
+    Dataset ->
+    Year ->
+    IO (Dataset, [TerryValue CountryId (WObs Double)])
 -- lookupCountryTable3 :: Connection -> Dataset -> Year -> IO (Dataset, [TerryValue CountryId v])
 lookupCountryTable3 conn ds yr = do
     case dsAggregation ds of
@@ -124,7 +140,8 @@ lookupCountryTable3 conn ds yr = do
         WeightedBy indicatorId -> do
             worldTab <- lookupTable conn (dsIndicator ds) yr
             weightTab <- lookupTable conn indicatorId yr -- issue TODO ??
-            let combTab = mkWeighted worldTab weightTab :: [TerryValue CountryId (WObs Double)]
+            let combTab =
+                    mkWeighted worldTab weightTab :: [TerryValue CountryId (WObs Double)]
                 ctTab = (ds, combTab)
             return ctTab
 
