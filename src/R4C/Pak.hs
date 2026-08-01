@@ -17,8 +17,88 @@ import R4C.Import.Database
 import UniformBase
 import R4C.Country
 import R4C.Territory 
-import R4C.Export.Table 
+import R4C.Export.Table ( combineTerryTables ) 
 import qualified Data.Map.Strict as M
+import UniformBase 
+
+makePakExtensive
+    :: Connection
+    -> Pak CountryId (WObs Double)
+    -> Dataset 
+    -> IO ( (Pak CountryId (WObs Double)))
+makePakExtensive conn pak1@(ds, table) newDs =
+    case dsAggregation ds of
+        Sum -> do
+            putIOwords
+                [ "makePakExtensive not required, "
+                , dsShortName ds
+                , showT $ dsIndicator ds
+                , " is extensive", "same pak returned - fix code!"
+                ]
+            pure pak1
+
+        WeightedBy weightIndicator -> do
+            putIOwords
+                [ "makePakExtensive required, "
+                , dsShortName ds
+                , showT $ dsIndicator ds
+                , " is weighted by "
+                , showT weightIndicator
+                ]
+
+            makePakExtensive2
+                conn
+                pak1
+                newDs
+
+makePakExtensive2 :: Connection -> Pak CountryId (WObs Double) -> Dataset 
+            -> IO ( (Pak CountryId (WObs Double)))
+makePakExtensive2 conn p1@(weightDs, tab1) intensiveDs = do 
+    putIOwords ["makeTerryTableExtensive", showT . dsIndicator $ ds1, 
+                    "to", showT . dsIndicator $ intensiveDs]
+    let extensiveDs =
+            intensiveDs
+                { dsIndicator =
+                    IndicatorId
+                        ( "extensive of "
+                            <> unIndicatorId (dsIndicator intensiveDs)
+                        )
+                , dsShortName =
+                    dsShortName intensiveDs <> " extensive"
+                , dsDefinition =
+                    "Extensive value calculated by multiplying "
+                        <> dsShortName intensiveDs
+                        <> " by "
+                        <> dsShortName weightDs
+                , dsUnit = dsUnit intensiveDs
+                , dsAggregation = Sum
+                , dsDecimals = 0
+                , dsScale = Unit
+                , dsExtensive = True
+                , dsLastYear = dsLastYear intensiveDs
+                }
+    newTab <- createTableExtensive conn tab1 
+    let newPak = case newPak of 
+            Nothing -> errorT ["makePakExtensive2" 
+                        "new createTableExtensive",
+                         showT . dsIndicator $ intensiveDs] 
+            Just n -> return  (extensiveDs, n)   -- TODO 
+            
+    return newPak 
+
+createTableExtensive
+    :: Connection
+    -> TerryTable CountryId (WObs Double)
+    -> Year 
+    -> IO (TerryTable CountryId (WObs Double))
+createTableExtensive conn table weightYear = do
+    weightDs <- lookupCountryTable3 conn weightIndicator Year
+
+    weightPak <- lookupCountryTable3 conn weightDs weightYear
+    pure . snd $ weightDs
+
+
+
 
 lookupRegionTable3 :: Connection -> [(RegionId, [CountryId])] -> Dataset -> Year -> IO RegionTable3
 -- fill for each region a countryTable with only its countries 
@@ -101,3 +181,6 @@ reg3CountryTable4 regionMembers tabs   =
 
 -- reg3CountryTable3 :: (Eq ct) => [(rg, [ct])] -> (Dataset, TerryTable ct ( v)) -> (Dataset, [(rg, TerryTable ct v)] )
 -- reg3CountryTable3 regionMembers (ds, tab)  = reg2 ds regionMembers tab 
+
+
+    

@@ -70,7 +70,8 @@ oneRT3 (ds , (t)) = wrapMdCol ds t
 
 
 wrapMdCol :: Dataset -> TerryTable t v -> MdColumn t v
-wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName dataset 
+wrapMdCol dataset ct = MdColumn {colTitle =   t2s $ dsShortName 
+ 
                     , colScale = dsScale dataset
                     , colUnit =  dsUnit dataset 
                     , colDecimals =  dsDecimals dataset

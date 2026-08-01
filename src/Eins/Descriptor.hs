@@ -144,7 +144,7 @@ agriPercent = Dataset
         , dsDefinition =
             "Txxx"
         , dsUnit = "%"
-        , dsAggregation = Sum -- WeightedBy (IndicatorId "xxyy")
+        , dsAggregation = WeightedBy (IndicatorId "xxyy")
         , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False
@@ -160,7 +160,7 @@ xxx3 = Dataset
         , dsDefinition =
             "Txxx"
         , dsUnit = "%"
-        , dsAggregation = Sum -- WeightedBy (IndicatorId "xxyy")
+        , dsAggregation = WeightedBy (IndicatorId "AG.SRF.TOTL.K2")
         , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False

@@ -20,6 +20,7 @@ import qualified Data.Map.Strict as Map
 import UniformBase 
 import qualified Data.Map.Strict as Map
 import Data.List (foldl')
+-- import R4C.Pak
 
 -- type Column a = [(RegionId, Maybe a)]
 
@@ -236,7 +237,8 @@ instance (Eq v, Num v) => CombineVal (WObs v) where
 
     combineMaybe _ _ _ =
         Nothing
-        
+
+
 combineTerryTables
     :: (Ord t, CombineVal v)
     => (CombineBase v -> CombineBase v -> CombineBase v)

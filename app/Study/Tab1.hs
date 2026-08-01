@@ -82,7 +82,8 @@ getData11 = do
 
     -- compute agricultural land area
     let agri3 :: CountryTable3
-        agri3 = (agriLand, combineTerryTables (fromPercent) (snd agriPerc3) (snd surf3))
+        -- agri3 = (agriLand, combineTerryTables (fromPercent) (snd agriPerc3) (snd surf3))
+        agri3 = (agriland, makeTerryTableExtensive agriPerc3)
         use3 = (useableLand, sumTerryTables $ map snd [forest3, urban3, agri3])
         c4 = c3 ++ [agri3, use3]:: [CountryTable3]
 
