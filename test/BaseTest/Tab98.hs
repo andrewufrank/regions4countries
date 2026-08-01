@@ -5,7 +5,7 @@
 -- the population, the surface, gnp . 
 -- compare gnpPC with gnp/pop 
 -- within the region: standard dev. for surface per person
-
+-- here try convert to extensive - for gdpPC
 -----------------------------------------------------------------------------
 
 module BaseTest.Tab99
@@ -35,55 +35,31 @@ import R4C.Pak
 import Eins.Region2
 import R4C.Country (lookupCountries)
 
-exp1 = do 
-    _ <- exp1a less1m 
-    return ()
-exp1t = exp1a threeCountries
-
-exp1a :: [CountryId] -> IO String
--- countries is what is included in printed list 
--- the gdp should be averaged ok automatically 
-exp1a countries= do
-    conn <- open dbPath 
-    let req = [population, gdpPPpc, surfaceArea]  -- gnpPPpc is not extensional 
-        years = map Year [2024, 2021, 2023]
-        reqYears = zip ( req) years-- :: [(Dataset, Year)]
-    countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
-    close conn
-
-    let mdC = wrapMdCol3 countryTables
--- the operations on the tables must be with the mdcol data! 
-    let md = markdownTable allCodeNames countries mdC  --less1m mdC
-    putStrLn md 
-    print md
-    return (md)
-
 threeCountries = [CountryId "MAF",CountryId "PLW",CountryId "NRU",CountryId "TUV"]
 less1m = map CountryId R3.less1mTax
 
 
-avcountries = map CountryId ["FIN", "CYP", "PRT",  "AUT", "BRA", "BGD", "RUS"]
-avregionOrder2 = take 4 $ map terryId regionNames2
+avcountries = map CountryId ["FIN", "CYP", "PRT"] -- "AUT", "BRA", "BGD", "RUS"]
+avregionOrder2 = take 2 $ map terryId regionNames2
 
-exp3 :: IO ()
--- checks weighted average for gdpPC 
-exp3 = do 
-    _ <- exp3a regionOrder  (map CountryId ["FIN", "CYP", "USA",  "AUT", "BRA", "BGD", "RUS"])  
+exp5 :: IO ()
+exp5 = do 
+    _ <- exp5b regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
     return ()
 
--- exp3 :: IO ()  
+-- exp5 :: IO ()  
 -- | show all countries with popuplation surface and GNP
--- exp3a :: [RegionId] -> [CountryId] -> IO (String, String)
+-- exp5a :: [RegionId] -> [CountryId] -> IO (String, String)
 -- regOrder and countries list what is include in result
-exp3a :: [RegionId] -> p -> IO String
-exp3a regOrder countries = do
+exp5a :: [RegionId] -> p -> IO String
+exp5a regOrder countries = do
     let regionDef = RBT.regionMembers -- g7, eu, russia 
 
     conn <- open dbPath 
     let reqYears = [(population, Year 2024)
                     , (gnp, Year 2021)
                     , (surfaceArea, Year 2023)
-                    , (gdpPPpc, Year 2021)]  -- intensional, weighted by population
+                    , (gdpPPpc, Year 2021)]
     [pop3, surf3, gdp3, gnp3] <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
     -- pop3  <- lookupCountryTable3 conn (population)(Year 2024)
     -- surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
@@ -104,7 +80,7 @@ exp3a regOrder countries = do
         mdRegion4 = wrapMdCol3 reg4tot
         mdRegion = markdownTable regionNames2 avregionOrder2  mdRegion4
     putStrLn mdRegion
-    -- print mdRegion
+    print mdRegion
     return mdRegion
 
 
@@ -115,35 +91,35 @@ exp3a regOrder countries = do
     -- print md1
     -- return md1
 
-exp4 :: IO ()
-exp4 = do 
-    _ <- exp3b regionOrder  (map CountryId ["FIN", "CYP", "USA",  "AUT", "BRA", "BGD", "RUS"])  
-    return ()
+-- exp6 :: IO ()
+-- exp6 = do 
+--     _ <- exp6b regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
+--     return ()
 
-exp3b :: [RegionId] -> [CountryId] -> IO String
-exp3b regOrder countries = do
-    let regionDef = RBT.regionMembers -- g7, eu, russia 
+-- exp6b :: [RegionId] -> [CountryId] -> IO String
+-- exp6b regOrder countries = do
+--     let regionDef = RBT.regionMembers -- g7, eu, russia 
 
-    conn <- open dbPath 
-    let reqYears = [(population, Year 2024), 
-                    (surfaceArea, Year 2023), 
-                    (gnp, Year 2021), 
-                    (gdpPPpc, Year 2021)]
-    [pop3, surf3, gnp3, gdp3] <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
+--     conn <- open dbPath 
+--     let reqYears = [(population, Year 2024), 
+--                     (surfaceArea, Year 2023), 
+--                     (gnp, Year 2021), 
+--                     (gdpPPpc, Year 2021)]
+--     [pop3, surf3, gnp3, gdp3] <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
 
-    -- pop3  <- lookupCountryTable3 conn (population)(Year 2024)
-    -- surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
-    -- gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
-    -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
-    close conn
+--     -- pop3  <- lookupCountryTable3 conn (population)(Year 2024)
+--     -- surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
+--     -- gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
+--     -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
+--     close conn
 
-    let c3 = [pop3, surf3, gdp3, gnp3]  
+--     let c3 = [pop3, surf3, gdp3, gnp3]  
 
-        mdC = wrapMdCol3  c3 
-    let md1 = markdownTable allCodeNames countries mdC
-    putStrLn md1 
-    -- print md1
-    return md1
+--         mdC = wrapMdCol3  c3 
+--     let md1 = markdownTable allCodeNames countries mdC
+--     putStrLn md1 
+--     -- print md1
+--     return md1
 
 
 -- writeTab1Table :: FilePath -> String -> IO ()

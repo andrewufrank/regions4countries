@@ -40,6 +40,7 @@ library
       R4C.Pak
       R4C.Statistics
       R4C.Territory
+      R4C.TerryTable
   other-modules:
       Paths_Regions4Countries
   hs-source-dirs:

@@ -12,28 +12,28 @@
 module Tab1
     where
 
--- import           Eins.Region (regionOrder)
-import qualified Eins.Region as RBT
-import qualified Data.Text as T
+import           Eins.Region (regionOrder)
+-- import qualified Eins.Region as RBT
+-- import qualified Data.Text as T
 import           Database.SQLite.Simple
-import           GHC.Generics (Generic1 (to1))
-import           GHC.IO.Handle.Types (Handle__)
-import           R4C.Aggregate
+-- import           GHC.Generics (Generic1 (to1))
+-- import           GHC.IO.Handle.Types (Handle__)
+-- import           R4C.Aggregate
 import           R4C.Export.CountnryCodeNames
-import           R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
+-- import           R4C.Export.Markdown  
 import           R4C.Export.Table
 import           R4C.Import.Database
 import           R4C.Import.Query
 import           R4C.Model
 import           R4C.Pak
-import qualified Eins.Region3 as R3
+-- import qualified Eins.Region3 as R3
 import           Eins.Region3
-import           R4C.Statistics
+-- import           R4C.Statistics
 import           R4C.Territory
 import           Eins.Config
 import           Eins.Descriptor
 import           Eins.Region2
-import           System.Directory (createDirectoryIfMissing)
+-- import           System.Directory (createDirectoryIfMissing)
 import           System.FilePath ((</>))
 import           UniformBase hiding ((</>))
 import Eins.Descriptor2 
