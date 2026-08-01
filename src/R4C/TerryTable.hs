@@ -21,18 +21,19 @@ import UniformBase
 import qualified Data.Map.Strict as Map
 import Data.List (foldl')
 import Database.SQLite.Simple
+import R4C.Import.Database
 
--- createTableExtensive ::
---     Connection ->
---     TerryTable CountryId (WObs Double) ->
---     Year ->
---     IO (TerryTable CountryId (WObs Double))
--- createTableExtensive conn table weightYear = do
---     weightDs <- lookupCountryTable3 conn weightIndicator Year
-
---     weightPak <- lookupCountryTable3 conn weightDs weightYear
---     pure . snd $ weightDs
-
+createTableExtensive ::
+    Connection ->
+    TerryTable CountryId (WObs Double) ->
+    IndicatorId -> Year ->
+    IO (TerryTable CountryId (WObs Double))
+createTableExtensive conn table weightIndicatorId weightYear = do
+    weightTab :: TerryTable CountryId ( Double) 
+        <- lookupTable conn weightIndicatorId weightYear
+    let weightTabWeight = mkUnitWeight weightTab
+    let newTab = combineTerryTables (*) weightTabWeight table 
+    pure newTab
 
 lookupRegion
     :: RegionId
@@ -57,6 +58,20 @@ mkUnitWeight =
   where
     convert (TerryValue c mv) =
         TerryValue c (fmap (\v -> WObs v 1) mv)
+
+dropUnitWeight
+    :: TerryTable CountryId (WObs Double)
+    -> TerryTable CountryId Double
+dropUnitWeight = map unconvert
+  where
+    unconvert (TerryValue c mwobs) =
+        TerryValue c (fmap dropWeight mwobs)
+
+    dropWeight (WObs v _) = v
+
+-- table2double :: TerryTable CountryId (Wobs Double) - TerryTable CountryId Double 
+-- table2double [tvs] = 
+
 
 -- mkWeighted :: [TerryValue t a1] -> [TerryValue a2 v] -> [TerryValue t (WObs a1)]
 mkWeighted valueTable weightTable =

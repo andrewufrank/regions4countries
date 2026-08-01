@@ -7,6 +7,7 @@
 -- within the region: standard dev. for surface per person
 -- here try convert to extensive - for gdpPC
 -----------------------------------------------------------------------------
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module BaseTest.Tab99
     where
@@ -20,6 +21,7 @@ import R4C.Export.Table
 -- import GHC.Generics (Generic1(to1))
 import Eins.Config 
 import Eins.Descriptor
+import Eins.Descriptor2
 -- import R4C.Statistics
 import R4C.Export.Markdown (writeMarkdownBlock, writeMarkdownIncludes)
 import System.Directory (createDirectoryIfMissing)
@@ -35,6 +37,37 @@ import R4C.Pak
 import Eins.Region2
 import R4C.Country (lookupCountries)
 
+
+exp6 :: IO ()
+exp6 = do 
+    _ <- exp6b regionOrder  (map CountryId ["FIN", "CYP", "PRT","AUT", "BRA", "USA", "RUS"])  
+    return ()
+
+exp6b :: [RegionId] -> [CountryId] -> IO String
+exp6b regOrder countries = do
+    let regionDef = RBT.regionMembers -- g7, eu, russia 
+
+    conn <- open dbPath 
+    let reqYears = [(population, Year 2024), 
+                    (surfaceArea, Year 2023), 
+                    (gnpPP, Year 2021), 
+                    (gdpPPpc, Year 2021)] --per capita, intensive
+    c3 <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
+    let [pop3, surf3, gdp3, gnpPc3] = c3 
+
+    gdp5 <- makePakExtensive conn gnpPc3 gnpcc (Year 2021)
+
+    close conn
+
+
+    let    mdC = wrapMdCol3  (c3 ++ [gdp5]) 
+    let md1 = markdownTable allCodeNames countries mdC
+    putStrLn md1 
+    -- print md1
+    return md1
+
+
+
 threeCountries = [CountryId "MAF",CountryId "PLW",CountryId "NRU",CountryId "TUV"]
 less1m = map CountryId R3.less1mTax
 
@@ -42,46 +75,46 @@ less1m = map CountryId R3.less1mTax
 avcountries = map CountryId ["FIN", "CYP", "PRT"] -- "AUT", "BRA", "BGD", "RUS"]
 avregionOrder2 = take 2 $ map terryId regionNames2
 
-exp5 :: IO ()
-exp5 = do 
-    _ <- exp5b regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
-    return ()
+-- exp5 :: IO ()
+-- exp5 = do 
+--     _ <- exp5a regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
+--     return ()
 
--- exp5 :: IO ()  
--- | show all countries with popuplation surface and GNP
--- exp5a :: [RegionId] -> [CountryId] -> IO (String, String)
--- regOrder and countries list what is include in result
-exp5a :: [RegionId] -> p -> IO String
-exp5a regOrder countries = do
-    let regionDef = RBT.regionMembers -- g7, eu, russia 
+-- -- exp5 :: IO ()  
+-- -- | show all countries with popuplation surface and GNP
+-- -- exp5a :: [RegionId] -> [CountryId] -> IO (String, String)
+-- -- regOrder and countries list what is include in result
+-- exp5a :: [RegionId] -> p -> IO String
+-- exp5a regOrder countries = do
+--     let regionDef = RBT.regionMembers -- g7, eu, russia 
 
-    conn <- open dbPath 
-    let reqYears = [(population, Year 2024)
-                    , (gnp, Year 2021)
-                    , (surfaceArea, Year 2023)
-                    , (gdpPPpc, Year 2021)]
-    [pop3, surf3, gdp3, gnp3] <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
-    -- pop3  <- lookupCountryTable3 conn (population)(Year 2024)
-    -- surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
-    -- gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
-    -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
-    -- close conn
+--     conn <- open dbPath 
+--     let reqYears = [(population, Year 2024)
+--                     , (gnp, Year 2021)
+--                     , (surfaceArea, Year 2023)
+--                     , (gdpPPpc, Year 2021)]
+--     [pop3, surf3, gdp3, gnp3] <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
+--     -- pop3  <- lookupCountryTable3 conn (population)(Year 2024)
+--     -- surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
+--     -- gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
+--     -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
+--     -- close conn
 
-    let c3 = [pop3, surf3, gdp3, gnp3]  
-    let c4 = c3
-    -- type RegionTable3 = (Dataset, [(RegionId, CountryTable)]) -- new format
+--     let c3 = [pop3, surf3, gdp3, gnp3]  
+--     let c4 = c3
+--     -- type RegionTable3 = (Dataset, [(RegionId, CountryTable)]) -- new format
 
-    let 
-        reg4:: [(Dataset, [(RegionId, TerryTable CountryId (WObs Double))])]
-        reg4  = reg3CountryTable4 regionMembers2 c4
-        reg4tot :: [(Dataset, [TerryValue RegionId Double])]
-        reg4tot = regtab3_regtab1 reg4
+--     let 
+--         reg4:: [(Dataset, [(RegionId, TerryTable CountryId (WObs Double))])]
+--         reg4  = reg3CountryTable4 regionMembers2 c4
+--         reg4tot :: [(Dataset, [TerryValue RegionId Double])]
+--         reg4tot = regtab3_regtab1 reg4
 
-        mdRegion4 = wrapMdCol3 reg4tot
-        mdRegion = markdownTable regionNames2 avregionOrder2  mdRegion4
-    putStrLn mdRegion
-    print mdRegion
-    return mdRegion
+--         mdRegion4 = wrapMdCol3 reg4tot
+--         mdRegion = markdownTable regionNames2 avregionOrder2  mdRegion4
+--     putStrLn mdRegion
+--     print mdRegion
+--     return mdRegion
 
 
     -- mdC :: [MdColumn RegionId Double]
@@ -90,37 +123,6 @@ exp5a regOrder countries = do
     -- putStrLn md1 
     -- print md1
     -- return md1
-
--- exp6 :: IO ()
--- exp6 = do 
---     _ <- exp6b regionOrder  (map CountryId ["FIN", "CYP", "PRT"])  
---     return ()
-
--- exp6b :: [RegionId] -> [CountryId] -> IO String
--- exp6b regOrder countries = do
---     let regionDef = RBT.regionMembers -- g7, eu, russia 
-
---     conn <- open dbPath 
---     let reqYears = [(population, Year 2024), 
---                     (surfaceArea, Year 2023), 
---                     (gnp, Year 2021), 
---                     (gdpPPpc, Year 2021)]
---     [pop3, surf3, gnp3, gdp3] <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
-
---     -- pop3  <- lookupCountryTable3 conn (population)(Year 2024)
---     -- surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
---     -- gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
---     -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
---     close conn
-
---     let c3 = [pop3, surf3, gdp3, gnp3]  
-
---         mdC = wrapMdCol3  c3 
---     let md1 = markdownTable allCodeNames countries mdC
---     putStrLn md1 
---     -- print md1
---     return md1
-
 
 -- writeTab1Table :: FilePath -> String -> IO ()
 -- writeTab1Table filename contents = do

@@ -147,4 +147,20 @@ popGrowthCount = Dataset
             "xxx"
         }
 
+gnpcc = Dataset
+        {dsIndicator = IndicatorId {unIndicatorId = "GNPpercapita2country"}
+        , dsShortName = "GNP2c"
+        , dsName = "GNP2c"
+        , dsDefinition =
+            "Txxx"
+        , dsUnit = "$x"
+        , dsAggregation = Sum -- WeightedBy (IndicatorId "SP.POP.TOTL")
+        , dsDecimals = 0
+        , dsScale = Mega
+        , dsExtensive = True
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "xxx"
+        }
+
  

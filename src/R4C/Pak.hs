@@ -23,15 +23,19 @@ import UniformBase
 makePakExtensive ::
     Connection ->
     Pak CountryId (WObs Double) ->
-    Dataset ->
+    Dataset -> Year ->
     IO ((Pak CountryId (WObs Double)))
-makePakExtensive conn pak1@(ds, table) newDs =
-    case dsAggregation ds of
+-- | make the dataset ds1 extensive with the weightq
+-- from the weightIndicator 
+-- and the same year 
+-- it will have the descriptor based on newDescriptor
+makePakExtensive conn pak1@(ds1, table) newDescriptor yearDs =
+    case dsAggregation ds1 of
         Sum -> do
             putIOwords
                 [ "makePakExtensive not required, "
-                , dsShortName ds
-                , showT $ dsIndicator ds
+                , dsShortName ds1
+                , showT $ dsIndicator ds1
                 , " is extensive"
                 , "same pak returned - fix code!"
                 ]
@@ -39,8 +43,8 @@ makePakExtensive conn pak1@(ds, table) newDs =
         WeightedBy weightIndicator -> do
             putIOwords
                 [ "makePakExtensive required, "
-                , dsShortName ds
-                , showT $ dsIndicator ds
+                , dsShortName ds1
+                , showT $ dsIndicator ds1
                 , " is weighted by "
                 , showT weightIndicator
                 ]
@@ -48,42 +52,44 @@ makePakExtensive conn pak1@(ds, table) newDs =
             makePakExtensive2
                 conn
                 pak1
-                newDs
+                newDescriptor yearDs weightIndicator
 
 makePakExtensive2 ::
     Connection ->
     Pak CountryId (WObs Double) ->
-    Dataset ->
+    Dataset -> Year -> 
+    IndicatorId -> 
     IO ((Pak CountryId (WObs Double)))
-makePakExtensive2 conn p1@(weightDs, tab1) intensiveDs = do
+makePakExtensive2 conn p1@(ds1, tab1) newDescriptor year weightIndicatorId = do
     putIOwords
         [ "makeTerryTableExtensive"
-        , showT . dsIndicator $ weightDs
+        , showT . dsIndicator $ ds1
         , "to"
-        , showT . dsIndicator $ intensiveDs
+        , showT weightIndicatorId
         ]
     let extensiveDs =
-            intensiveDs
+            newDescriptor
                 { dsIndicator =
                     IndicatorId
                         ( "extensive of "
-                            <> unIndicatorId (dsIndicator intensiveDs)
+                            <> unIndicatorId (dsIndicator ds1)
                         )
                 , dsShortName =
-                    dsShortName intensiveDs <> " extensive"
+                    dsShortName ds1 <> " extensive"
                 , dsDefinition =
                     "Extensive value calculated by multiplying "
-                        <> dsShortName intensiveDs
+                        <> dsShortName ds1
                         <> " by "
-                        <> dsShortName weightDs
-                , dsUnit = dsUnit intensiveDs
+                        <> showT weightIndicatorId
+                , dsUnit = dsUnit ds1 <> "ext"
                 , dsAggregation = Sum
                 , dsDecimals = 0
-                , dsScale = Unit
+                , dsScale = Giga
                 , dsExtensive = True
-                , dsLastYear = dsLastYear intensiveDs
+                , dsLastYear = Just year
                 }
-    newTab <- undefined  --- createTableExtensive conn tab1 (fromJustNote "dfswew" $ dsLastYear intensiveDs)
+    -- let tab1double = dropUnitWeight tab1 
+    newTab <- createTableExtensive conn tab1  weightIndicatorId year
     -- let newPak = case newPak of
     --         Nothing ->
     --             putIOwords

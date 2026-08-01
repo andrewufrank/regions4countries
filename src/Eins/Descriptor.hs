@@ -59,7 +59,7 @@ surfaceArea =
         , dsDecimals = 3
         , dsScale = Mega
         , dsExtensive = True
-        , dsLastYear = Nothing
+        , dsLastYear = Just (Year 2023)
         , dsSourceOrganization =
             "FAO electronic files and web site, Food and Agriculture"
             <> " Organization of the United Nations (FAO), publisher: Food"
@@ -114,7 +114,7 @@ gnpPP =
         , dsUnit = "PP$"
         , dsAggregation = Sum  
         , dsDecimals = 0
-        , dsScale = Kilo
+        , dsScale = Giga
         , dsExtensive = True  
         , dsLastYear = Nothing
         , dsSourceOrganization =
