@@ -7,6 +7,7 @@ dist-newstyle
 test/testdata/*
 \#*#
 *~
+*.~lock*
 *.lkshs
 *.lkshw
 */*.lkshs

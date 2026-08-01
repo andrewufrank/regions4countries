@@ -172,6 +172,7 @@ executable show-indicator
 executable study
   main-is: Study.hs
   other-modules:
+      Tab1
       Paths_Regions4Countries
   hs-source-dirs:
       app/Study

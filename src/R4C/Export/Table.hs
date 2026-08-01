@@ -216,7 +216,7 @@ instance CombineVal Double where
     combineMaybe _ _ _ =
         Nothing
 
-instance Eq v => CombineVal (WObs v) where
+instance (Eq v, Num v) => CombineVal (WObs v) where
     type CombineBase (WObs v) = v
 
     combineMaybe f
@@ -224,6 +224,15 @@ instance Eq v => CombineVal (WObs v) where
         (Just (WObs y wy))
       | wx == wy =
             Just (WObs (f x y) wx)
+
+      | wx == 1 =
+            Just (WObs (f x y) wy)
+
+      | wy == 1 =
+            Just (WObs (f x y) wx)
+
+      | otherwise =
+            Nothing
 
     combineMaybe _ _ _ =
         Nothing

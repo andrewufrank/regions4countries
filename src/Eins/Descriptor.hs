@@ -84,27 +84,7 @@ arableLand =
             "FAO  "
         }
 
-fertilityRate :: Dataset
-fertilityRate =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
-        , dsShortName = "Fertilitaetsrate"
-        , dsName = "Fertility rate, total (births per woman)"
-        , dsDefinition =
-            "Total fertility rate represents the number of children"
-            <> " that would be born to a woman if she were to live to the"
-            <> " end of her childbearing years and bear children in"
-            <> " accordance with age-specific fertility rates of the"
-            <> " specified year."
-        , dsUnit = "P/woman"
-        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
-        , dsDecimals = 2
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "World Population Prospects, United Nations (UN) (ESTAT)"
-        }
+
 
 -- grossNatProd :: Dataset
 gnp =
@@ -154,7 +134,7 @@ gdpPPpc = Dataset
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 
 agriPercent = Dataset
@@ -164,13 +144,13 @@ agriPercent = Dataset
         , dsDefinition =
             "Txxx"
         , dsUnit = "%"
-        , dsAggregation = Sum -- WeightedBy (IndicatorId "xxx")
+        , dsAggregation = Sum -- WeightedBy (IndicatorId "xxyy")
         , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 
 xxx3 = Dataset
@@ -180,13 +160,13 @@ xxx3 = Dataset
         , dsDefinition =
             "Txxx"
         , dsUnit = "%"
-        , dsAggregation = Sum -- WeightedBy (IndicatorId "xxx")
+        , dsAggregation = Sum -- WeightedBy (IndicatorId "xxyy")
         , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 
 forest = Dataset
@@ -202,7 +182,7 @@ forest = Dataset
         , dsExtensive = True
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 
 urban = Dataset
@@ -218,7 +198,7 @@ urban = Dataset
         , dsExtensive = True
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 
 populationGrowthRate = Dataset
@@ -228,119 +208,141 @@ populationGrowthRate = Dataset
         , dsDefinition =
             "Txxx"
         , dsUnit = "%"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
         , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 
+fertilityRate :: Dataset
+fertilityRate =
+    Dataset
+        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
+        , dsShortName = "Fertilitaetsrate"
+        , dsName = "Fertility rate, total (births per woman)"
+        , dsDefinition =
+            "Total fertility rate represents the number of children"
+            <> " that would be born to a woman if she were to live to the"
+            <> " end of her childbearing years and bear children in"
+            <> " accordance with age-specific fertility rates of the"
+            <> " specified year."
+        , dsUnit = "P/woman"
+        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
+        , dsDecimals = 2
+        , dsScale = Unit
+        , dsExtensive = False
+        , dsLastYear = Nothing
+        , dsSourceOrganization =
+            "World Population Prospects, United Nations (UN) (ESTAT)"
+        }
+        
 surfaxc1ePerCapita = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx1"}
+        , dsShortName = "xxyy"
+        , dsName = "xxyy"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsUnit = "xxyy"
+        , dsAggregation = WeightedBy (IndicatorId "xxyy")
         , dsDecimals = 0
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 
 usableAxreaPerCapita1 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx2"}
+        , dsShortName = "xxyy"
+        , dsName = "xxyy"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsUnit = "xxyy"
+        , dsAggregation = WeightedBy (IndicatorId "xxyy")
         , dsDecimals = 0
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 xxx6 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx3"}
+        , dsShortName = "xxyy"
+        , dsName = "xxyy"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsUnit = "xxyy"
+        , dsAggregation = WeightedBy (IndicatorId "xxyy")
         , dsDecimals = 0
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 xxx5 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx4"}
+        , dsShortName = "xxyy"
+        , dsName = "xxyy"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsUnit = "xxyy"
+        , dsAggregation = WeightedBy (IndicatorId "xxyy")
         , dsDecimals = 0
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 xxx4 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx5"}
+        , dsShortName = "xxyy"
+        , dsName = "xxyy"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsUnit = "xxyy"
+        , dsAggregation = WeightedBy (IndicatorId "xxx6")
         , dsDecimals = 0
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 
 xxx33 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx7"}
+        , dsShortName = "xxyy"
+        , dsName = "xxyy"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsUnit = "xxyy"
+        , dsAggregation = WeightedBy (IndicatorId "xxx0")
         , dsDecimals = 0
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }
 xxx2 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx"}
-        , dsShortName = "xxx"
-        , dsName = "xxx"
+        { dsIndicator = IndicatorId {unIndicatorId = "xxx8"}
+        , dsShortName = "xxyy"
+        , dsName = "xxyy"
         , dsDefinition =
             "Txxx"
-        , dsUnit = "xxx"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsUnit = "xxyy"
+        , dsAggregation = WeightedBy (IndicatorId "xxx9")
         , dsDecimals = 0
         , dsScale = Unit
         , dsExtensive = False
         , dsLastYear = Nothing
         , dsSourceOrganization =
-            "xxx"
+            "xxyy"
         }

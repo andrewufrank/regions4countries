@@ -79,6 +79,9 @@ mkWeighted valueTable weightTable =
 --     -> (Dataset, TerryTable t Double)
 combinesCountryTable3 dsx f tab1 tab2 = (dsx, combineTerryTables f (snd tab1) (snd tab2))
 
+-- combining weighted datasets works only for linear (specific affine) functions. 
+-- see document weightedAverage.md 
+
 
 reg3CountryTable4 :: (Eq ct) => [(rg, [ct])] -> [(Dataset, TerryTable ct (v))] 
         -> [(Dataset, [(rg, TerryTable ct v)] )]

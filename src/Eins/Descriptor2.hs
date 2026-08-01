@@ -124,7 +124,7 @@ netMigrationCount =    Dataset
         , dsUnit = "P/Py"
         -- , dsAggregation = Sum
         , dsDecimals = 3
-        , dsScale = Unit
+        , dsScale = Kilo
         , dsExtensive = False
         , dsLastYear = Nothing
         -- , dsSourceOrganization =
@@ -132,12 +132,13 @@ netMigrationCount =    Dataset
         }
 
 popGrowthCount = Dataset
-        { dsShortName = "Wachstum Bevoelkerung"
+        {dsIndicator = IndicatorId {unIndicatorId = "GrowthCount"}
+        , dsShortName = "Wachstum Bevoelkerung"
         , dsName = "population growth annual "
         , dsDefinition =
             "Txxx"
         , dsUnit = "P/y"
-        , dsAggregation = WeightedBy (IndicatorId "xxx")
+        , dsAggregation = Sum -- WeightedBy (IndicatorId "SP.POP.TOTL")
         , dsDecimals = 0
         , dsScale = Mega
         , dsExtensive = True
@@ -145,3 +146,5 @@ popGrowthCount = Dataset
         , dsSourceOrganization =
             "xxx"
         }
+
+ 
