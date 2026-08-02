@@ -17,25 +17,17 @@ import qualified Data.Map.Strict as Map
 import Data.Ord (Down (..))
 import qualified Data.Scientific as Sc
 import qualified Data.Text as T
-import Database.SQLite.Simple
 import Numeric (showFFloat)
-import R4C.Import.Database
 import R4C.Model
 import UniformBase
 
 createTableExtensive ::
-  Connection ->
   TerryTable CountryId (WObs Double) ->
-  IndicatorId ->
-  Year ->
-  IO (TerryTable CountryId (WObs Double))
-createTableExtensive conn table weightIndicatorId weightYear = do
-  -- weightTab :: TerryTable CountryId (Double) <-
-  --   lookupTable conn weightIndicatorId weightYear
-  let   weightTab = getValue4weights table
-        weightTabWeight = mkUnitWeight weightTab
-  let newTab = combineTerryTables (*) weightTabWeight table
-  pure newTab
+  TerryTable CountryId (WObs Double)
+createTableExtensive table =
+  combineTerryTables (*) weightTabWeight table
+  where
+    weightTabWeight = mkUnitWeight (getValue4weights table)
 
 lookupRegion ::
   RegionId ->

@@ -21,91 +21,56 @@ import R4C.TerryTable
 import UniformBase
 
 makePakExtensive ::
-    Connection ->
     Pak CountryId (WObs Double) ->
     Dataset ->
     Year ->
-    IO ((Pak CountryId (WObs Double)))
+    Pak CountryId (WObs Double)
 
 {- | make the dataset ds1 extensive with the weightq
 from the weightIndicator
 and the same year
 it will have the descriptor based on newDescriptor
 -}
-makePakExtensive conn pak1@(ds1, table) newDescriptor yearDs =
+makePakExtensive pak1@(ds1, _) newDescriptor yearDs =
     case dsAggregation ds1 of
-        Sum -> do
-            putIOwords
-                [ "makePakExtensive not required, "
-                , dsShortName ds1
-                , showT $ dsIndicator ds1
-                , " is extensive"
-                , "same pak returned - fix code!"
-                ]
-            pure pak1
-        WeightedBy weightIndicator -> do
-            putIOwords
-                [ "makePakExtensive required, "
-                , dsShortName ds1
-                , showT $ dsIndicator ds1
-                , " is weighted by "
-                , showT weightIndicator
-                ]
-
+        Sum -> pak1
+        WeightedBy weightIndicator ->
             makePakExtensive2
-                conn
                 pak1
                 newDescriptor
                 yearDs
                 weightIndicator
 
 makePakExtensive2 ::
-    Connection ->
     Pak CountryId (WObs Double) ->
     Dataset ->
     Year ->
     IndicatorId ->
-    IO ((Pak CountryId (WObs Double)))
-makePakExtensive2 conn p1@(ds1, tab1) newDescriptor year weightIndicatorId = do
-    putIOwords
-        [ "makeTerryTableExtensive"
-        , showT . dsIndicator $ ds1
-        , "to"
-        , showT weightIndicatorId
-        ]
-    let extensiveDs =
-            newDescriptor
-                { dsIndicator =
-                    IndicatorId
-                        ( "extensive of "
-                            <> unIndicatorId (dsIndicator ds1)
-                        )
-                , dsShortName =
-                    dsShortName ds1 <> " extensive"
-                , dsDefinition =
-                    "Extensive value calculated by multiplying "
-                        <> dsShortName ds1
-                        <> " by "
-                        <> showT weightIndicatorId
-                , dsUnit = dsUnit ds1 <> "ext"
-                , dsAggregation = Sum
-                , dsDecimals = 0
-                , dsScale = Giga
-                , dsExtensive = True
-                , dsLastYear = Just year
-                }
-    -- let tab1double = dropUnitWeight tab1
-    newTab <- createTableExtensive conn tab1 weightIndicatorId year
-    -- let newPak = case newPak of
-    --         Nothing ->
-    --             putIOwords
-    --                 [ "makePakExtensive2"
-    --                     "new createTableExtensive"
-    --                 , showT . dsIndicator $ intensiveDs
-    --                 ]
-    --             return Nothing
-    --         Just n -> return $ Just (extensiveDs, n) -- TODO
-    return (extensiveDs, newTab)
+    Pak CountryId (WObs Double)
+makePakExtensive2 (ds1, tab1) newDescriptor year weightIndicatorId =
+    (extensiveDs, createTableExtensive tab1)
+  where
+    extensiveDs =
+        newDescriptor
+            { dsIndicator =
+                IndicatorId
+                    ( "extensive of "
+                        <> unIndicatorId (dsIndicator ds1)
+                    )
+            , dsShortName =
+                dsShortName ds1 <> " extensive"
+            , dsDefinition =
+                "Extensive value calculated by multiplying "
+                    <> dsShortName ds1
+                    <> " by "
+                    <> showT weightIndicatorId
+            , dsUnit = dsUnit ds1 <> "ext"
+            , dsAggregation = Sum
+            , dsDecimals = 0
+            , dsScale = Giga
+            , dsExtensive = True
+            , dsLastYear = Just year
+            }
 
 lookupRegionTable3 ::
     Connection ->
