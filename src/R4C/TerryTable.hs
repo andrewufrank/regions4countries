@@ -30,9 +30,10 @@ createTableExtensive ::
   Year ->
   IO (TerryTable CountryId (WObs Double))
 createTableExtensive conn table weightIndicatorId weightYear = do
-  weightTab :: TerryTable CountryId (Double) <-
-    lookupTable conn weightIndicatorId weightYear
-  let weightTabWeight = mkUnitWeight weightTab
+  -- weightTab :: TerryTable CountryId (Double) <-
+  --   lookupTable conn weightIndicatorId weightYear
+  let   weightTab = getValue4weights table
+        weightTabWeight = mkUnitWeight weightTab
   let newTab = combineTerryTables (*) weightTabWeight table
   pure newTab
 
@@ -70,10 +71,23 @@ dropUnitWeight = map unconvert
 
     dropWeight (WObs v _) = v
 
+getValue4weights ::   TerryTable CountryId (WObs Double) ->
+  TerryTable CountryId Double
+getValue4weights = map recoverValues
+  where
+    recoverValues (TerryValue c mwobs) =
+      TerryValue c (fmap getWeight mwobs)
+
+    getWeight ::  (WObs Double) ->  Double 
+    getWeight ( (WObs v w)) =  w 
+
 -- table2double :: TerryTable CountryId (Wobs Double) - TerryTable CountryId Double
 -- table2double [tvs] =
 
 -- mkWeighted :: [TerryValue t a1] -> [TerryValue a2 v] -> [TerryValue t (WObs a1)]
+mkWeighted :: Ord k => [TerryValue k a] -> [TerryValue k a] -> [TerryValue k (WObs a)]
+-- | add the weights to a table, using the value from the weightTable
+-- used in the 'weighted by' case, so weightedAverage works
 mkWeighted valueTable weightTable =
   map addWeight valueTable
   where
@@ -117,32 +131,6 @@ combineMdTables f xs ys =
     xt = colValues xs
     yt = colValues ys
     xyt = combineTerryTables (operationFunction f) xt yt
-
--- xytitle = colTitle xs <> colTitle ys  --
--- xyDecimals = min (colDecimals xs) (colDecimals ys)
--- xyUnit = colUnit xs <> " op " <> colUnit ys
--- xyScale =  min (colScale xs)   (colScale ys)
-
--- combineTerryTables
---     :: Ord t
---     => (Double -> Double -> Double)
---     -> TerryTable t (WObs Double)
---     -> TerryTable t (WObs Double)
---     -> TerryTable t (WObs Double)
--- combineTerryTables f xs ys =
---     [ TerryValue
---         { tvCode  = tvCode x
---         , tvValue = combineMaybe f (tvValue x) (tvValue y)
---         }
---     | x <- xs
---     , Just y <- [Map.lookup (tvCode x) yMap]
---     ]
---   where
---     yMap =
---         Map.fromList
---             [ (tvCode y, y)
---             | y <- ys
---             ]
 
 -- -------------
 
@@ -202,31 +190,6 @@ combineTerryTables f xs ys =
         | y <- ys
         ]
 
--- combineTerryTables
---     :: (Ord t, CombineVal v)
---     => (CombineBase v -> CombineBase v -> CombineBase v)
---     -> TerryTable t v
---     -> TerryTable t v
---     -> TerryTable t v
--- combineTerryTables f xs ys =
---     [ TerryValue
---         { tvCode  = tvCode x
---         , tvValue = combineMaybe f (tvValue x) (tvValue y)
---         }
---     | x <- xs
---     , Just y <- [Map.lookup (tvCode x) yMap]
---     ]
---   where
---     yMap =
---         Map.fromList
---             [ (tvCode y, y)
---             | y <- ys
---             ]
-
--- sumTerryTables
---     :: (Ord t, Eq t, Show t)
---     => [TerryTable t v]
---     -> TerryTable t v
 sumTerryTables :: (Ord t) => [TerryTable t (WObs Double)] -> [TerryValue t (WObs Double)]
 sumTerryTables [] = []
 sumTerryTables [t] = t
