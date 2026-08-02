@@ -15,7 +15,8 @@ import qualified MarkdownSpec
 import qualified RegionSpec
 import qualified WorldBankSpec
 import qualified OrchestratorSpec
-import qualified CountrySpec 
+import qualified Tab99spec 
+import qualified Tab98spec 
 main :: IO ()
 main =
   defaultMain $
@@ -26,7 +27,8 @@ main =
       , AggregateSpec.tests
       -- , DatasetSyncSpec.tests
       , MarkdownSpec.tests
-      , CountrySpec.tests
+      , Tab99spec.tests
+      , Tab98spec.tests
     --   , IndicatorSpec.tests
     --   , DatabaseSpec.tests
       ]

@@ -212,10 +212,11 @@ test-suite r4c-test
       BaseTest.CountryExperiments
       BaseTest.Tab98
       BaseTest.Tab99
-      CountrySpec
       MarkdownSpec
       OrchestratorSpec
       RegionSpec
+      Tab98spec
+      Tab99spec
       WorldBankSpec
       Paths_Regions4Countries
   hs-source-dirs:

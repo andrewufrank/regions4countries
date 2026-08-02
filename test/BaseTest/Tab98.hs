@@ -41,16 +41,68 @@ import R4C.Territory
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 
+
+exp5 :: IO ()
+-- | check the conversion to extensive for gdp per cap, compare with gnp....
+-- test regions 
+exp5 = do
+    _ <- exp5a (map RegionId ["EU", "RUSSIA"])   
+    return ()
+
+-- exp5 :: IO ()
+-- | show all countries with popuplation surface and GNP
+-- exp5a :: [RegionId] -> [CountryId] -> IO (String, String)
+-- regOrder and countries list what is include in result
+exp5a :: [RegionId]   -> IO String
+exp5a regOrder   = do
+    let regionDef = RBT.regionMembers -- g7, eu, russia
+
+    conn <- open dbPath
+    let reqYears =
+            [ (population, Year 2024)
+            , (surfaceArea, Year 2023)
+            , (gnpPP, Year 2021)
+            , (gdpPPpc, Year 2021) -- per capita, intensive
+            ]
+    c3 <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
+    let [pop3, surf3, gdp3, gnpPc3] = c3
+
+    let gdp5 = makePakExtensive gnpPc3 gnpcc (Year 2021)
+
+    close conn
+
+    let c4 = c3 ++ [gdp5]
+        reg4:: [(Dataset, [(RegionId, TerryTable CountryId (WObs Double))])]
+        reg4  = reg3CountryTable4 regionMembers2 c4
+        reg4tot :: [(Dataset, [TerryValue RegionId Double])]
+        reg4tot = regtab3_regtab1 reg4
+
+        mdRegion4 = wrapMdCol3 reg4tot
+        mdRegion = markdownTable regionNames2 regOrder  mdRegion4
+    putStrLn mdRegion
+    -- print mdRegion
+    return mdRegion
+
+-- mdC :: [MdColumn RegionId Double]
+--     mdC = wrapMdCol3 c4
+-- let md1 = markdownTable RBT.regionNames regOrder mdC
+-- putStrLn md1
+-- -- print md1
+-- return md1
+
+
 exp6 :: IO ()
+-- | check the conversion to extensive for gdp per cap, compare with gnp....
+-- test countries 
 exp6 = do
     _ <-
         exp6b
-            regionOrder
+            -- regionOrder
             (map CountryId ["FIN", "CYP", "PRT", "AUT", "BRA", "USA", "RUS"])
     return ()
 
-exp6b :: [RegionId] -> [CountryId] -> IO String
-exp6b regOrder countries = do
+exp6b ::  [CountryId] -> IO String
+exp6b  countries = do
     let regionDef = RBT.regionMembers -- g7, eu, russia
     conn <- open dbPath
     let reqYears =
@@ -66,7 +118,8 @@ exp6b regOrder countries = do
 
     close conn
 
-    let mdC = wrapMdCol3 (c3 ++ [gdp5])
+    let c4 = c3 ++ [gdp5]
+        mdC = wrapMdCol3 c4
     let md1 = markdownTable allCodeNames countries mdC
     putStrLn md1
     -- print md1
@@ -79,7 +132,7 @@ less1m = map CountryId R3.less1mTax
 
 avcountries = map CountryId ["FIN", "CYP", "PRT"] -- "AUT", "BRA", "BGD", "RUS"]
 
-avregionOrder2 = take 2 $ map terryId regionNames2
+avregionOrder2 = take 6 $ map terryId regionNames2
 
 
 -- writeTab1Table :: FilePath -> String -> IO ()

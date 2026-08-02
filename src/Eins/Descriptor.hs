@@ -109,7 +109,7 @@ gnpPP =
     Dataset
         { dsIndicator = IndicatorId {unIndicatorId = "NY.GNP.MKTP.PP.KD"}  --NY.GDP.PCAP.PP.CD"}
         , dsShortName = "GNP PP  "
-        , dsName = "GDP  PPP (current international $)"
+        , dsName = "GNP  PP (current international $)"
         , dsDefinition =   ""
         , dsUnit = "PP$"
         , dsAggregation = Sum  
