@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
-
+{-# LANGUAGE TypeOperators #-}
 -----------------------------------------------------------------------------
 --
 -- Module      :   R4C.TerryTable
@@ -22,103 +22,132 @@ import R4C.Model
 import UniformBase
 
 createTableExtensive ::
-  TerryTable CountryId (WObs Double) ->
-  TerryTable CountryId (WObs Double)
+    TerryTable CountryId (WObs Double) ->
+    TerryTable CountryId (WObs Double)
 createTableExtensive table =
-  combineTerryTables (*) weightTabWeight table
+    combineTerryTables (*) weightTabWeight table
   where
     weightTabWeight = mkUnitWeight (getValue4weights table)
 
 lookupRegion ::
-  RegionId ->
-  (TerryTable RegionId Double) ->
-  Maybe (RegionValue)
+    RegionId ->
+    (TerryTable RegionId Double) ->
+    Maybe (RegionValue)
 lookupRegion r =
-  find (\rv -> tvCode rv == r)
+    find (\rv -> tvCode rv == r)
 
 lookupTerry ::
-  (Eq t) =>
-  t ->
-  TerryTable t v ->
-  Maybe (TerryValue t v)
+    (Eq t) =>
+    t ->
+    TerryTable t v ->
+    Maybe (TerryValue t v)
 lookupTerry r =
-  find (\rv -> tvCode rv == r)
+    find (\rv -> tvCode rv == r)
 
 mkUnitWeight ::
-  TerryTable CountryId Double ->
-  TerryTable CountryId (WObs Double)
+    TerryTable CountryId Double ->
+    TerryTable CountryId (WObs Double)
 mkUnitWeight =
-  map convert
+    map convert
   where
     convert (TerryValue c mv) =
-      TerryValue c (fmap (\v -> WObs v 1) mv)
+        TerryValue c (fmap (\v -> WObs v 1) mv)
 
 dropUnitWeight ::
-  TerryTable CountryId (WObs Double) ->
-  TerryTable CountryId Double
+    TerryTable CountryId (WObs Double) ->
+    TerryTable CountryId Double
 dropUnitWeight = map unconvert
   where
     unconvert (TerryValue c mwobs) =
-      TerryValue c (fmap dropWeight mwobs)
+        TerryValue c (fmap dropWeight mwobs)
 
     dropWeight (WObs v _) = v
 
-getValue4weights ::   TerryTable CountryId (WObs Double) ->
-  TerryTable CountryId Double
+getValue4weights ::
+    TerryTable CountryId (WObs Double) ->
+    TerryTable CountryId Double
 getValue4weights = map recoverValues
   where
     recoverValues (TerryValue c mwobs) =
-      TerryValue c (fmap getWeight mwobs)
+        TerryValue c (fmap getWeight mwobs)
 
-    getWeight ::  (WObs Double) ->  Double 
-    getWeight ( (WObs v w)) =  w 
+    getWeight :: (WObs Double) -> Double
+    getWeight ((WObs v w)) = w
 
 -- table2double :: TerryTable CountryId (Wobs Double) - TerryTable CountryId Double
 -- table2double [tvs] =
 
 -- mkWeighted :: [TerryValue t a1] -> [TerryValue a2 v] -> [TerryValue t (WObs a1)]
-mkWeighted :: Ord k => [TerryValue k a] -> [TerryValue k a] -> [TerryValue k (WObs a)]
--- | add the weights to a table, using the value from the weightTable
--- used in the 'weighted by' case, so weightedAverage works
+mkWeighted ::
+    (Ord k) =>
+    [TerryValue k a] -> [TerryValue k a] -> [TerryValue k (WObs a)]
+
+{- | add the weights to a table, using the value from the weightTable
+used in the 'weighted by' case, so weightedAverage works
+-}
 mkWeighted valueTable weightTable =
-  map addWeight valueTable
+    map addWeight valueTable
   where
     weights =
-      M.fromList
-        [ (country, weight)
-        | TerryValue country weight <- weightTable
-        ]
+        M.fromList
+            [ (country, weight)
+            | TerryValue country weight <- weightTable
+            ]
 
     addWeight (TerryValue country value) =
-      TerryValue country $
-        case M.lookup country weights of
-          Nothing ->
-            Nothing
-          Just weight ->
-            WObs <$> value <*> weight
+        TerryValue country $
+            case M.lookup country weights of
+                Nothing ->
+                    Nothing
+                Just weight ->
+                    WObs <$> value <*> weight
 
 valueToDouble :: Value -> Double
 valueToDouble (Value v) =
-  Sc.toRealFloat v
+    Sc.toRealFloat v
+--
+class ScaleByDouble v where
+    scaleByDouble :: Double -> v -> v
+    
+instance ScaleByDouble Double where
+  scaleByDouble k x = k * x
 
--- scaleRegionTable :: Double -> (TerryTable RegionId Double) -> (TerryTable RegionId Double)
-scaleRegionTable :: (Ord t, Show t, Eq t) => Double -> MdColumn t Double -> MdColumn t Double
-scaleRegionTable k ct = ct {colValues = cv2}
+instance ScaleByDouble v => ScaleByDouble (WObs v) where
+  scaleByDouble k (WObs x weight) =
+      WObs
+          (scaleByDouble k x)
+          weight
+
+scaleTerryTable
+    :: ScaleByDouble v
+    => Double
+    -> TerryTable t v
+    -> TerryTable t v
+scaleTerryTable k =
+    map scaleValue
   where
-    -- cv2 :: TerryTable RegionId Double
-    cv2 = map (\rv -> rv {tvValue = fmap (* k) (tvValue rv)}) (colValues ct)
+    scaleValue (TerryValue c mv) =
+        TerryValue c (fmap (scaleByDouble k) mv)
+
+-- map (\rv -> rv {tvValue = fmap (* k) (tvValue rv)}) (colValues ct)
 
 -- | combine two MdColumns t v with a functioin
-combineMdTables :: (Ord t, Show t, Eq t) => Operation -> MdColumn t Double -> MdColumn t Double -> MdColumn t Double
+combineMdTables ::
+    (Ord t, Show t, Eq t
+      , CombineVal v, CombineBase v ~ Double) =>
+    Operation ->
+    MdColumn t v ->
+    MdColumn t v ->
+    MdColumn t v
 combineMdTables f xs ys =
-  MdColumn
-    { colValues = xyt,
-      colTitle = colTitle xs <> colTitle ys, --
-      colDecimals = min (colDecimals xs) (colDecimals ys),
-      -- , colUnit = colUnit xs <> show f <>  colUnit ys
-      colUnit = colUnit xs <> s2t (operationSymbol f) <> colUnit ys,
-      colScale = min (colScale xs) (colScale ys)
-    }
+    MdColumn
+        { colValues = xyt
+        , colTitle = colTitle xs <> colTitle ys --
+        , colDecimals = min (colDecimals xs) (colDecimals ys)
+        , -- , colUnit = colUnit xs <> show f <>  colUnit ys
+          colUnit = colUnit xs <> s2t (operationSymbol f) <> colUnit ys
+        , colScale = min (colScale xs) (colScale ys)
+        }
   where
     xt = colValues xs
     yt = colValues ys
@@ -127,66 +156,68 @@ combineMdTables f xs ys =
 -- -------------
 
 class CombineVal v where
-  type CombineBase v
+    type CombineBase v
 
-  combineMaybe ::
-    (CombineBase v -> CombineBase v -> CombineBase v) ->
-    Maybe v ->
-    Maybe v ->
-    Maybe v
+    combineMaybe ::
+        (CombineBase v -> CombineBase v -> CombineBase v) ->
+        Maybe v ->
+        Maybe v ->
+        Maybe v
 
 instance CombineVal Double where
-  type CombineBase Double = Double
+    type CombineBase Double = Double
 
-  combineMaybe f (Just x) (Just y) =
-    Just (f x y)
-  combineMaybe _ _ _ =
-    Nothing
+    combineMaybe f (Just x) (Just y) =
+        Just (f x y)
+    combineMaybe _ _ _ =
+        Nothing
 
 instance (Eq v, Num v) => CombineVal (WObs v) where
-  type CombineBase (WObs v) = v
+    type CombineBase (WObs v) = v
 
-  combineMaybe
-    f
-    (Just (WObs x wx))
-    (Just (WObs y wy))
-      | wx == wy =
-          Just (WObs (f x y) wx)
-      | wx == 1 =
-          Just (WObs (f x y) wy)
-      | wy == 1 =
-          Just (WObs (f x y) wx)
-      | otherwise =
-          Nothing
-  combineMaybe _ _ _ =
-    Nothing
+    combineMaybe
+        f
+        (Just (WObs x wx))
+        (Just (WObs y wy))
+            | wx == wy =
+                Just (WObs (f x y) wx)
+            | wx == 1 =
+                Just (WObs (f x y) wy)
+            | wy == 1 =
+                Just (WObs (f x y) wx)
+            | otherwise =
+                Nothing
+    combineMaybe _ _ _ =
+        Nothing
 
 combineTerryTables ::
-  (Ord t, CombineVal v) =>
-  (CombineBase v -> CombineBase v -> CombineBase v) ->
-  TerryTable t v ->
-  TerryTable t v ->
-  TerryTable t v
+    (Ord t, CombineVal v) =>
+    (CombineBase v -> CombineBase v -> CombineBase v) ->
+    TerryTable t v ->
+    TerryTable t v ->
+    TerryTable t v
 combineTerryTables f xs ys =
-  [ TerryValue
-      { tvCode = tvCode x,
-        tvValue = combineMaybe f (tvValue x) (tvValue y)
-      }
-  | x <- xs,
-    Just y <- [Map.lookup (tvCode x) yMap]
-  ]
+    [ TerryValue
+        { tvCode = tvCode x
+        , tvValue = combineMaybe f (tvValue x) (tvValue y)
+        }
+    | x <- xs
+    , Just y <- [Map.lookup (tvCode x) yMap]
+    ]
   where
     yMap =
-      Map.fromList
-        [ (tvCode y, y)
-        | y <- ys
-        ]
+        Map.fromList
+            [ (tvCode y, y)
+            | y <- ys
+            ]
 
-sumTerryTables :: (Ord t) => [TerryTable t (WObs Double)] -> [TerryValue t (WObs Double)]
+sumTerryTables ::
+    (Ord t) =>
+    [TerryTable t (WObs Double)] -> [TerryValue t (WObs Double)]
 sumTerryTables [] = []
 sumTerryTables [t] = t
 sumTerryTables (t : u : ts) =
-  sumTerryTables (combineTerryTables (+) t u : ts)
+    sumTerryTables (combineTerryTables (+) t u : ts)
 
 data Operation = Add | Subtract | Multiply | Divide
 

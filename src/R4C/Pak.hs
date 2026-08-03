@@ -20,6 +20,15 @@ import R4C.Territory
 import R4C.TerryTable
 import UniformBase
 
+
+-- scalePak :: (Ord t, Show t) => (a, Double) -> MdColumn t v -> (a, MdColumn t v)
+scalePak ::
+    (Ord t, Show t, ScaleByDouble v) =>
+    Double ->
+    (Dataset, TerryTable t v) ->
+    (Dataset, TerryTable t v)
+scalePak f (ds, tab) = (ds, scaleTerryTable f tab)
+
 makePakExtensive ::
     Pak CountryId (WObs Double) ->
     Dataset ->
@@ -66,8 +75,8 @@ makePakExtensive2 (ds1, tab1) newDescriptor year weightIndicatorId =
                     <> showT weightIndicatorId
             , dsUnit = dsUnit ds1 <> "ext"
             , dsAggregation = Sum
-            , dsDecimals = 0
-            , dsScale = Giga
+            , dsDecimals = 0 -- shoud be taken from weighted
+            , dsScale = Unit -- should be taken from weighted
             , dsExtensive = True
             , dsLastYear = Just year
             }
@@ -85,7 +94,7 @@ lookupRegionTable3 conn regionDef ds yr = do
             (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
     return regTab
 
--- lookupCountryTable3 :: Connection ->   Dataset -> Year -> IO CountryTable3
+-- lookupCountryTable3 :: Connection ->   Dataset -> Year -> IO CountryPak3
 -- fill for each region a countryTable with only its countries
 -- lookupCountryTable3 :: Connection -> Dataset -> Year -> IO (Dataset, [TerryValue CountryId ( Double)])
 

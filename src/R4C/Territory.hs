@@ -62,10 +62,10 @@ aggregateTery op memberships table  = op (catMaybes values)
 
 
 wrapMdCol3 ::   [(Dataset, [(TerryValue t v)])] -> [MdColumn t v]
-wrapMdCol3 rt3s = map oneRT3 rt3s
+wrapMdCol3 rt3s = map wrapMdCol1 rt3s
 
-oneRT3 :: (Dataset, (TerryTable t v)) -> MdColumn t v
-oneRT3 (ds , (t)) = wrapMdCol ds t 
+wrapMdCol1 :: (Dataset, (TerryTable t v)) -> MdColumn t v
+wrapMdCol1 (ds , (t)) = wrapMdCol ds t 
     -- map (\(t,d) -> wrapMdCol d t) $ zip rct2 req
 
 

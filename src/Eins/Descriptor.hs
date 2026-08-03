@@ -144,7 +144,7 @@ agriPercent = Dataset
         , dsDefinition =
             "Txxx"
         , dsUnit = "%"
-        , dsAggregation = WeightedBy (IndicatorId "xxyy")
+        , dsAggregation = WeightedBy (IndicatorId "AG.SRF.TOTL.K2")
         , dsDecimals = 2
         , dsScale = Unit
         , dsExtensive = False

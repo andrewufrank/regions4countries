@@ -5,13 +5,13 @@
 -- for each region:
 -- the population, the surface, surface per person,
 -- within the region: standard dev. for surface per person
-
 -----------------------------------------------------------------------------
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module Study.Study
-    where
-import Tab1 
+where
+
+import Tab1
 
 -- import           Eins.Region (regionOrder)
 -- import qualified Eins.Region as RBT
@@ -31,34 +31,33 @@ import Tab1
 -- import           Eins.Region3
 -- import           R4C.Statistics
 -- import           R4C.Territory
-import           Eins.Config
+import Eins.Config
+
 -- import           Eins.Descriptor
 -- import           Eins.Region2
-import           System.Directory (createDirectoryIfMissing)
-import           System.FilePath ((</>))
-import           UniformBase hiding ((</>))
--- import Eins.Descriptor2 
+import System.Directory (createDirectoryIfMissing)
+import System.FilePath ((</>))
+import UniformBase hiding ((</>))
+
+-- import Eins.Descriptor2
 
 writeTab1Table :: FilePath -> String -> IO ()
 writeTab1Table filename contents = do
     createDirectoryIfMissing True tableOutputDirectory
     writeFile (tableOutputDirectory </> filename) contents
 
-allTables :: IO()
-allTables = do 
-    -- getData11 
+allTables :: IO ()
+allTables = do
+    -- getData11
     getData12
 
-
 -- regionMembers = regionMembers3 ++ extraRegions3 :: RegionMembers
-
 
 -- fromPercent :: Double -> Double -> Double
 -- fromPercent a b = a * 0.01 * b
 
 -- toPercent :: Double -> Double -> Double
 -- toPercent a b = a * 100 / b
-
 
 -- getData11 :: IO ()
 -- -- fig11 -- Flaeche , Nutzbare flaeche
@@ -71,24 +70,23 @@ allTables = do
 --     urban3 <- lookupCountryTable3 conn urban (Year 2015)
 --     agriPerc3 <- lookupCountryTable3 conn agriPercent (Year 2023)
 --     -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
- 
 
 --     --  let req = [population, surfaceArea, forest, urban, agriPercent]
 --     --     years = map Year [2023,  2023, 2023, 2015, 2023]
 --     --     reqYears = zip req years
---     let c3 :: [(Dataset, [TerryValue CountryId (WObs Double)])] 
---         c3 = [pop3, surf3, forest3, urban3, agriPerc3] :: [CountryTable3]
+--     let c3 :: [(Dataset, [TerryValue CountryId (WObs Double)])]
+--         c3 = [pop3, surf3, forest3, urban3, agriPerc3] :: [CountryPak3]
 --             -- <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
 
 --     close conn
 
---  -- old 
+--  -- old
 
 --     -- compute agricultural land area
---     let agri3 :: CountryTable3
+--     let agri3 :: CountryPak3
 --         agri3 = (agriLand, combineTerryTables (fromPercent) (snd agriPerc3) (snd surf3))
 --         use3 = (useableLand, sumTerryTables $ map snd [forest3, urban3, agri3])
---         c4 = c3 ++ [agri3, use3]:: [CountryTable3]
+--         c4 = c3 ++ [agri3, use3]:: [CountryPak3]
 
 --         mcountry4 = wrapMdCol3 c4
 --         -- print all tables for testing
@@ -96,7 +94,7 @@ allTables = do
 --     putStrLn mdCountry
 
 --     -- make region tables
---     let reg4 = reg3CountryTable4 regionMembers2 c4 
+--     let reg4 = reg3CountryTable4 regionMembers2 c4
 --     -- :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
 --         reg4tot@[pop4, surf4,forest4,urban4,agriPerc4, agri4, use4]
 --                  =  regtab3_regtab1 reg4 -- :: [(Dataset, [TerryValue RegionId Double])]
@@ -118,7 +116,7 @@ allTables = do
 -- --     let req = [population, fertilityRate]
 -- --         years = map Year [2024,  2024, 2024]
 -- --         reqYears = zip req years
--- --     c3@[pop3, fertRate3] :: [CountryTable3]
+-- --     c3@[pop3, fertRate3] :: [CountryPak3]
 -- --     let women = scaleRegionTable (0.5*20) pops
 -- --         fertilityCount3  = (fertilityCount combineTerryTables Multiply (snd women) (snd fertRate3))
 -- --     return (fertilityCount3)
@@ -131,7 +129,7 @@ allTables = do
 -- --         years = map Year [2024, 2024, 2024, 2024]
 -- --         reqYears = zip req years
 
--- --     c3@[pop3, popGrowth3, fertRate3, mignet3] :: [CountryTable3]
+-- --     c3@[pop3, popGrowth3, fertRate3, mignet3] :: [CountryPak3]
 -- --             <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
 -- --     close conn
 
@@ -145,7 +143,6 @@ allTables = do
 -- --     let mcountry4 = wrapMdCol3 c4
 -- --         mdCountry = markdownTable allCodeNames xcountries mcountry4  --less1m mdC
 -- --     putStrLn mdCountry
-
 
 -- --     let reg4  :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
 -- --         reg4tot@[pop4, popGrowth4, fertRate4, mignet4, fertilityCount4, popGrowthCount4, netmigPM4] =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
@@ -233,4 +230,3 @@ allTables = do
 
 -- dreiCountr = map CountryId ["FIN", "CYP", "PRT"]
 -- xcountries = map CountryId ["FIN", "CYP", "PRT", "AUT", "BRA", "BGD", "RUS"]
-
