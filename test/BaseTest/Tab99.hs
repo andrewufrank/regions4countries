@@ -59,7 +59,7 @@ exp1a countries = do
         mapM (\(d, y) -> lookupCountryTable3 conn (d) y) reqYears
     close conn
 
-    let mdC = wrapMdCol3 countryTables
+    let mdC = map wrapMdCol1 countryTables
     -- the operations on the tables must be with the mdcol data!
     let md = markdownTable allCodeNames countries mdC -- less1m mdC
     putStrLn md
@@ -111,14 +111,14 @@ exp3a regOrder countries = do
         reg4tot :: [RegionPak3]
         reg4tot = country2regionPak regionMembers2 c4
 
-        mdRegion4 = wrapMdCol3 reg4tot
+        mdRegion4 = map wrapMdCol1 reg4tot
         mdRegion = markdownTable regionNames2 avregionOrder2 mdRegion4
     putStrLn mdRegion
     -- print mdRegion
     return mdRegion
 
 -- mdC :: [MdColumn RegionId Double]
---     mdC = wrapMdCol3 c4
+--     mdC = map wrapMdCol1 c4
 -- let md1 = markdownTable RBT.regionNames regOrder mdC
 -- putStrLn md1
 -- print md1
@@ -153,7 +153,7 @@ exp3b regOrder countries = do
 
     let c3 = [pop3, surf3, gdp3, gnp3]
 
-        mdC = wrapMdCol3 c3
+        mdC = map wrapMdCol1 c3
     let md1 = markdownTable allCodeNames countries mdC
     putStrLn md1
     -- print md1

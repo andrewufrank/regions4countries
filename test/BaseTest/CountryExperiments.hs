@@ -70,7 +70,7 @@ exp7a countries regionDef = do
         c4 = c3
         -- ++ [gpc4]  -- the countries with difference between GDP and GNP (cyprus, ireland, luxemburg, malta)
         -- the operations on the tables must be with the mdcol data!
-        mc4 = wrapMdCol3 c4
+        mc4 = map wrapMdCol1 c4
     let md = markdownTable allCodeNames countries mc4 -- less1m mdC
     putStrLn md
 
@@ -86,7 +86,7 @@ exp7a countries regionDef = do
                 , dsDecimals = 0
                 }
         -- to test comp gdp per cap aus gpc4 and pop3
-        md4 = wrapMdCol3 (reg4tot ++ [gnpPC4]) :: [Col RegionId (WObs Double)]
+        md4 = map wrapMdCol1 (reg4tot ++ [gnpPC4]) :: [Col RegionId (WObs Double)]
     let md2 = markdownTable RBT.regionNames RBT.regionOrder md4 -- less1m mdC
     putStrLn md2
     -- print md2
@@ -118,19 +118,19 @@ exp7a countries regionDef = do
 --                     , dsScale = Giga
 --                     , dsUnit = "PP$"
 --                     , dsDecimals = 0 }
---     -- let [gnp3, surf3] = map wrapMdCol3 [reg3gnp, reg3surf]
+--     -- let [gnp3, surf3] = map (map wrapMdCol1) [reg3gnp, reg3surf]
 
 --     let
 --         reg3s = [pop3, surf3, gdp3] ++ [gn3, surf3] :: [RegionTable3]
 --     let mdC :: [MdColumn RegionId Double]
---         mdC = wrapMdCol3 . regtab3_regtab1 $ reg3s
+--         mdC = map wrapMdCol1 . regtab3_regtab1 $ reg3s
 --     let md1 = markdownTable RBT.regionNames regOrder mdC
 --     putStrLn md1
 
 --     -- get OneCountry
 --     let regid = RegionId "EU"
 --     let euMdC = getOneRegionMany3  reg3s regid -- implies the wrap
---     -- let md3 = wrapMdCol3 euMdC :: [MdColumn CountryId Double]
+--     -- let md3 = map wrapMdCol1 euMdC :: [MdColumn CountryId Double]
 --     let md2 =  markdownTable allCodeNames countries    euMdC --less1m mdC
 --     putStrLn  md2
 --     -- print md1
@@ -158,18 +158,18 @@ exp7a countries regionDef = do
 
 --     -- combineMdTables -- difficult for region tables
 
---     -- let [gnp3, surf3] = map wrapMdCol3 [reg3gnp, reg3surf]
+--     -- let [gnp3, surf3] = map (map wrapMdCol1) [reg3gnp, reg3surf]
 
 --     let reg3s = [pop3,gdp3] ++ [gn3, surf3] :: [RegionTable3]
 --     let mdC :: [MdColumn RegionId Double]
---         mdC = wrapMdCol3 . regtab3_regtab1 $ reg3s
+--         mdC = map wrapMdCol1 . regtab3_regtab1 $ reg3s
 --     let md1 = markdownTable RBT.regionNames regOrder mdC
 --     putStrLn md1
 
 --     -- get OneCountry
 --     let regid = RegionId "EU"
 --     let euMdC = getOneRegionMany3  reg3s regid -- implies the wrap
---     -- let md3 = wrapMdCol3 euMdC :: [MdColumn CountryId Double]
+--     -- let md3 = map wrapMdCol1 euMdC :: [MdColumn CountryId Double]
 --     let md2 =  markdownTable allCodeNames countries    euMdC --less1m mdC
 --     putStrLn  md2
 --     -- print md1
@@ -189,7 +189,7 @@ exp7a countries regionDef = do
 
 --     countryTables :: [CountryPak3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
 --     close conn
---     let mdC = wrapMdCol3 countryTables
+--     let mdC = map wrapMdCol1 countryTables
 --     let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
 
 --     let gpc4 = (combineMdTables Divide g3  pop3){colScale=Kilo}
@@ -227,7 +227,7 @@ exp7a countries regionDef = do
 --         reg4 = reg3CountryTable4 regionDef gt4 :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
 --         reg4tot =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
 --         -- reg4tot = map (second sumCountryTables) reg4
---         md4 = wrapMdCol3 reg4tot :: [MdColumn RegionId Double]
+--         md4 = map wrapMdCol1 reg4tot :: [MdColumn RegionId Double]
 --     let md2 = markdownTable RBT.regionNames RBT.regionOrder md4  --less1m mdC
 --     putStrLn md2
 
@@ -247,7 +247,7 @@ exp7a countries regionDef = do
 
 --     countryTables :: [CountryPak3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
 --     close conn
---     let mdC = wrapMdCol3 countryTables
+--     let mdC = map wrapMdCol1 countryTables
 --     let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
 
 --     let gpc4 = (combineMdTables Divide g3  pop3){colScale=Kilo}

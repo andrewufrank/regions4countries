@@ -75,14 +75,14 @@ exp5a regOrder   = do
         reg4tot :: [RegionPak3]
         reg4tot = country2regionPak regionMembers2 c4
 
-        mdRegion4 = wrapMdCol3 reg4tot
+        mdRegion4 = map wrapMdCol1 reg4tot
         mdRegion = markdownTable regionNames2 regOrder  mdRegion4
     putStrLn mdRegion
     -- print mdRegion
     return mdRegion
 
 -- mdC :: [MdColumn RegionId Double]
---     mdC = wrapMdCol3 c4
+--     mdC = map wrapMdCol1 c4
 -- let md1 = markdownTable RBT.regionNames regOrder mdC
 -- putStrLn md1
 -- -- print md1
@@ -117,7 +117,7 @@ exp6b  countries = do
     close conn
 
     let c4 = c3 ++ [gdp5]
-        mdC = wrapMdCol3 c4
+        mdC = map wrapMdCol1 c4
     let md1 = markdownTable allCodeNames countries mdC
     putStrLn md1
     -- print md1

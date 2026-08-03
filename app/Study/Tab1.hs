@@ -112,7 +112,7 @@ getData11 = do
 
     --     -- usePerc4 = combinesCountryTable3 useableLandPerCent (toPercent) use4 surf4
     --     -- usePC4 = (useableLandPC, combineTerryTables (haPC) (snd use4) (snd pop4))
-    let mreg5 = wrapMdCol3 reg5 --(reg4tot ++ [usePerc4, usePC4]) ::
+    let mreg5 = map wrapMdCol1 reg5 --(reg4tot ++ [usePerc4, usePC4]) ::
         [pop5, surf5, forest5, urban5, agriPerc5, agri5, use5] = mreg5 
     --             [MdColumn RegionId Double]
     let mdRegion1 = markdownTable regionNames2 regionOrder2 
@@ -154,7 +154,7 @@ haPC a b = a * 10000 / b
 --         c3 = [pop3, popGrowth3, fertRate3, mignet3]
 
 --     -- test data availability
---     let mcountry3 = wrapMdCol3 c3
+--     let mcountry3 = map wrapMdCol1 c3
 --         mdCountry = markdownTable allCodeNames xcountries mcountry3  --less1m mdC
 --     putStrLn mdCountry
 
@@ -176,7 +176,7 @@ haPC a b = a * 10000 / b
 --     -- -- let fertility2 = zip regionsList fertility
 
 --     -- putStrLn $ show popGrowthCount3
---     let mcountry4 = wrapMdCol3 c4
+--     let mcountry4 = map wrapMdCol1 c4
 --         mdCountry = markdownTable allCodeNames xcountries mcountry4  --less1m mdC
 --     putStrLn mdCountry
 
@@ -188,7 +188,7 @@ haPC a b = a * 10000 / b
 --         reg4tot :: [(Dataset, [TerryValue RegionId Double])]
 
 --         fertRate4x = combinesCountryTable3 fertilityRate (/) popGrowthCount4 pop4
---         mdRegion4 = wrapMdCol3 (reg4tot ++ [fertRate4x] ) :: [MdColumn RegionId Double]
+--         mdRegion4 = map wrapMdCol1 (reg4tot ++ [fertRate4x] ) :: [MdColumn RegionId Double]
 
 --         mdRegion = markdownTable  regionNames2 regionOrder2 mdRegion4
 

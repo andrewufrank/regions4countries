@@ -34,7 +34,7 @@ import R4C.Export.Table
 import R4C.Pak
 -- import Study.Tab1
 -- import Eins.Region
-import R4C.Territory (regtab3_regtab1, wrapMdCol3)
+import R4C.Territory (wrapMdCol1)
 
 regionMembersSmall :: RegionMembers  -- [(RegionId, CountryId)]
 regionMembersSmall =
@@ -67,14 +67,14 @@ exp1 = do
         c3 = [pop3, surf3, fert3]
         c4 = c3 :: [CountryPak3]
 
-        mCountry4 = wrapMdCol3 c4
+        mCountry4 = map wrapMdCol1 c4
         mdCountry = markdownTable allCodeNames avcountries mCountry4
     putStrLn mdCountry
 
     let reg4tot :: [RegionPak3]
         reg4tot = country2regionPak regionMembers2 c4
 
-        mdRegion4 = wrapMdCol3 reg4tot
+        mdRegion4 = map wrapMdCol1 reg4tot
         mdRegion = markdownTable regionNames2 avregionOrder2  mdRegion4
     putStrLn mdRegion
 

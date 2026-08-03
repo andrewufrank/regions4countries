@@ -88,7 +88,7 @@ allTables = do
 --         use3 = (useableLand, sumTerryTables $ map snd [forest3, urban3, agri3])
 --         c4 = c3 ++ [agri3, use3]:: [CountryPak3]
 
---         mcountry4 = wrapMdCol3 c4
+--         mcountry4 = map wrapMdCol1 c4
 --         -- print all tables for testing
 --     let mdCountry = markdownTable allCodeNames xcountries mcountry4  --less1m mdC
 --     putStrLn mdCountry
@@ -100,7 +100,7 @@ allTables = do
 --                  =  regtab3_regtab1 reg4 -- :: [(Dataset, [TerryValue RegionId Double])]
 --         usePerc4 = combinesCountryTable3 useableLandPerCent (toPercent)  use4 surf4
 --         usePC4 = (useableLandPC, combineTerryTables  (haPC) (snd use4) (snd pop4))
---         mdRegion4 = wrapMdCol3 (reg4tot ++ [usePerc4, usePC4]) :: [MdColumn RegionId Double]
+--         mdRegion4 = map wrapMdCol1 (reg4tot ++ [usePerc4, usePC4]) :: [MdColumn RegionId Double]
 
 --         mdRegion = markdownTable  regionNames2 regionOrder2 mdRegion4
 
@@ -140,7 +140,7 @@ allTables = do
 -- --         c4 = c3 ++ [fertilityCount3, popGrowthCount3, netmigPMP3 ]
 -- --     -- -- let fertility2 = zip regionsList fertility
 
--- --     let mcountry4 = wrapMdCol3 c4
+-- --     let mcountry4 = map wrapMdCol1 c4
 -- --         mdCountry = markdownTable allCodeNames xcountries mcountry4  --less1m mdC
 -- --     putStrLn mdCountry
 
@@ -148,7 +148,7 @@ allTables = do
 -- --         reg4tot@[pop4, popGrowth4, fertRate4, mignet4, fertilityCount4, popGrowthCount4, netmigPM4] =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
 
 -- --         fertRate4x = combinesCountryTable3 fertilityRate (/) fertilityCount4 pop4
--- --         mdRegion4 = wrapMdCol3 (reg4tot ++ [fertRate4x] ) :: [MdColumn RegionId Double]
+-- --         mdRegion4 = map wrapMdCol1 (reg4tot ++ [fertRate4x] ) :: [MdColumn RegionId Double]
 
 -- --         mdRegion = markdownTable  regionNames2 regionOrder2 mdRegion4
 
