@@ -36,6 +36,7 @@ import R4C.Export.CountnryCodeNames
 import R4C.Export.Table
 import R4C.Pak
 import R4C.Territory
+import R4C.TerryTable (Operation (Divide))
 
 dreiEu = map CountryId ["FIN", "CYP", "PRT"]
 
@@ -76,15 +77,7 @@ exp7a countries regionDef = do
 
     let reg4tot@[pop4, surf4, gnp4] = country2regionPak regionDef c4
         -- gnpPC4 = (ds2, combineTerryTables (/) (snd gnp4) (snd pop4))
-        gnpPC4 = combinesCountryTable3 ds2 (/) gnp4 pop4
-        ds2 =
-            Dataset
-                { dsExtensive = False
-                , dsShortName = "gnp per cap."
-                , dsScale = Kilo
-                , dsUnit = "$/P"
-                , dsDecimals = 0
-                }
+        gnpPC4 = combinePak3 Divide gnp4 pop4
         -- to test comp gdp per cap aus gpc4 and pop3
         md4 = map wrapMdCol1 (reg4tot ++ [gnpPC4]) :: [Col RegionId (WObs Double)]
     let md2 = markdownTable RBT.regionNames RBT.regionOrder md4 -- less1m mdC
@@ -330,7 +323,7 @@ exp1a_ countries = do
     putIOwords ["the sums are", showT aggs]
 
     let mdC =
-            map (\(t, d) -> wrapMdCol d t) $ zip countryTables req ::
+            map (\(t, d) -> wrapMdCol1 (Pak d t)) $ zip countryTables req ::
                 [Col CountryId Double]
     -- the operations on the tables must be with the mdcol data!
     -- let sortedRegions = sortTerryByColumn Descending  (headNote "wewer" countryTables)

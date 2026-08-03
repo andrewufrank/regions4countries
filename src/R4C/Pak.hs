@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeOperators #-}
 -----------------------------------------------------------------------------
 --
 -- Module      :  Pak
@@ -56,6 +57,65 @@ sumPak3 paks@(Pak firstDataset _ : _) =
             , dsAggregation = Sum
             , dsDecimals = maximum (map dsDecimals datasets)
             , dsExtensive = all dsExtensive datasets
+            , dsLastYear = case years of
+                [] -> Nothing
+                _ -> Just (maximum years)
+            , dsSourceOrganization = T.intercalate "; " organizations
+            }
+
+combinePak3 ::
+    (Ord t, CombineVal v, CombineBase v ~ Double) =>
+    Operation ->
+    Pak t v ->
+    Pak t v ->
+    Pak t v
+combinePak3 operation left right =
+    Pak combinedDataset
+        ( combineTerryTables
+            (operationFunction operation)
+            (pTerryTable left)
+            (pTerryTable right)
+        )
+  where
+    leftDataset = pDataSet left
+    rightDataset = pDataSet right
+    symbol = s2t (operationSymbol operation)
+    combineText getter = getter leftDataset <> " " <> symbol <> " " <> getter rightDataset
+    years = [year | Just year <- map dsLastYear [leftDataset, rightDataset]]
+    organizations = nub [dsSourceOrganization leftDataset, dsSourceOrganization rightDataset]
+    isExtensive = case operation of
+        Add -> dsExtensive leftDataset && dsExtensive rightDataset
+        Subtract -> dsExtensive leftDataset && dsExtensive rightDataset
+        Multiply -> dsExtensive leftDataset /= dsExtensive rightDataset
+        Divide -> dsExtensive leftDataset && not (dsExtensive rightDataset)
+    aggregation
+        | isExtensive = Sum
+        | dsAggregation leftDataset == dsAggregation rightDataset = dsAggregation leftDataset
+        | otherwise = Mean
+    unit = case operation of
+        Add | dsUnit leftDataset == dsUnit rightDataset -> dsUnit leftDataset
+        Subtract | dsUnit leftDataset == dsUnit rightDataset -> dsUnit leftDataset
+        Divide | dsUnit leftDataset == dsUnit rightDataset -> ""
+        _ -> dsUnit leftDataset <> symbol <> dsUnit rightDataset
+
+    combinedDataset =
+        leftDataset
+            { dsIndicator =
+                IndicatorId
+                    ( unIndicatorId (dsIndicator leftDataset)
+                        <> " " <> symbol <> " "
+                        <> unIndicatorId (dsIndicator rightDataset)
+                    )
+            , dsShortName = combineText dsShortName
+            , dsName = combineText dsName
+            , dsDefinition =
+                "Derived by applying " <> symbol <> " to "
+                    <> dsShortName leftDataset <> " and " <> dsShortName rightDataset
+            , dsUnit = unit
+            , dsAggregation = aggregation
+            , dsDecimals = min (dsDecimals leftDataset) (dsDecimals rightDataset)
+            , dsScale = min (dsScale leftDataset) (dsScale rightDataset)
+            , dsExtensive = isExtensive
             , dsLastYear = case years of
                 [] -> Nothing
                 _ -> Just (maximum years)

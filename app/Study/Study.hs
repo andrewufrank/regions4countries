@@ -8,10 +8,11 @@
 -----------------------------------------------------------------------------
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
-module Study.Study
+module Main
 where
 
 import Tab1
+import Tab2
 
 -- import           Eins.Region (regionOrder)
 -- import qualified Eins.Region as RBT
@@ -48,8 +49,14 @@ writeTab1Table filename contents = do
 
 allTables :: IO ()
 allTables = do
-    -- getData11
+    getData11
     getData12
+    -- MIGRATION TODO: re-enable when Tab2's missing Dataset descriptors exist.
+    -- getData21
+    -- getData22
+
+main :: IO ()
+main = allTables
 
 -- regionMembers = regionMembers3 ++ extraRegions3 :: RegionMembers
 

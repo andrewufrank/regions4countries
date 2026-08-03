@@ -46,7 +46,7 @@ tests =
         (_, md2) <- exp7a threeEUcountriesT RBT.regionMembers
 
         assertEqual "md2 from exp7a" md2  
-            "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) | gnp per cap.(k$/P) |\n|:---|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |\n| Europ. Union | 45.604 | 0.344 | 67 | 0 |\n| Gruppe 7 | 194.292 | 12.499 | 75 | 0 |\n| Russland | 143.670 | 17.125 | 48 | 0 |\n"
+            "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) | GDP per capita / Bev\246lkerung(kPP$/P/P) |\n|:---|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |\n| Europ. Union | 45.604 | 0.344 | 67 | 0 |\n| Gruppe 7 | 194.292 | 12.499 | 75 | 0 |\n| Russland | 143.670 | 17.125 | 48 | 0 |\n"
         
         --  "| Region | Population(MP) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) | gnp(GPP$) | gnp per cap.(k$/P) |\n|:---|---:|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |  |\n| Europ. Union | 450.228 | 4.313 |  | 23453 | 52 |\n| Gruppe 7 | 785.543 | 27.354 |  | 47705 | 61 |\n| Russland | 143.670 | 17.125 |  | 5551 | 39 |\n"
     ]

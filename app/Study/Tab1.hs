@@ -139,60 +139,62 @@ haPC a b = a * 10000 / b
 --         fertilityCount3  = (fertilityCount combineTerryTables Multiply (snd women) (snd fertRate3))
 --     return (fertilityCount3)
 
--- getData12 :: IO ()
--- -- fig12 -- bevoelkerung, wachstum migration
--- getData12 = do
---     conn <- open dbPath
+getData12 :: IO ()
+-- fig12 -- bevoelkerung, wachstum migration
+getData12 = do
+    conn <- open dbPath
 
---     pop3  <- lookupCountryTable3 conn (population)(Year 2024)
---     popGrowth3 <- lookupCountryTable3 conn ( population) (Year 2023)
---     fertRate3 <- lookupCountryTable3 conn fertilityRate (Year 2024)
---     mignet3 <- lookupCountryTable3 conn migrationNet (Year 2024)
---     close conn
+    pop3  <- lookupCountryTable3 conn (population)(Year 2024)
+    popGrowth3 <- lookupCountryTable3 conn ( population) (Year 2023)
+    fertRate3 <- lookupCountryTable3 conn fertilityRate (Year 2024)
+    mignet3 <- lookupCountryTable3 conn migrationNet (Year 2024)
+    close conn
 
---     let c3 :: [CountryPak3]
---         c3 = [pop3, popGrowth3, fertRate3, mignet3]
+    let c3 :: [CountryPak3]
+        c3 = [pop3, popGrowth3, fertRate3, mignet3]
 
---     -- test data availability
---     let mcountry3 = map wrapMdCol1 c3
---         mdCountry = markdownTable allCodeNames xcountries mcountry3  --less1m mdC
---     putStrLn mdCountry
+    -- test data availability
+    let mcountry3 = map wrapMdCol1 c3
+        mdCountry = markdownTable allCodeNames xcountries mcountry3  --less1m mdC
+    putStrLn mdCountry
 
---     --olf     conn <- open dbPath
---     -- let req = [population, populationGrowthRate, fertilityRate, migrationNet]
---     --     years = map Year [2024, 2024, 2024, 2024]
---     --     reqYears = zip req years
+    --olf     conn <- open dbPath
+    -- let req = [population, populationGrowthRate, fertilityRate, migrationNet]
+    --     years = map Year [2024, 2024, 2024, 2024]
+    --     reqYears = zip req years
 
---     -- c3@ :: [CountryPak3]
---     --         <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
---     -- close conn
+    -- c3@ :: [CountryPak3]
+    --         <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+    -- close conn
 
---     let -- women3 = second (scaleRegionTable (0.5*20)) pop3
---         -- fertilityCount3  = (fertilityCount, combineTerryTables (*) (snd pop3) (snd fertRate3))
---         popGrowthCount3  = (popGrowthCount, combineTerryTables (\a b -> a * b ) (snd pop3) (snd fertRate3))
---         netmigPMP3 = (netMigrationCount, combineTerryTables (\a b -> (10**6) * a / b ) (snd mignet3) (snd pop3) ) -- :: RegionTable3
---         c4 :: [CountryPak3]
---         c4 = c3 ++ [ popGrowthCount3, netmigPMP3 ]
---     -- -- let fertility2 = zip regionsList fertility
+    let -- women3 = second (scaleRegionTable (0.5*20)) pop3
+        -- fertilityCount3  = (fertilityCount, combineTerryTables (*) (snd pop3) (snd fertRate3))
+        popGrowthCount3 = combinePak3 Multiply pop3 fertRate3
+        netmigPMP3 =
+            Pak netMigrationCount
+                (combineTerryTables
+                    (\a b -> (10 ** 6) * a / b)
+                    (pTerryTable mignet3)
+                    (pTerryTable pop3))
+        c4 :: [CountryPak3]
+        c4 = c3 ++ [ popGrowthCount3, netmigPMP3 ]
+    -- -- let fertility2 = zip regionsList fertility
 
---     -- putStrLn $ show popGrowthCount3
---     let mcountry4 = map wrapMdCol1 c4
---         mdCountry = markdownTable allCodeNames xcountries mcountry4  --less1m mdC
---     putStrLn mdCountry
+    -- putStrLn $ show popGrowthCount3
+    let mcountry4 = map wrapMdCol1 c4
+        mdCountry = markdownTable allCodeNames xcountries mcountry4  --less1m mdC
+    putStrLn mdCountry
 
---     let reg4  :: [(Dataset, [(RegionId, TerryTable CountryId (WObs Double))])]
---         reg4 = reg3CountryTable4 regionMembers2 c4
---         [pop4, popGrowth4, fertRate4, mignet4, popGrowthCount4, netmigPM4]
---             = reg4tot
---         reg4tot  =  regtab3_regtab1 reg4
---         reg4tot :: [(Dataset, [TerryValue RegionId Double])]
+    let [pop4, popGrowth4, fertRate4, mignet4, popGrowthCount4, netmigPM4]
+            = reg4tot
+        reg4tot = country2regionPak regionMembers2 c4 :: [RegionPak3]
 
---         fertRate4x = combinesCountryTable3 fertilityRate (/) popGrowthCount4 pop4
---         mdRegion4 = map wrapMdCol1 (reg4tot ++ [fertRate4x] ) :: [MdColumn RegionId Double]
+        fertRate4x = combinePak3 Divide popGrowthCount4 pop4
+        mdRegion4 = map wrapMdCol1 (reg4tot ++ [fertRate4x]) :: [Col RegionId (WObs Double)]
 
---         mdRegion = markdownTable  regionNames2 regionOrder2 mdRegion4
+        mdRegion = markdownTable  regionNames2 regionOrder2 mdRegion4
 
---     putStrLn mdRegion
+    putStrLn mdRegion
 
 -- old
 -- writeTab1Table "tab12" mdRegion
