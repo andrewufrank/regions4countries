@@ -60,18 +60,19 @@ data Indicator = Indicator
 data Dataset = Dataset
     { dsIndicator :: IndicatorId
     , dsShortName :: Text
-    , dsName :: Text
-    , dsDefinition :: Text
+    -- , dsName :: Text
+    -- , dsDefinition :: Text
     , dsUnit :: Text
     , dsAggregation :: Aggregation
-    , dsDecimals :: Int
-    , dsScale :: Scale
-    , dsExtensive :: Bool
-    , dsLastYear :: Maybe Year
-    , dsSourceOrganization :: Text
+    -- , dsDecimals :: Int
+    -- , dsScale :: Scale
+    -- , dsExtensive :: Bool
+    -- , dsYear :: MayYear
+    -- , dsSourceOrganization :: Text
     }
     deriving (Eq, Ord, Show)
 
+-- | Dataset 
 newtype Year = Year Int
     deriving (Eq, Ord, Show)
 

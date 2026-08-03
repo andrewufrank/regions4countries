@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeOperators #-}
 -----------------------------------------------------------------------------
 --
 -- Module      :  Pak
@@ -32,14 +31,32 @@ scalePak ::
     Pak t v
 scalePak f (Pak ds tab) = Pak ds (scaleTerryTable f tab)
 
+constructDataset :: Dataset -> TerryTable t (WObs Double) -> Dataset
+constructDataset dataset table =
+    dataset
+        { dsExtensive = dsAggregation dataset == Sum
+        , dsScale = scaleForMagnitude largestValue
+        , dsDecimals = if dsUnit dataset == "%" then 2 else 0
+        }
+  where
+    largestValue = maximum (0 : [abs (wobs value) | TerryValue _ (Just value) <- table])
+
+    scaleForMagnitude magnitude
+        | magnitude < 10 ** 5 = Unit
+        | magnitude < 10 ** 8 = Kilo
+        | magnitude < 10 ** 11 = Mega
+        | magnitude < 10 ** 14 = Giga
+        | otherwise = Tera
+
 sumPak3 ::
     Ord t =>
     [Pak t (WObs Double)] ->
     Pak t (WObs Double)
 sumPak3 [] = error "sumPak3: cannot derive a dataset from an empty list"
 sumPak3 paks@(Pak firstDataset _ : _) =
-    Pak sumDataset (sumTerryTables (map pTerryTable paks))
+    Pak (constructDataset sumDataset summedTable) summedTable
   where
+    summedTable = sumTerryTables (map pTerryTable paks)
     datasets = map pDataSet paks
     shortNames = map dsShortName datasets
     names = map dsName datasets
@@ -64,19 +81,19 @@ sumPak3 paks@(Pak firstDataset _ : _) =
             }
 
 combinePak3 ::
-    (Ord t, CombineVal v, CombineBase v ~ Double) =>
+    Ord t =>
     Operation ->
-    Pak t v ->
-    Pak t v ->
-    Pak t v
+    Pak t (WObs Double) ->
+    Pak t (WObs Double) ->
+    Pak t (WObs Double)
 combinePak3 operation left right =
-    Pak combinedDataset
-        ( combineTerryTables
+    Pak (constructDataset combinedDataset combinedTable) combinedTable
+  where
+    combinedTable =
+        combineTerryTables
             (operationFunction operation)
             (pTerryTable left)
             (pTerryTable right)
-        )
-  where
     leftDataset = pDataSet left
     rightDataset = pDataSet right
     symbol = s2t (operationSymbol operation)
@@ -145,8 +162,9 @@ makePakExtensive2 ::
     IndicatorId ->
     Pak CountryId (WObs Double)
 makePakExtensive2 (Pak ds1 tab1) year weightIndicatorId =
-    Pak extensiveDs (createTableExtensive tab1)
+    Pak (constructDataset extensiveDs extensiveTable) extensiveTable
   where
+    extensiveTable = createTableExtensive tab1
     extensiveDs =
         ds1
             { dsIndicator =
@@ -206,14 +224,14 @@ lookupCountryTable3 conn ds yr = do
         Sum -> do
             worldTab <- lookupTable conn (dsIndicator ds) yr
             let combTab = mkUnitWeight worldTab
-                ctTab = Pak ds combTab
+                ctTab = Pak (constructDataset ds combTab) combTab
             return ctTab
         WeightedBy indicatorId -> do
             worldTab <- lookupTable conn (dsIndicator ds) yr
             weightTab <- lookupTable conn indicatorId yr -- issue TODO ??
             let combTab =
                     mkWeighted worldTab weightTab :: [TerryValue CountryId (WObs Double)]
-                ctTab = Pak ds combTab
+                ctTab = Pak (constructDataset ds combTab) combTab
             return ctTab
 
 -- combinesCountryTable3 :: (Ord t, Show t)

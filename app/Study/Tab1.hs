@@ -38,6 +38,7 @@ import R4C.TerryTable
 import System.FilePath ((</>))
 import UniformBase hiding (uncurry, (</>))
 
+regionMembers :: RegionMembers
 regionMembers = regionMembers3 ++ extraRegions3 :: RegionMembers
 
 fromPercent :: Double -> Double -> Double
@@ -170,12 +171,12 @@ getData12 = do
     let -- women3 = second (scaleRegionTable (0.5*20)) pop3
         -- fertilityCount3  = (fertilityCount, combineTerryTables (*) (snd pop3) (snd fertRate3))
         popGrowthCount3 = combinePak3 Multiply pop3 fertRate3
-        netmigPMP3 =
-            Pak netMigrationCount
-                (combineTerryTables
-                    (\a b -> (10 ** 6) * a / b)
-                    (pTerryTable mignet3)
-                    (pTerryTable pop3))
+        netmigPMP3 = combinePak3 Divide mignet3 pop3
+            -- Pak netMigrationCount
+            --     (combineTerryTables
+            --         (\a b -> (10 ** 6) * a / b)
+            --         (pTerryTable mignet3)
+            --         (pTerryTable pop3))
         c4 :: [CountryPak3]
         c4 = c3 ++ [ popGrowthCount3, netmigPMP3 ]
     -- -- let fertility2 = zip regionsList fertility
