@@ -15,6 +15,7 @@ import Eins.Descriptor
 import Eins.Region (regionOrder)
 import Eins.Region2
 import Eins.Region3
+import R4C.Country (lookupCountries)
 import R4C.Export.CountnryCodeNames
 import R4C.Export.Table
 import R4C.Import.Query
@@ -24,7 +25,6 @@ import R4C.Territory
 import R4C.TerryTable
 import System.FilePath ((</>))
 import UniformBase hiding (uncurry, (</>))
-import R4C.Country (lookupCountries)
 
 regionMembers :: RegionMembers
 regionMembers = regionMembers3 ++ extraRegions3 :: RegionMembers
@@ -52,7 +52,7 @@ getData11 = do
         agri3 =
             setPakShortName "Landwirtschaft" $
                 combinePaks FromPercentOf agriPerc3 surf3
-                -- could take the base dataset from the weighted value
+        -- could take the base dataset from the weighted value
         use3 = setPakShortName "Nutzbar" $ sumPaks [forest3, urban3, agri3]
         useF3 =
             setPakShortName "Nutzbar" $
@@ -64,8 +64,10 @@ getData11 = do
     let mdBase = markdownPakTable allCodeNames xcountries c3'
     let mdUse =
             markdownPakTable
-                allCodeNames xcountries tab11paks
-                
+                allCodeNames
+                xcountries
+                tab11paks
+
         tab11paks = [surf3, agri3, forest3, urban3, use3, useF3]
     -- make selection of region or country names automatic
     putStrLn mdBase
@@ -76,7 +78,7 @@ getData11 = do
     let reg5 = countryToRegionPaks regionMembers2 tab11paks :: [RegionPak3]
 
     let mdRegion1 = markdownPakTable regionNames2 regionOrder2 reg5
- 
+
     putStrLn mdRegion1
 
 -- writeTab1Table "tab11" mdRegion
@@ -104,7 +106,8 @@ getData12 = do
     popGrowth3 <- lookupCountryPak conn (population) (Year 2023)
     fertRate3 <- lookupCountryPak conn fertilityRate (Year 2024)
     mignet3 <- lookupCountryPak conn migrationNet (Year 2024)
-    popGrowthPercent <- lookupCountryPak conn populationGrowthRate (Year 2024)
+    popGrowthPercent <-
+        lookupCountryPak conn populationGrowthRate (Year 2024)
     close conn
 
     let c3 :: [CountryPak3]

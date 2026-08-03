@@ -60,11 +60,11 @@ data Indicator = Indicator
 data Dataset = Dataset
     { dsIndicator :: IndicatorId
     , dsShortName :: Text
-    -- , dsName :: Text
-    -- , dsDefinition :: Text
-    , dsUnit :: Text
+    , -- , dsName :: Text
+      -- , dsDefinition :: Text
+      dsUnit :: Text
     , dsAggregation :: Aggregation
-    -- , dsDecimals :: Int
+    , dsDecimals :: Int
     -- , dsScale :: Scale
     -- , dsExtensive :: Bool
     -- , dsYear :: MayYear
@@ -72,7 +72,7 @@ data Dataset = Dataset
     }
     deriving (Eq, Ord, Show)
 
--- | Dataset 
+-- | Dataset
 newtype Year = Year Int
     deriving (Eq, Ord, Show)
 
@@ -196,7 +196,8 @@ type CountryValue = TerryValue CountryId Double
 type CountryTable = TerryTable CountryId (Double)
 type CountryPak3 = Pak CountryId (WObs Double)
 type RegionPak3 = Pak RegionId (WObs Double)
-        -- Retaining weights allows regions to be aggregated again.
+
+-- Retaining weights allows regions to be aggregated again.
 
 type RegionValue = TerryValue RegionId Double -- RegionValueX Double
 type RegionTable = Col RegionId Double -- TerryTable RegionId ( Double) -- [RegionValue]

@@ -40,7 +40,7 @@ constructDataset dataset table =
                 { colTitle = t2s (dsShortName dataset)
                 , colScale = scaleForMagnitude largestValue
                 , colUnit = dsUnit dataset
-                , colDecimals = if dsUnit dataset == "%" then 2 else 0
+                , colDecimals = dsDecimals dataset
                 }
         , cTerrryTable = table
         }
