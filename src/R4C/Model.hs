@@ -183,14 +183,18 @@ countriesInRegion memberships region =
         Just cs -> cs
         Nothing -> []
 
-type Pak t v = (Dataset, TerryTable t v)
+data Pak t v = Pak
+    { pDataSet :: Dataset
+    , pTerryTable :: TerryTable t v
+    }
+    deriving (Eq, Ord, Show)
 
 type RegionName = TerryName RegionId
 
 type CountryValue = TerryValue CountryId Double
 type CountryTable = TerryTable CountryId (Double)
-type CountryPak3 = (Dataset, TerryTable CountryId (WObs Double))
-type RegionPak3 = (Dataset, TerryTable RegionId (WObs Double))
+type CountryPak3 = Pak CountryId (WObs Double)
+type RegionPak3 = Pak RegionId (WObs Double)
         -- Retaining weights allows regions to be aggregated again.
 
 type RegionValue = TerryValue RegionId Double -- RegionValueX Double

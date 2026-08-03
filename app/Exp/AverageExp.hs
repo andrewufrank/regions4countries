@@ -63,18 +63,16 @@ exp1 = do
 
     close conn
 
-    let c3 :: [(Dataset, [TerryValue CountryId (WObs Double)])] 
+    let c3 :: [CountryPak3]
         c3 = [pop3, surf3, fert3]
-        c4 = c3 :: [(Dataset, [TerryValue CountryId (WObs Double)])]
+        c4 = c3 :: [CountryPak3]
 
         mCountry4 = wrapMdCol3 c4
         mdCountry = markdownTable allCodeNames avcountries mCountry4
     putStrLn mdCountry
 
-    let reg4:: [(Dataset, [(RegionId, TerryTable CountryId (WObs Double))])]
-        reg4  = reg3CountryTable4 regionMembers2 c4
-        reg4tot :: [(Dataset, [TerryValue RegionId (WObs Double)])]
-        reg4tot = regtab3_regtab1 reg4
+    let reg4tot :: [RegionPak3]
+        reg4tot = country2regionPak regionMembers2 c4
 
         mdRegion4 = wrapMdCol3 reg4tot
         mdRegion = markdownTable regionNames2 avregionOrder2  mdRegion4

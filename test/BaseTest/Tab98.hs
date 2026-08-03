@@ -72,7 +72,7 @@ exp5a regOrder   = do
     close conn
 
     let c4 = c3 ++ [gdp5]
-        reg4tot :: [(Dataset, [TerryValue RegionId (WObs Double)])]
+        reg4tot :: [RegionPak3]
         reg4tot = country2regionPak regionMembers2 c4
 
         mdRegion4 = wrapMdCol3 reg4tot

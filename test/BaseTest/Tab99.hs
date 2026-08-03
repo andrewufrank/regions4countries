@@ -108,7 +108,7 @@ exp3a regOrder countries = do
     let c3 = [pop3, surf3, gdp3, gnp3]
     let c4 = c3
     let
-        reg4tot :: [(Dataset, [TerryValue RegionId (WObs Double)])]
+        reg4tot :: [RegionPak3]
         reg4tot = country2regionPak regionMembers2 c4
 
         mdRegion4 = wrapMdCol3 reg4tot

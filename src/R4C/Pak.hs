@@ -2,7 +2,7 @@
 --
 -- Module      :  Pak
 --  datastructures of the type
---  type Pak t v = (Dataset, TerryTable t v)
+--  data Pak t v = Pak { pDataSet :: Dataset, pTerryTable :: TerryTable t v }
 -----------------------------------------------------------------------------
 
 module R4C.Pak where
@@ -27,19 +27,19 @@ import UniformBase
 scalePak ::
     (Ord t, Show t, ScaleByDouble v) =>
     Double ->
-    (Dataset, TerryTable t v) ->
-    (Dataset, TerryTable t v)
-scalePak f (ds, tab) = (ds, scaleTerryTable f tab)
+    Pak t v ->
+    Pak t v
+scalePak f (Pak ds tab) = Pak ds (scaleTerryTable f tab)
 
 sumPak3 ::
     Ord t =>
     [Pak t (WObs Double)] ->
     Pak t (WObs Double)
 sumPak3 [] = error "sumPak3: cannot derive a dataset from an empty list"
-sumPak3 paks@((firstDataset, _) : _) =
-    (sumDataset, sumTerryTables (map snd paks))
+sumPak3 paks@(Pak firstDataset _ : _) =
+    Pak sumDataset (sumTerryTables (map pTerryTable paks))
   where
-    datasets = map fst paks
+    datasets = map pDataSet paks
     shortNames = map dsShortName datasets
     names = map dsName datasets
     indicators = map (unIndicatorId . dsIndicator) datasets
@@ -70,7 +70,7 @@ makePakExtensive ::
 {- | Make a dataset extensive using its configured weight indicator.
 The descriptor of the result is derived from the source dataset.
 -}
-makePakExtensive pak1@(ds1, _) yearDs =
+makePakExtensive pak1@(Pak ds1 _) yearDs =
     case dsAggregation ds1 of
         Sum -> pak1
         WeightedBy weightIndicator ->
@@ -84,8 +84,8 @@ makePakExtensive2 ::
     Year ->
     IndicatorId ->
     Pak CountryId (WObs Double)
-makePakExtensive2 (ds1, tab1) year weightIndicatorId =
-    (extensiveDs, createTableExtensive tab1)
+makePakExtensive2 (Pak ds1 tab1) year weightIndicatorId =
+    Pak extensiveDs (createTableExtensive tab1)
   where
     extensiveDs =
         ds1
@@ -139,27 +139,28 @@ lookupCountryTable3 ::
     Connection ->
     Dataset ->
     Year ->
-    IO (Dataset, [TerryValue CountryId (WObs Double)])
+    IO CountryPak3
 -- lookupCountryTable3 :: Connection -> Dataset -> Year -> IO (Dataset, [TerryValue CountryId v])
 lookupCountryTable3 conn ds yr = do
     case dsAggregation ds of
         Sum -> do
             worldTab <- lookupTable conn (dsIndicator ds) yr
             let combTab = mkUnitWeight worldTab
-                ctTab = (ds, combTab)
+                ctTab = Pak ds combTab
             return ctTab
         WeightedBy indicatorId -> do
             worldTab <- lookupTable conn (dsIndicator ds) yr
             weightTab <- lookupTable conn indicatorId yr -- issue TODO ??
             let combTab =
                     mkWeighted worldTab weightTab :: [TerryValue CountryId (WObs Double)]
-                ctTab = (ds, combTab)
+                ctTab = Pak ds combTab
             return ctTab
 
 -- combinesCountryTable3 :: (Ord t, Show t)
 --     => Dataset -> (Double -> Double -> Double) -> (Dataset, TerryTable t Double) -> (Dataset, TerryTable t Double)
 --     -> (Dataset, TerryTable t Double)
-combinesCountryTable3 dsx f tab1 tab2 = (dsx, combineTerryTables f (snd tab1) (snd tab2))
+combinesCountryTable3 dsx f tab1 tab2 =
+    Pak dsx (combineTerryTables f (pTerryTable tab1) (pTerryTable tab2))
 
 -- combining weighted datasets works only for linear (specific affine) functions.
 -- see document weightedAverage.md
@@ -167,11 +168,11 @@ combinesCountryTable3 dsx f tab1 tab2 = (dsx, combineTerryTables f (snd tab1) (s
 reg3CountryTable4 ::
     (Eq ct) =>
     [(rg, [ct])] ->
-    [(Dataset, TerryTable ct (v))] ->
+    [Pak ct v] ->
     [(Dataset, [(rg, TerryTable ct v)])]
 -- construct region tables from country tables, does not aggregate values
 reg3CountryTable4 regionMembers tabs =
-    map (\(ds, tab) -> reg2 ds regionMembers tab) tabs
+    map (\(Pak ds tab) -> reg2 ds regionMembers tab) tabs
   where
     regTab1pop ::
         (Eq ct) =>
@@ -196,7 +197,9 @@ country2regionPak ::
     [Pak ct (WObs Double)] ->
     [Pak rg (WObs Double)]
 country2regionPak regionMembers =
-    regtab3_regtab1 . reg3CountryTable4 regionMembers
+    map (\(dataset, table) -> Pak dataset table)
+        . regtab3_regtab1
+        . reg3CountryTable4 regionMembers
 
 -- reg3CountryTable3 :: (Eq ct) => [(rg, [ct])] -> (Dataset, TerryTable ct ( v)) -> (Dataset, [(rg, TerryTable ct v)] )
 -- reg3CountryTable3 regionMembers (ds, tab)  = reg2 ds regionMembers tab
