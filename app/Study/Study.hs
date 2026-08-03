@@ -40,7 +40,6 @@ import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 import UniformBase hiding ((</>))
 
--- import Eins.Descriptor2
 
 writeTab1Table :: FilePath -> String -> IO ()
 writeTab1Table filename contents = do

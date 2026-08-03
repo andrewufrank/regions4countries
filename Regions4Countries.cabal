@@ -22,7 +22,6 @@ library
   exposed-modules:
       Eins.Config
       Eins.Descriptor
-      Eins.Descriptor2
       Eins.Region
       Eins.Region2
       Eins.Region3

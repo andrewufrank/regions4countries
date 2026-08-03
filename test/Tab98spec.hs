@@ -21,7 +21,7 @@ tests =
     [ testCase "testCase list of countries" $ do
         vals <- exp5a regionOrderTest  
         vals @?= 
-            "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GNP PP  (TPP$) | GDP per capita(kPP$/P) | GDP per capita extensive(TPP$) |\n|:---|---:|---:|---:|---:|---:|\n| EU |  |  |  |  |  |\n| Russland | 144 | 17 | 6 | 39 | 6 |\n"
+            "| Region | Bev\246lkerung(MP) | Flaeche(kkm\178) | GNP PP  (GPP$) | GDP per capita(PP$/P) | GDP per capita extensive(GPP$) |\n|:---|---:|---:|---:|---:|---:|\n| EU |  |  |  |  |  |\n| Russland | 144 | 17125 | 5555 | 38638 | 5593 |\n"
 
     , testCase "testCase regions 3a" $ do
         vals1 <- exp6b  threeEUcountriesT

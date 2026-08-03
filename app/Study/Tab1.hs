@@ -23,7 +23,6 @@ where
 import Database.SQLite.Simple
 import Eins.Config
 import Eins.Descriptor
-import Eins.Descriptor2
 import Eins.Region (regionOrder)
 import Eins.Region2
 import Eins.Region3

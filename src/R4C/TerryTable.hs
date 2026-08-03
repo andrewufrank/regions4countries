@@ -21,6 +21,37 @@ import Numeric (showFFloat)
 import R4C.Model
 import UniformBase
 
+class Magnitude v where
+    magnitude :: v -> Double
+
+instance Magnitude Double where
+    magnitude = abs
+
+instance Magnitude (WObs Double) where
+    magnitude = abs . wobs
+
+constructDataset :: Magnitude v => Dataset -> TerryTable t v -> Col t v
+constructDataset dataset table =
+    Col
+        { cMd =
+            MdCol
+                { colTitle = t2s (dsShortName dataset)
+                , colScale = scaleForMagnitude largestValue
+                , colUnit = dsUnit dataset
+                , colDecimals = if dsUnit dataset == "%" then 2 else 0
+                }
+        , cTerrryTable = table
+        }
+  where
+    largestValue = maximum (0 : [magnitude value | TerryValue _ (Just value) <- table])
+
+    scaleForMagnitude value
+        | value < 10 ** 5 = Unit
+        | value < 10 ** 8 = Kilo
+        | value < 10 ** 11 = Mega
+        | value < 10 ** 14 = Giga
+        | otherwise = Tera
+
 createTableExtensive ::
     TerryTable CountryId (WObs Double) ->
     TerryTable CountryId (WObs Double)

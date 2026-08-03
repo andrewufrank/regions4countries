@@ -18,7 +18,6 @@ import Database.SQLite.Simple -- for debug
 -- import GHC.Generics (Generic1(to1))
 import Eins.Config
 import Eins.Descriptor
-import Eins.Descriptor2
 
 -- import R4C.Statistics
 

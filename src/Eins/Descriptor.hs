@@ -1,348 +1,64 @@
--- | The editable, generated registry for this study.
+-- | Minimal dataset registry for the study.
 module Eins.Descriptor where
 
-import Data.List (find)
-
+import Data.Text (Text)
 import R4C.Model
 
-sqkm = "km\178"
-
-population :: Dataset
-population =
+dataset :: Text -> Text -> Text -> Aggregation -> Dataset
+dataset indicator shortName unit aggregation =
     Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.POP.TOTL"}
-        , dsShortName = "Bevölkerung"
-        , dsName = "Population, total"
-        , dsDefinition = "Total population  "
-        , dsUnit = "P"
-        , dsAggregation = Sum
-        , dsDecimals = 3
-        , dsScale = Mega
-        , dsExtensive = True
-        , dsLastYear = Just (Year 2024)
-        , dsSourceOrganization =
-            "World Population Prospects, United Nations (UN), uri:"
-             
-        }
-migrationNet :: Dataset
-migrationNet =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SM.POP.NETM"}
-        , dsShortName = "Netto Migration"
-        , dsName = "Net migration per Year"
-        , dsDefinition =
-            "Net migration is the net total of migrants during the"
-            <> " period, that is, the number of immigrants minus the number"
-            <> " of emigrants, including both citizens and noncitizens."
-        , dsUnit = "P/y"
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsScale = Kilo
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "World Population Prospects, United Nations (UN),"
-            <> " publisher: UN Population Division"
+        { dsIndicator = IndicatorId indicator
+        , dsShortName = shortName
+        , dsUnit = unit
+        , dsAggregation = aggregation
         }
 
-surfaceArea :: Dataset
-surfaceArea =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.SRF.TOTL.K2"}
-        , dsShortName = "Flaeche"
-        , dsName = "Surface area (sq. km)"
-        , dsDefinition =
-            "Surface area is a country's total area, including areas"
-            <> " under inland bodies of water and some coastal waterways."
-        , dsUnit = "km\178"
-        , dsAggregation = Sum
-        , dsDecimals = 3
-        , dsScale = Mega
-        , dsExtensive = True
-        , dsLastYear = Just (Year 2023)
-        , dsSourceOrganization =
-            "FAO electronic files and web site, Food and Agriculture"
-            <> " Organization of the United Nations (FAO), publisher: Food"
-            <> " and Agriculture Organization of the United Nations (FAO)"
-        }
+population = dataset "SP.POP.TOTL" "Bevölkerung" "P" Sum
+migrationNet = dataset "SM.POP.NETM" "Netto Migration" "P/y" Sum
+surfaceArea = dataset "AG.SRF.TOTL.K2" "Flaeche" "km\178" Sum
+arableLand = dataset "zzz" "Landwirtschaft" "km\178" Sum
+gnp = dataset "NY.GNP.ATLS.CD" "GNP" "US$" Sum
+gnpPP = dataset "NY.GNP.MKTP.PP.KD" "GNP PP  " "PP$" Sum
+gdpPPpc = dataset "NY.GDP.PCAP.PP.CD" "GDP per capita" "PP$/P" populationWeighted
+agriPercent = dataset "AG.LND.AGRI.ZS" "Landwirtschaft" "%" surfaceWeighted
+xxx3 = dataset "AG.LND.FRST.ZS" "Wald Anteil" "%" surfaceWeighted
+forest = dataset "AG.LND.FRST.K2" "Wald" "km\178" Sum
+urban = dataset "AG.LND.TOTL.UR.K2" "Urban" "km\178" Sum
+populationGrowthRate = dataset "SP.POP.GROW" "Wachstum Bevoelkerung" "%" populationWeighted
+fertilityRate = dataset "SP.DYN.TFRT.IN" "Fertilitaetsrate" "P/woman" populationWeighted
 
-arableLand :: Dataset
-arableLand =
-    Dataset
-        { dsIndicator = IndicatorId "zzz"
-        , dsShortName = "Landwirtschaft"
-        , dsName = "Surface area (sq. km)"
-        , dsDefinition =
-            " ."
-        , dsUnit = "km\178"
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsScale = Kilo
-        , dsExtensive = True
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "FAO  "
-        }
+-- Datasets used by Tab2.
+cerealProduction = dataset "AG.PRD.CREL.MT" "Getreideproduktion" "t" Sum
+arableLandPC = dataset "AG.LND.ARBL.HA.PC" "Ackerland pro Person" "ha/P" populationWeighted
+ferilizerConsum = dataset "AG.CON.FERT.ZS" "Düngerverbrauch" "kg/ha" arableWeighted
 
+-- Values calculated by the Tab2 study.
+cerealFood = dataset "derived.cerealFood" "Menschliche Ernährung" "t" Sum
+cerealDomesticUse = dataset "derived.cerealDomesticUse" "Gesamter Getreideverbrauch" "t" Sum
+potentialCerealExport = dataset "derived.potentialCerealExport" "Potenzieller Getreideexport" "t" Sum
+arableLandTotal = dataset "derived.arableLandTotal" "Ackerland" "ha" Sum
+fertilizerConsumptionTotal = dataset "derived.fertilizerConsumptionTotal" "Düngerverbrauch gesamt" "kg" Sum
 
+-- Virtual datasets. Their identifiers document that they are derived rather
+-- than loaded directly from World Bank observations.
+agriLand = dataset "derived.agriLand" "Landwirtschaft" "km\178" Sum
+useableLand = dataset "derived.useableLand" "Nutzbares Land" "km\178" Sum
+useableLandPerCent = dataset "derived.useableLandPercent" "Nutzbares Land" "%" surfaceWeighted
+useableLandPC = dataset "derived.useableLandPerCapita" "Nutzbare Landflaeche" "a/P" populationWeighted
+fertilityCount = dataset "derived.fertilityCount" "Kinder geboren" "P/y" Sum
+netMigrationCount = dataset "derived.netMigrationRate" "MigrationRate netto" "P/Py" populationWeighted
+popGrowthCount = dataset "derived.populationGrowthCount" "Wachstum Bevoelkerung" "P/y" Sum
+gnpcc = dataset "derived.gnpPerCountry" "GNP2c" "$x" Sum
 
--- grossNatProd :: Dataset
-gnp =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "NY.GNP.ATLS.CD"}
-        , dsShortName = "GNP"
-        , dsName = "GNI, Atlas method (current US$)"
-        , dsDefinition =
-            "Gross national income  "
-        , dsUnit = "US$"
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsScale = Giga
-        , dsExtensive = True
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            " World Bank (WB)"
-        }
+-- Placeholder descriptors retained for older experiments.
+surfaxc1ePerCapita = cerealProduction
+usableAxreaPerCapita1 = dataset "xxx2" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxyy"))
+xxx6 = dataset "xxx3" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxyy"))
+xxx5 = dataset "xxx4" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxyy"))
+xxx4 = dataset "xxx5" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxx6"))
+xxx33 = dataset "xxx7" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxx0"))
+xxx2 = dataset "xxx8" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxx9"))
 
-
-gnpPP =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "NY.GNP.MKTP.PP.KD"}  --NY.GDP.PCAP.PP.CD"}
-        , dsShortName = "GNP PP  "
-        , dsName = "GNP  PP (current international $)"
-        , dsDefinition =   ""
-        , dsUnit = "PP$"
-        , dsAggregation = Sum  
-        , dsDecimals = 0
-        , dsScale = Giga
-        , dsExtensive = True  
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "International Comparison Program (ICP), World Bank (WB "
-         }
-
-gdpPPpc = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "NY.GDP.PCAP.PP.CD"}
-        , dsShortName = "GDP per capita"
-        , dsName = "GDP_PP per capita"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "PP$/P"
-        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
-        , dsDecimals = 0
-        , dsScale = Kilo
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-
-agriPercent = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.AGRI.ZS"}
-        , dsShortName = "Landwirtschaft"
-        , dsName = "Agriculturall land percent"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "%"
-        , dsAggregation = WeightedBy (IndicatorId "AG.SRF.TOTL.K2")
-        , dsDecimals = 2
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-
-xxx3 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.FRST.ZS"}
-        , dsShortName = "Wald Anteil"
-        , dsName = "Forest area percent"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "%"
-        , dsAggregation = WeightedBy (IndicatorId "AG.SRF.TOTL.K2")
-        , dsDecimals = 2
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-
-forest = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.FRST.K2"}
-        , dsShortName = "Wald"
-        , dsName = "Forest area"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = sqkm
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsScale = Kilo
-        , dsExtensive = True
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-
-urban = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.LND.TOTL.UR.K2"}
-        , dsShortName = "Urban"
-        , dsName = "Urban land area"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = sqkm
-        , dsAggregation = Sum
-        , dsDecimals = 0
-        , dsScale = Kilo
-        , dsExtensive = True
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-
-populationGrowthRate = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.POP.GROW"}
-        , dsShortName = "Wachstum Bevoelkerung"
-        , dsName = "population growth annual "
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "%"
-        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
-        , dsDecimals = 2
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-
-fertilityRate :: Dataset
-fertilityRate =
-    Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "SP.DYN.TFRT.IN"}
-        , dsShortName = "Fertilitaetsrate"
-        , dsName = "Fertility rate, total (births per woman)"
-        , dsDefinition =
-            "Total fertility rate represents the number of children"
-            <> " that would be born to a woman if she were to live to the"
-            <> " end of her childbearing years and bear children in"
-            <> " accordance with age-specific fertility rates of the"
-            <> " specified year."
-        , dsUnit = "P/woman"
-        , dsAggregation = WeightedBy (IndicatorId "SP.POP.TOTL")
-        , dsDecimals = 2
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "World Population Prospects, United Nations (UN) (ESTAT)"
-        }
-        
-surfaxc1ePerCapita = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "AG.PRD.CREL.MT"}
-        , dsShortName = "xxyy"
-        , dsName = "xxyy"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "xxyy"
-        , dsAggregation = WeightedBy (IndicatorId "xxyy")
-        , dsDecimals = 0
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-
-usableAxreaPerCapita1 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx2"}
-        , dsShortName = "xxyy"
-        , dsName = "xxyy"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "xxyy"
-        , dsAggregation = WeightedBy (IndicatorId "xxyy")
-        , dsDecimals = 0
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-xxx6 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx3"}
-        , dsShortName = "xxyy"
-        , dsName = "xxyy"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "xxyy"
-        , dsAggregation = WeightedBy (IndicatorId "xxyy")
-        , dsDecimals = 0
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-xxx5 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx4"}
-        , dsShortName = "xxyy"
-        , dsName = "xxyy"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "xxyy"
-        , dsAggregation = WeightedBy (IndicatorId "xxyy")
-        , dsDecimals = 0
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-xxx4 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx5"}
-        , dsShortName = "xxyy"
-        , dsName = "xxyy"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "xxyy"
-        , dsAggregation = WeightedBy (IndicatorId "xxx6")
-        , dsDecimals = 0
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-
-xxx33 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx7"}
-        , dsShortName = "xxyy"
-        , dsName = "xxyy"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "xxyy"
-        , dsAggregation = WeightedBy (IndicatorId "xxx0")
-        , dsDecimals = 0
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
-xxx2 = Dataset
-        { dsIndicator = IndicatorId {unIndicatorId = "xxx8"}
-        , dsShortName = "xxyy"
-        , dsName = "xxyy"
-        , dsDefinition =
-            "Txxx"
-        , dsUnit = "xxyy"
-        , dsAggregation = WeightedBy (IndicatorId "xxx9")
-        , dsDecimals = 0
-        , dsScale = Unit
-        , dsExtensive = False
-        , dsLastYear = Nothing
-        , dsSourceOrganization =
-            "xxyy"
-        }
+populationWeighted = WeightedBy (dsIndicator population)
+surfaceWeighted = WeightedBy (dsIndicator surfaceArea)
+arableWeighted = WeightedBy (IndicatorId "AG.LND.ARBL.HA")

@@ -26,7 +26,7 @@ tests =
 
     , testCase "testCase regions 3a" $ do
         vals1 <- exp3a regionOrderTest threeEUcountriesT
-        vals1 @?= "| Region | Bev\246lkerung(MP) | GNP(GUS$) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) |\n|:---|---:|---:|---:|---:|\n| USA & Kanada | 308 | 22145 | 13 | 70 |\n| S\252damerika | 108 | 987 | 4 | 20 |\n| Europa | 50 | 2168 | 0 | 52 |\n| Russland | 144 | 1724 | 17 | 39 |\n"
+        vals1 @?= "| Region | Bev\246lkerung(MP) | GNP(GUS$) | Flaeche(kkm\178) | GDP per capita(PP$/P) |\n|:---|---:|---:|---:|---:|\n| USA & Kanada | 308 | 22145 | 13394 | 70226 |\n| S\252damerika | 108 | 987 | 4389 | 19899 |\n| Europa | 50 | 2168 | 416 | 52417 |\n| Russland | 144 | 1724 | 17125 | 38638 |\n"
         -- "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) | GNP(GUS$) |\n|:---|---:|---:|---:|---:|\n| USA & Kanada | 307.673 | 13.394 | 81 | 22145 |\n| S\252damerika | 107.603 | 4.389 | 24 | 987 |\n"
         --        "| Region | Population(MP) | GNP(GUS$) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) |\n|:---|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |\n| Europ. Union | 450.228 | 17211 | 4.313 |  |\n| Gruppe 7 | 785.543 | 43949 | 27.354 |  |\n| Russland | 143.670 | 1724 | 17.125 |  |\n"
 
@@ -46,7 +46,7 @@ tests =
         (_, md2) <- exp7a threeEUcountriesT RBT.regionMembers
 
         assertEqual "md2 from exp7a" md2  
-            "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) | GDP per capita / Bev\246lkerung(PP$/P/P) |\n|:---|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |\n| Europ. Union | 46 | 0 | 67 | 0 |\n| Gruppe 7 | 194 | 12 | 75 | 0 |\n| Russland | 144 | 17 | 48 | 0 |\n"
+            "| Region | Bev\246lkerung(MP) | Flaeche(kkm\178) | GDP per capita(PP$/P) | GDP per capita / Bev\246lkerung(PP$/P/P) |\n|:---|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |\n| Europ. Union | 46 | 344 | 66847 | 0 |\n| Gruppe 7 | 194 | 12499 | 75036 | 0 |\n| Russland | 144 | 17125 | 47686 | 0 |\n"
         
         --  "| Region | Population(MP) | Flaeche(Mkm\178) | GDP per capita(kPP$/P) | gnp(GPP$) | gnp per cap.(k$/P) |\n|:---|---:|---:|---:|---:|---:|\n| EUROPE |  |  |  |  |  |\n| Europ. Union | 450.228 | 4.313 |  | 23453 | 52 |\n| Gruppe 7 | 785.543 | 27.354 |  | 47705 | 61 |\n| Russland | 143.670 | 17.125 |  | 5551 | 39 |\n"
     ]

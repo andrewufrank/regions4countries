@@ -14,7 +14,6 @@ module Tab2
 import Database.SQLite.Simple
 import Eins.Config
 import Eins.Descriptor
-import Eins.Descriptor2
 import Eins.Region (regionOrder)
 import Eins.Region2
 import Eins.Region3 hiding (regionOrder)
@@ -26,6 +25,7 @@ import R4C.Model
 import R4C.Pak
 import R4C.Territory
 import R4C.TerryTable
+import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 import UniformBase hiding (uncurry, (</>))
 
@@ -36,24 +36,18 @@ getData21 :: IO ()
 getData21 = do
     conn <- open dbPath 
     pop3 <- lookupCountryTable3 conn (population) (Year 2024)
-    surf3 <- lookupCountryTable3 conn (surfaceArea) (Year 2023)
-
-
-
     cerealProd <- lookupCountryTable3 conn cerealProduction (Year 2023) -- 2024 not all values 
     -- AG.PRD.CREL.MT
-    let cerealFood = scaleRegionTable 0.1 pops3   -- 100 kg per head   
+    let cerealFood3 = (scalePak 0.1 pop3) {pDataSet = cerealFood} -- 100 kg per head
     
     close conn
 
-    let mdCols = 
-            [ cerealProd
-            , cerealFood
+    let regionPaks = country2regionPak regionMembers2 [cerealProd, cerealFood3] :: [RegionPak3]
+        mdCols = map wrapMdCol1 regionPaks
             --  MdColumn "Getreideproduktion (T kg)" Mega 2  cerealProd
             -- -- value is t
             -- , MdColumn "menschliche Ernaehrung (Mega kg)" Mega 2  cerealFood
             -- value is 10**11 kg 
-            ]
     -- let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
@@ -65,20 +59,18 @@ getData22 :: IO ()
 -- | Ernaehrungssituation 1980 (ohne Russland, noch nicht existent)
 getData22 = do
     conn <- open dbPath 
-    (pops3, surfs3) <- popsSurf conn
-    pops1980 <-  (aggregate regionMembers2 conn population (Year 1980)) 
-    cerealProd <- aggregate regionMembers2 conn cerealProduction (Year 1980) -- 2024 not all values 
-    let cerealFood = scaleRegionTable 0.1 pops1980   -- 100 kg per head   
-    let cerealDomUse = scaleRegionTable (2.5) cerealFood -- 40..45% for human food 
-    let potExport = combineRegionTables Subtract cerealProd cerealDomUse 
+    pops1980 <- lookupCountryTable3 conn population (Year 1980)
+    cerealProd <- lookupCountryTable3 conn cerealProduction (Year 1980)
+    let cerealFood3 = (scalePak 0.1 pops1980) {pDataSet = cerealFood}
+        cerealDomUse3 = (scalePak 2.5 cerealFood3) {pDataSet = cerealDomesticUse}
+        potExport3 = (combinePak3 Subtract cerealProd cerealDomUse3)
+            {pDataSet = potentialCerealExport}
 
     close conn
 
-    let mdCols = 
-            [ cerealProd 
-            , cerealFood 
-            , cerealDomUse 
-            , potExport 
+    let regionPaks = country2regionPak regionMembers2
+            [cerealProd, cerealFood3, cerealDomUse3, potExport3] :: [RegionPak3]
+        mdCols = map wrapMdCol1 regionPaks
             --  MdColumn "Getreideproduktion (T kg)" Mega 0  cerealProd
             -- -- value is t
             -- , MdColumn "menschliche Ernaehrung (Mega kg)" Mega 0  cerealFood
@@ -86,7 +78,6 @@ getData22 = do
             -- , MdColumn "total Verbrauch (Mega kg)" Mega 0 cerealDomUse 
             -- , MdColumn "potential fuer Export (Mega kg)" Mega 0 potExport
 
-            ]
     -- let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
@@ -97,11 +88,12 @@ getData22 = do
 -- duengerverbrauch und produktion 
 getData23 = do
     conn <- open dbPath 
-    (pops3, surfs3) <- popsSurf conn
-
-    arablHA  <- aggregate regionMembers2 conn arableLandPC (Year 2023)  -- nur ackerland
-    fertConsumpha <- aggregate regionMembers2 conn ferilizerConsum (Year 2023)
-    let fertilizerConsumTot = combineRegionTables Multiply arablHA fertConsumpha 
+    pops3 <- lookupCountryTable3 conn population (Year 2023)
+    arablePC3 <- lookupCountryTable3 conn arableLandPC (Year 2023)
+    fertConsumpha3 <- lookupCountryTable3 conn ferilizerConsum (Year 2023)
+    let arableHA3 = (combinePak3 Multiply arablePC3 pops3) {pDataSet = arableLandTotal}
+        fertilizerConsumTot3 = (combinePak3 Multiply arableHA3 fertConsumpha3)
+            {pDataSet = fertilizerConsumptionTotal}
     
     -- fertConsumpc <- aggregate regionMembers2 conn ferilizerConsum2 (Year 2023) -- leer
     -- let fertilizerProd = combineRegionTables Divide fertilizerConsumTot fertConsumpc 
@@ -109,10 +101,9 @@ getData23 = do
 
     close conn
 
-    let mdCols = 
-            [ arablHA
-            , fertConsumpha
-            , fertilizerConsumTot 
+    let regionPaks = country2regionPak regionMembers2
+            [arableHA3, fertConsumpha3, fertilizerConsumTot3] :: [RegionPak3]
+        mdCols = map wrapMdCol1 regionPaks
             -- , fertConsumpc 
             -- , fertilizerProd 
             -- MdColumn "arablHA (M ha)" Mega 0  arablHA
@@ -122,10 +113,14 @@ getData23 = do
             -- , MdColumn "Duengerproduktion (M kg)" Mega 0  fertilizerProd
             -- value is t
             -- value is 10**11 kg 
-            ]
     -- let sortedRegions = sortTerryByColumn Descending  pops3 --surfPerCap
 
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames2 regionOrder mdCols
     putStrLn md
     writeTab2Table "tab23" md
+
+writeTab2Table :: FilePath -> String -> IO ()
+writeTab2Table filename contents = do
+    createDirectoryIfMissing True tableOutputDirectory
+    writeFile (tableOutputDirectory </> filename) contents

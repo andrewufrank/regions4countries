@@ -13,7 +13,6 @@ module R4C.Pak where
 -- import R4C.Import.Instances
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
-import Data.List (nub)
 import Database.SQLite.Simple
 import R4C.Country
 import R4C.Import.Database
@@ -31,53 +30,24 @@ scalePak ::
     Pak t v
 scalePak f (Pak ds tab) = Pak ds (scaleTerryTable f tab)
 
-constructDataset :: Dataset -> TerryTable t (WObs Double) -> Dataset
-constructDataset dataset table =
-    dataset
-        { dsExtensive = dsAggregation dataset == Sum
-        , dsScale = scaleForMagnitude largestValue
-        , dsDecimals = if dsUnit dataset == "%" then 2 else 0
-        }
-  where
-    largestValue = maximum (0 : [abs (wobs value) | TerryValue _ (Just value) <- table])
-
-    scaleForMagnitude magnitude
-        | magnitude < 10 ** 5 = Unit
-        | magnitude < 10 ** 8 = Kilo
-        | magnitude < 10 ** 11 = Mega
-        | magnitude < 10 ** 14 = Giga
-        | otherwise = Tera
-
 sumPak3 ::
     Ord t =>
     [Pak t (WObs Double)] ->
     Pak t (WObs Double)
 sumPak3 [] = error "sumPak3: cannot derive a dataset from an empty list"
 sumPak3 paks@(Pak firstDataset _ : _) =
-    Pak (constructDataset sumDataset summedTable) summedTable
+    Pak sumDataset summedTable
   where
     summedTable = sumTerryTables (map pTerryTable paks)
     datasets = map pDataSet paks
     shortNames = map dsShortName datasets
-    names = map dsName datasets
     indicators = map (unIndicatorId . dsIndicator) datasets
-    years = [year | Just year <- map dsLastYear datasets]
-    organizations = nub (map dsSourceOrganization datasets)
 
     sumDataset =
         firstDataset
             { dsIndicator = IndicatorId ("sum of " <> T.intercalate " + " indicators)
             , dsShortName = T.intercalate " + " shortNames
-            , dsName = T.intercalate " + " names
-            , dsDefinition =
-                "Sum of " <> T.intercalate ", " shortNames
             , dsAggregation = Sum
-            , dsDecimals = maximum (map dsDecimals datasets)
-            , dsExtensive = all dsExtensive datasets
-            , dsLastYear = case years of
-                [] -> Nothing
-                _ -> Just (maximum years)
-            , dsSourceOrganization = T.intercalate "; " organizations
             }
 
 combinePak3 ::
@@ -87,7 +57,7 @@ combinePak3 ::
     Pak t (WObs Double) ->
     Pak t (WObs Double)
 combinePak3 operation left right =
-    Pak (constructDataset combinedDataset combinedTable) combinedTable
+    Pak combinedDataset combinedTable
   where
     combinedTable =
         combineTerryTables
@@ -98,13 +68,12 @@ combinePak3 operation left right =
     rightDataset = pDataSet right
     symbol = s2t (operationSymbol operation)
     combineText getter = getter leftDataset <> " " <> symbol <> " " <> getter rightDataset
-    years = [year | Just year <- map dsLastYear [leftDataset, rightDataset]]
-    organizations = nub [dsSourceOrganization leftDataset, dsSourceOrganization rightDataset]
     isExtensive = case operation of
-        Add -> dsExtensive leftDataset && dsExtensive rightDataset
-        Subtract -> dsExtensive leftDataset && dsExtensive rightDataset
-        Multiply -> dsExtensive leftDataset /= dsExtensive rightDataset
-        Divide -> dsExtensive leftDataset && not (dsExtensive rightDataset)
+        Add -> extensive leftDataset && extensive rightDataset
+        Subtract -> extensive leftDataset && extensive rightDataset
+        Multiply -> extensive leftDataset /= extensive rightDataset
+        Divide -> extensive leftDataset && not (extensive rightDataset)
+    extensive dataset = dsAggregation dataset == Sum
     aggregation
         | isExtensive = Sum
         | dsAggregation leftDataset == dsAggregation rightDataset = dsAggregation leftDataset
@@ -124,19 +93,8 @@ combinePak3 operation left right =
                         <> unIndicatorId (dsIndicator rightDataset)
                     )
             , dsShortName = combineText dsShortName
-            , dsName = combineText dsName
-            , dsDefinition =
-                "Derived by applying " <> symbol <> " to "
-                    <> dsShortName leftDataset <> " and " <> dsShortName rightDataset
             , dsUnit = unit
             , dsAggregation = aggregation
-            , dsDecimals = min (dsDecimals leftDataset) (dsDecimals rightDataset)
-            , dsScale = min (dsScale leftDataset) (dsScale rightDataset)
-            , dsExtensive = isExtensive
-            , dsLastYear = case years of
-                [] -> Nothing
-                _ -> Just (maximum years)
-            , dsSourceOrganization = T.intercalate "; " organizations
             }
 
 makePakExtensive ::
@@ -161,8 +119,8 @@ makePakExtensive2 ::
     Year ->
     IndicatorId ->
     Pak CountryId (WObs Double)
-makePakExtensive2 (Pak ds1 tab1) year weightIndicatorId =
-    Pak (constructDataset extensiveDs extensiveTable) extensiveTable
+makePakExtensive2 (Pak ds1 tab1) _year weightIndicatorId =
+    Pak extensiveDs extensiveTable
   where
     extensiveTable = createTableExtensive tab1
     extensiveDs =
@@ -174,17 +132,8 @@ makePakExtensive2 (Pak ds1 tab1) year weightIndicatorId =
                     )
             , dsShortName =
                 dsShortName ds1 <> " extensive"
-            , dsDefinition =
-                "Extensive value calculated by multiplying "
-                    <> dsShortName ds1
-                    <> " by "
-                    <> showT weightIndicatorId
             , dsUnit = extensiveUnit weightIndicatorId (dsUnit ds1)
             , dsAggregation = Sum
-            , dsDecimals = 0
-            , dsScale = extensiveScale weightIndicatorId
-            , dsExtensive = True
-            , dsLastYear = Just year
             }
 
     extensiveUnit (IndicatorId "SP.POP.TOTL") unit =
@@ -192,9 +141,6 @@ makePakExtensive2 (Pak ds1 tab1) year weightIndicatorId =
     extensiveUnit (IndicatorId "AG.SRF.TOTL.K2") _ = "km\178"
     extensiveUnit indicator unit = unit <> " * " <> showT indicator
 
-    extensiveScale (IndicatorId "SP.POP.TOTL") = Giga
-    extensiveScale (IndicatorId "AG.SRF.TOTL.K2") = Kilo
-    extensiveScale _ = Unit
 
 lookupRegionTable3 ::
     Connection ->
@@ -224,14 +170,14 @@ lookupCountryTable3 conn ds yr = do
         Sum -> do
             worldTab <- lookupTable conn (dsIndicator ds) yr
             let combTab = mkUnitWeight worldTab
-                ctTab = Pak (constructDataset ds combTab) combTab
+                ctTab = Pak ds combTab
             return ctTab
         WeightedBy indicatorId -> do
             worldTab <- lookupTable conn (dsIndicator ds) yr
             weightTab <- lookupTable conn indicatorId yr -- issue TODO ??
             let combTab =
                     mkWeighted worldTab weightTab :: [TerryValue CountryId (WObs Double)]
-                ctTab = Pak (constructDataset ds combTab) combTab
+                ctTab = Pak ds combTab
             return ctTab
 
 -- combinesCountryTable3 :: (Ord t, Show t)

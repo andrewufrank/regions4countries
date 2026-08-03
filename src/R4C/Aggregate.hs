@@ -18,6 +18,7 @@ import R4C.Import.Database
 import R4C.Territory 
 import R4C.Statistics
 import R4C.Export.Table
+import R4C.TerryTable (constructDataset)
 import UniformBase 
 
 aggregate
@@ -47,17 +48,7 @@ aggregate memberships conn dataset year = do
                     (aggregationFunction agg)
                     memberships
                     table
-    return
-        Col
-            { cMd =
-                MdCol
-                    { colTitle = t2s $ dsShortName dataset
-                    , colScale = Mega
-                    , colUnit = dsUnit dataset
-                    , colDecimals = dsDecimals dataset
-                    }
-            , cTerrryTable = regTab
-            }
+    return (constructDataset dataset regTab)
 
 aggregationFunction
     :: Aggregation

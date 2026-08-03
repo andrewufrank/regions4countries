@@ -20,6 +20,7 @@ import Data.List
 import UniformBase
 import qualified Data.List.NonEmpty as NE 
 import R4C.Statistics
+import R4C.TerryTable (Magnitude, constructDataset)
 
 valuesInRegion
     :: RegionMembers
@@ -61,17 +62,8 @@ aggregateTery op memberships table  = op (catMaybes values)
             valuesInTable memberships table  
 
 
-wrapMdCol1 :: Pak t v -> Col t v
-wrapMdCol1 (Pak ds t) = Col (makeCol4ds ds)  t 
-
-makeCol4ds :: Dataset -> MdCol
-makeCol4ds dataset =
-            MdCol
-                { colTitle = t2s $ dsShortName dataset
-                , colScale = dsScale dataset
-                , colUnit = dsUnit dataset
-                , colDecimals = dsDecimals dataset
-                }
+wrapMdCol1 :: Magnitude v => Pak t v -> Col t v
+wrapMdCol1 (Pak dataset table) = constructDataset dataset table
 
 -- convert RegionTable3 = (Dataset, [(RegionId, CountryTable)]) to (Dataset, RegionTable1)
 -- regtab3_regtab1 (ds, tab) = (ds, sumCountryTables tab)
@@ -150,7 +142,7 @@ getOneRegion :: RegionId -> Dataset -> [(RegionId, CountryTable)] -> Maybe (Col 
 getOneRegion  regid dataset regtab = 
     case mbCountries of 
         Nothing -> Nothing -- putIOwords ["region", showT regid, "not found"]
-        Just (_, ctTab) ->  Just $  Col (makeCol4ds dataset)  ctTab -- :: MdColumn CountryId Double 
+        Just (_, ctTab) -> Just $ constructDataset dataset ctTab
     where
         mbCountries = find ((regid ==). fst) regtab  -- [(RegionId, CountryTable)]
 
