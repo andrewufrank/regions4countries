@@ -67,15 +67,13 @@ exp5a regOrder   = do
     c3 <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
     let [pop3, surf3, gdp3, gnpPc3] = c3
 
-    let gdp5 = makePakExtensive gnpPc3 gnpcc (Year 2021)
+    let gdp5 = makePakExtensive gnpPc3 (Year 2021)
 
     close conn
 
     let c4 = c3 ++ [gdp5]
-        reg4:: [(Dataset, [(RegionId, TerryTable CountryId (WObs Double))])]
-        reg4  = reg3CountryTable4 regionMembers2 c4
         reg4tot :: [(Dataset, [TerryValue RegionId (WObs Double)])]
-        reg4tot = regtab3_regtab1 reg4
+        reg4tot = country2regionPak regionMembers2 c4
 
         mdRegion4 = wrapMdCol3 reg4tot
         mdRegion = markdownTable regionNames2 regOrder  mdRegion4
@@ -114,7 +112,7 @@ exp6b  countries = do
     c3 <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
     let [pop3, surf3, gdp3, gnpPc3] = c3
 
-    let gdp5 = makePakExtensive gnpPc3 gnpcc (Year 2021)
+    let gdp5 = makePakExtensive gnpPc3 (Year 2021)
 
     close conn
 

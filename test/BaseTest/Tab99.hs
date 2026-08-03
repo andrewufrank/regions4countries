@@ -107,13 +107,9 @@ exp3a regOrder countries = do
 
     let c3 = [pop3, surf3, gdp3, gnp3]
     let c4 = c3
-    -- type RegionTable3 = (Dataset, [(RegionId, CountryTable)]) -- new format
-
     let
-        reg4 :: [(Dataset, [(RegionId, TerryTable CountryId (WObs Double))])]
-        reg4 = reg3CountryTable4 regionMembers2 c4
         reg4tot :: [(Dataset, [TerryValue RegionId (WObs Double)])]
-        reg4tot = regtab3_regtab1 reg4
+        reg4tot = country2regionPak regionMembers2 c4
 
         mdRegion4 = wrapMdCol3 reg4tot
         mdRegion = markdownTable regionNames2 avregionOrder2 mdRegion4

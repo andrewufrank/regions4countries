@@ -73,7 +73,7 @@ getData11 = do
     -- -- <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
 
     let agriFactor = scalePak 0.01 agriPerc3
-        agri3 = makePakExtensive agriFactor agriLand (Year 2023) -- surfarea
+        agri3 = makePakExtensive agriFactor (Year 2023) -- surfarea
         use3 = (useableLand, sumTerryTables $ map snd [forest3, urban3, agri3])
 
         c3' = c3 ++ [agri3, use3] :: [CountryPak3]
@@ -105,11 +105,7 @@ getData11 = do
         -- woud have to come from the computed aggregates
 
     -- make region tables
-    let reg4 = reg3CountryTable4 regionMembers2 c3'
-        -- :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
-        reg5 = regtab3_regtab1 reg4  :: [RegionPak3]
-
--- merge these two function in a regionPak function 
+    let reg5 = country2regionPak regionMembers2 c3' :: [RegionPak3]
 
     --     -- usePerc4 = combinesCountryTable3 useableLandPerCent (toPercent) use4 surf4
     --     -- usePC4 = (useableLandPC, combineTerryTables (haPC) (snd use4) (snd pop4))

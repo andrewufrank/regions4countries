@@ -12,6 +12,7 @@ module R4C.Pak where
 -- import Data.List
 -- import R4C.Import.Instances
 import qualified Data.Map.Strict as M
+import qualified Data.Text as T
 import Database.SQLite.Simple
 import R4C.Country
 import R4C.Import.Database
@@ -31,36 +32,31 @@ scalePak f (ds, tab) = (ds, scaleTerryTable f tab)
 
 makePakExtensive ::
     Pak CountryId (WObs Double) ->
-    Dataset ->
     Year ->
     Pak CountryId (WObs Double)
 
-{- | make the dataset ds1 extensive with the weightq
-from the weightIndicator
-and the same year
-it will have the descriptor based on newDescriptor
+{- | Make a dataset extensive using its configured weight indicator.
+The descriptor of the result is derived from the source dataset.
 -}
-makePakExtensive pak1@(ds1, _) newDescriptor yearDs =
+makePakExtensive pak1@(ds1, _) yearDs =
     case dsAggregation ds1 of
         Sum -> pak1
         WeightedBy weightIndicator ->
             makePakExtensive2
                 pak1
-                newDescriptor
                 yearDs
                 weightIndicator
 
 makePakExtensive2 ::
     Pak CountryId (WObs Double) ->
-    Dataset ->
     Year ->
     IndicatorId ->
     Pak CountryId (WObs Double)
-makePakExtensive2 (ds1, tab1) newDescriptor year weightIndicatorId =
+makePakExtensive2 (ds1, tab1) year weightIndicatorId =
     (extensiveDs, createTableExtensive tab1)
   where
     extensiveDs =
-        newDescriptor
+        ds1
             { dsIndicator =
                 IndicatorId
                     ( "extensive of "
@@ -73,13 +69,22 @@ makePakExtensive2 (ds1, tab1) newDescriptor year weightIndicatorId =
                     <> dsShortName ds1
                     <> " by "
                     <> showT weightIndicatorId
-            , dsUnit = dsUnit ds1 <> "ext"
+            , dsUnit = extensiveUnit weightIndicatorId (dsUnit ds1)
             , dsAggregation = Sum
-            , dsDecimals = 0 -- shoud be taken from weighted
-            , dsScale = Unit -- should be taken from weighted
+            , dsDecimals = 0
+            , dsScale = extensiveScale weightIndicatorId
             , dsExtensive = True
             , dsLastYear = Just year
             }
+
+    extensiveUnit (IndicatorId "SP.POP.TOTL") unit =
+        maybe unit id (T.stripSuffix "/P" unit)
+    extensiveUnit (IndicatorId "AG.SRF.TOTL.K2") _ = "km\178"
+    extensiveUnit indicator unit = unit <> " * " <> showT indicator
+
+    extensiveScale (IndicatorId "SP.POP.TOTL") = Giga
+    extensiveScale (IndicatorId "AG.SRF.TOTL.K2") = Kilo
+    extensiveScale _ = Unit
 
 lookupRegionTable3 ::
     Connection ->
@@ -152,6 +157,14 @@ reg3CountryTable4 regionMembers tabs =
         (Dataset, [(rg, TerryTable ct v)])
     -- make all regions for a dataset  -> RegionTable3
     reg2 ds regionMembers tab = (ds, map (regTab1pop tab) regionMembers)
+
+country2regionPak ::
+    Eq ct =>
+    [(rg, [ct])] ->
+    [Pak ct (WObs Double)] ->
+    [Pak rg (WObs Double)]
+country2regionPak regionMembers =
+    regtab3_regtab1 . reg3CountryTable4 regionMembers
 
 -- reg3CountryTable3 :: (Eq ct) => [(rg, [ct])] -> (Dataset, TerryTable ct ( v)) -> (Dataset, [(rg, TerryTable ct v)] )
 -- reg3CountryTable3 regionMembers (ds, tab)  = reg2 ds regionMembers tab

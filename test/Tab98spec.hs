@@ -21,11 +21,11 @@ tests =
     [ testCase "testCase list of countries" $ do
         vals <- exp5a regionOrderTest  
         vals @?= 
-            "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GNP PP  (GPP$) | GDP per capita(kPP$/P) | GDP per capita extensive(GPP$/Pext) |\n|:---|---:|---:|---:|---:|---:|\n| EU |  |  |  |  |  |\n| Russland | 143.670 | 17.125 | 5555 | 39 | 5593 |\n"
+            "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GNP PP  (GPP$) | GDP per capita(kPP$/P) | GDP per capita extensive(GPP$) |\n|:---|---:|---:|---:|---:|---:|\n| EU |  |  |  |  |  |\n| Russland | 143.670 | 17.125 | 5555 | 39 | 5593 |\n"
 
     , testCase "testCase regions 3a" $ do
         vals1 <- exp6b  threeEUcountriesT
-        vals1 @?= "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GNP PP  (GPP$) | GDP per capita(kPP$/P) | GDP per capita extensive(GPP$/Pext) |\n|:---|---:|---:|---:|---:|---:|\n| Finland | 5.620 | 0.338 | 320 | 57 | 315 |\n| Cyprus | 1.358 | 0.009 | 40 | 48 | 63 |\n| Portugal | 10.695 | 0.092 | 397 | 39 | 401 |\n"
+        vals1 @?= "| Region | Bev\246lkerung(MP) | Flaeche(Mkm\178) | GNP PP  (GPP$) | GDP per capita(kPP$/P) | GDP per capita extensive(GPP$) |\n|:---|---:|---:|---:|---:|---:|\n| Finland | 5.620 | 0.338 | 320 | 57 | 315 |\n| Cyprus | 1.358 | 0.009 | 40 | 48 | 63 |\n| Portugal | 10.695 | 0.092 | 397 | 39 | 401 |\n"
 
     ]
     
