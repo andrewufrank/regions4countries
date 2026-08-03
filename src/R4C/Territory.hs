@@ -62,22 +62,16 @@ aggregateTery op memberships table  = op (catMaybes values)
 
 
 wrapMdCol1 :: Pak t v -> Col t v
-wrapMdCol1 (Pak ds t) = wrapMdCol ds t
-    -- map (\(t,d) -> wrapMdCol d t) $ zip rct2 req
+wrapMdCol1 (Pak ds t) = Col (makeCol4ds ds)  t 
 
-
-wrapMdCol :: Dataset -> TerryTable t v -> Col t v
-wrapMdCol dataset ct =
-    Col
-        { cMd =
+makeCol4ds :: Dataset -> MdCol
+makeCol4ds dataset =
             MdCol
                 { colTitle = t2s $ dsShortName dataset
                 , colScale = dsScale dataset
                 , colUnit = dsUnit dataset
                 , colDecimals = dsDecimals dataset
                 }
-        , cTerrryTable = ct
-        }
 
 -- convert RegionTable3 = (Dataset, [(RegionId, CountryTable)]) to (Dataset, RegionTable1)
 -- regtab3_regtab1 (ds, tab) = (ds, sumCountryTables tab)
@@ -151,15 +145,28 @@ getOneRegionMany3 rct regid  = catMaybes $ map (\tab -> getOneRegion regid (fst 
 type RegionTable2 = [(RegionId, CountryTable)] -- nur hier gebraucht
 
 
-getOneRegion :: RegionId -> Dataset -> RegionTable2 -> Maybe (Col CountryId Double)
+getOneRegion :: RegionId -> Dataset -> [(RegionId, CountryTable)] -> Maybe (Col CountryId Double)
 -- extract one country from a regionTable 
 getOneRegion  regid dataset regtab = 
     case mbCountries of 
         Nothing -> Nothing -- putIOwords ["region", showT regid, "not found"]
-        Just (_, ctTab) ->  Just $  wrapMdCol ( dataset)  ctTab -- :: MdColumn CountryId Double 
+        Just (_, ctTab) ->  Just $  Col (makeCol4ds dataset)  ctTab -- :: MdColumn CountryId Double 
     where
         mbCountries = find ((regid ==). fst) regtab  -- [(RegionId, CountryTable)]
-          
+
+-- wrapMdCol :: Dataset -> TerryTable t v -> Col t v
+-- wrapMdCol dataset ct =
+--     Col
+--         { cMd =
+--             MdCol
+--                 { colTitle = t2s $ dsShortName dataset
+--                 , colScale = dsScale dataset
+--                 , colUnit = dsUnit dataset
+--                 , colDecimals = dsDecimals dataset
+--                 }
+--         , cTerrryTable = ct
+--         }
+
 -- RegionValue is a a record {id, maybe value}, could be a map 
 -- a version with map 
 -- matchTerryTables
