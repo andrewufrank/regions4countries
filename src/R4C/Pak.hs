@@ -56,6 +56,9 @@ combinePak3 ::
     Pak t (WObs Double) ->
     Pak t (WObs Double) ->
     Pak t (WObs Double)
+-- | combines two pak with a function. 
+-- combining weighted datasets works only for linear (specific affine) functions.
+-- see document weightedAverage.md
 combinePak3 operation left right =
     Pak combinedDataset combinedTable
   where
@@ -104,6 +107,7 @@ makePakExtensive ::
 
 {- | Make a dataset extensive using its configured weight indicator.
 The descriptor of the result is derived from the source dataset.
+the year indicates which dataset be used for the weight dataset
 -}
 makePakExtensive pak1@(Pak ds1 _) yearDs =
     case dsAggregation ds1 of
@@ -142,18 +146,18 @@ makePakExtensive2 (Pak ds1 tab1) _year weightIndicatorId =
     extensiveUnit indicator unit = unit <> " * " <> showT indicator
 
 
-lookupRegionTable3 ::
-    Connection ->
-    [(RegionId, [CountryId])] ->
-    Dataset ->
-    Year ->
-    IO RegionTable3
--- fill for each region a countryTable with only its countries
-lookupRegionTable3 conn regionDef ds yr = do
-    worldTab <- lookupTable conn (dsIndicator ds) yr
-    let regTab =
-            (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
-    return regTab
+-- lookupRegionTable3 ::
+--     Connection ->
+--     [(RegionId, [CountryId])] ->
+--     Dataset ->
+--     Year ->
+--     IO RegionTable3
+-- -- fill for each region a countryTable with only its countries
+-- lookupRegionTable3 conn regionDef ds yr = do
+--     worldTab <- lookupTable conn (dsIndicator ds) yr
+--     let regTab =
+--             (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
+--     return regTab
 
 -- lookupCountryTable3 :: Connection ->   Dataset -> Year -> IO CountryPak3
 -- fill for each region a countryTable with only its countries
@@ -183,8 +187,9 @@ lookupCountryTable3 conn ds yr = do
 -- combinesCountryTable3 :: (Ord t, Show t)
 --     => Dataset -> (Double -> Double -> Double) -> (Dataset, TerryTable t Double) -> (Dataset, TerryTable t Double)
 --     -> (Dataset, TerryTable t Double)
-combinesCountryTable3 dsx f tab1 tab2 =
-    Pak dsx (combineTerryTables f (pTerryTable tab1) (pTerryTable tab2))
+-- combinesCountryTable3 :: (Ord t, CombineVal v) => Dataset -> (CombineBase v -> CombineBase v -> CombineBase v) -> Pak t v -> Pak t v -> Pak t v
+-- combinesCountryTable3 dsx f tab1 tab2 =
+--     Pak dsx (combineTerryTables f (pTerryTable tab1) (pTerryTable tab2))
 
 -- combining weighted datasets works only for linear (specific affine) functions.
 -- see document weightedAverage.md

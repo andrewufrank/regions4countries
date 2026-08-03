@@ -85,20 +85,20 @@ regionMembers2 =
  
 regionNames2 :: [TerryName RegionId] --  [Region]
 regionNames2 =
-  [ Terry (RegionId "USCAN")         "USA & Kanada"
+  [ Terry (RegionId "USCAN")         "USA"
   , Terry (RegionId "SAMERICA")      "Südamerika"
   , Terry (RegionId "EUROPE")        "Europa"
   , Terry (RegionId "RUSSIA")        "Russland"
   , Terry (RegionId "NORTH_AFRICA")  "Nordafrika"
-  , Terry (RegionId "SUBSAHARA")     "Subsahara-Afrika"
+  , Terry (RegionId "SUBSAHARA")     "Subs-Afrika"
   , Terry (RegionId "GULF")          "Golfstaaten"
-  , Terry (RegionId "CENTRAL_ASIA")  "Zentralasien"
+  , Terry (RegionId "CENTRAL_ASIA")  "Zentr-Asien"
   , Terry (RegionId "INDIA")         "Indien"
   , Terry (RegionId "FAREAST")       "Fernost"
   , Terry (RegionId "CHINA")         "China"
   , Terry (RegionId "JAPAN")         "Japan"
   , Terry (RegionId "SOUTH_ASIA")    "Südasien"
-  , Terry (RegionId "ANZ")           "Australien & Neuseeland"
+  , Terry (RegionId "ANZ")           "Australien"
   ]
  
 

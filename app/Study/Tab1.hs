@@ -7,18 +7,7 @@
 -----------------------------------------------------------------------------
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
-module Tab1
-where
-
--- import qualified Eins.Region as RBT
--- import qualified Data.Text as T
-
--- import           GHC.Generics (Generic1 (to1))
--- import           GHC.IO.Handle.Types (Handle__)
--- import           R4C.Aggregate
-
--- import           R4C.Export.Markdown
--- import qualified Eins.Region3 as R3
+module Tab1 where
 
 import Database.SQLite.Simple
 import Eins.Config
@@ -28,7 +17,6 @@ import Eins.Region2
 import Eins.Region3
 import R4C.Export.CountnryCodeNames
 import R4C.Export.Table
-import R4C.Import.Database
 import R4C.Import.Query
 import R4C.Model
 import R4C.Pak
@@ -50,16 +38,6 @@ getData11 :: IO ()
 -- fig11 -- Flaeche , Nutzbare flaeche
 getData11 = do
     conn <- open dbPath
-    -- let reqYears =
-    --         [ (population, Year 2024)
-    --         , (surfaceArea, Year 2023)
-    --         , (forest, Year 2023)
-    --         , (urban, Year 2015)
-    --         , (agriPercent, Year 2023) -- per capita, intensive
-    --         ]
-    -- c3 <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
-    -- let [pop3, surf3, forest3, urban3, agriPerc3] = c3
-
     pop3 <- lookupCountryTable3 conn (population) (Year 2024)
     surf3 <- lookupCountryTable3 conn (surfaceArea) (Year 2023)
     forest3 <- lookupCountryTable3 conn forest (Year 2023)
@@ -68,55 +46,46 @@ getData11 = do
 
     close conn
 
-    let -- c3 :: [(Dataset, [TerryValue CountryId (Double)])]
-        c3 = [pop3, surf3, forest3, urban3, agriPerc3] :: [CountryPak3]
-    -- -- <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+    let c3 = [pop3, surf3, forest3, urban3, agriPerc3] :: [CountryPak3]
 
     let agriFactor = scalePak 0.01 agriPerc3
         agri3 = makePakExtensive agriFactor (Year 2023) -- surfarea
         use3 = sumPak3 [forest3, urban3, agri3]
-
-        c3' = c3 ++ [agri3, use3] :: [CountryPak3]
+        useF3 = combinePak3 Divide use3  surf3
+        c3' = c3 ++ [agri3, use3, useF3] :: [CountryPak3]
 
 
     -- from here to produce country table     
-    let mc4 = map wrapMdCol1 c3 :: [Col CountryId (WObs Double)]
+    let mc4 = map wrapMdCol1 c3' :: [Col CountryId (WObs Double)]
 
-        [pop4, surf4, forest4, urban4, agriPerc4] = mc4
-        agri4 = wrapMdCol1 agri3
-        use4 = wrapMdCol1 use3
+        [pop4, surf4, forest4, urban4, agriPerc4, agri4, use4, useF4] = mc4
+        -- agri4 = wrapMdCol1 agri3
+        -- use4 = wrapMdCol1 use3
         
-        useFactor4 =
-            combineMdTables Divide use4
-                surf4 {cMd = (cMd surf4) {colScale = Micro, colDecimals = 5}}
+        -- useFactor4 =
+        --     combineMdTables Divide use4
+        --         surf4 {cMd = (cMd surf4) {colScale = Micro, colDecimals = 5}}
 
                 -- combine the mdtables, to edit the cols, but no need for a dataset def 
     -- print all tables for testing
     let mdBase = markdownTable allCodeNames xcountries (mc4) -- less1m mdC
-    let mdUse = markdownTable allCodeNames xcountries [surf4, agri4, forest4 , urban4, use4, useFactor4 ]
+    let mdUse = markdownTable allCodeNames xcountries [surf4, agri4, forest4 , urban4, use4, useF4 ]
     -- make selection of region or country names automatic
     putStrLn mdBase
     putStrLn mdUse 
 
-    -- let mc4' = mc4 ++ [agri4, use4, useFactor4]  :: [MdColumn CountryId (WObs Double)]
-
--- for region tables 
--- type RegionPak3 = (Dataset, TerryTable RegionId (WObs Double))  
-        -- change: wobs to allow weighted average
-        -- simplification: always WObs Double
-        -- probably not effective, when to set the weights
-        -- woud have to come from the computed aggregates
-
     -- make region tables
-    let reg5 = country2regionPak regionMembers2 c3' :: [RegionPak3]
 
     --     -- usePerc4 = combinesCountryTable3 useableLandPerCent (toPercent) use4 surf4
     --     -- usePC4 = (useableLandPC, combineTerryTables (haPC) (snd use4) (snd pop4))
+
+    let reg5 = country2regionPak regionMembers2 (c3' ++ [useF3]) :: [RegionPak3]
     let mreg5 = map wrapMdCol1 reg5 --(reg4tot ++ [usePerc4, usePC4]) ::
-        [pop5, surf5, forest5, urban5, agriPerc5, agri5, use5] = mreg5 
+        -- [pop5, surf5, forest5, urban5, agriPerc5, agri5, use5, useFactor5] = mreg5 
     --             [MdColumn RegionId Double]
-    let mdRegion1 = markdownTable regionNames2 regionOrder2 
-            [pop5, surf5, forest5, urban5, agriPerc5, agri5, use5]
+
+    let mdRegion1 = markdownTable regionNames2 regionOrder2 mreg5
+            -- [surf5, agri5, forest5, urban5, use5, useFactor5]
 
             -- merge the wrap and markdownTable; they are polymorph 
 

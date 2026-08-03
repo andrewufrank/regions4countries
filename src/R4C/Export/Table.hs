@@ -52,8 +52,8 @@ markdownTable names regions cols =
         "| Region | " ++ intercalate " | " (map title_units cols) ++ " |"
 
     separator =
-        "|:---|" ++ concat (replicate (length cols) "---:|")  -- the colon controls alignement
-
+        "|:---------|" ++ concat (replicate (length cols) "---:|")  -- the colon controls alignement
+                -- assume region names <= 10 char
     row r =
         "| " ++ showRegion names r ++ " | "
         ++ intercalate " | " (map (cell r) cols)
@@ -85,9 +85,17 @@ markdownTable names regions cols =
 
 
 title_units :: Col t v -> [Char]
-title_units col = colTitle md ++ "(" ++ show1scale (colScale md) ++ t2s (colUnit md) ++ ")"
-  where
-    md = cMd col
+-- title_units col = colTitle md ++ "(" ++ show1scale (colScale md) ++ t2s (colUnit md) ++ ")"
+--   where
+--     md = cMd col
+title_units col =
+        colTitle md
+            ++ "<br>*("
+            ++ show1scale (colScale md)
+            ++ t2s (colUnit md)
+            ++ ")*"
+      where
+        md = cMd col
 -------------
 class ShowCell a where
     showCell :: Col i a -> a -> String
