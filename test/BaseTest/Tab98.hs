@@ -40,22 +40,24 @@ import R4C.Territory
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 
-
 exp5 :: IO ()
--- | check the conversion to extensive for gdp per cap, compare with gnp....
--- test regions 
+
+{- | check the conversion to extensive for gdp per cap, compare with gnp....
+test regions
+-}
 exp5 = do
-    _ <- exp5a (map RegionId ["EU", "RUSSIA"])   
+    _ <- exp5a (map RegionId ["EU", "RUSSIA"])
     return ()
 
 -- exp5 :: IO ()
--- | show all countries with popuplation surface and GNP
--- exp5a :: [RegionId] -> [CountryId] -> IO (String, String)
--- regOrder and countries list what is include in result
-exp5a :: [RegionId]   -> IO String
-exp5a regOrder   = do
-    let regionDef = RBT.regionMembers -- g7, eu, russia
 
+{- | show all countries with popuplation surface and GNP
+exp5a :: [RegionId] -> [CountryId] -> IO (String, String)
+regOrder and countries list what is include in result
+-}
+exp5a :: [RegionId] -> IO String
+exp5a regOrder = do
+    let regionDef = RBT.regionMembers -- g7, eu, russia
     conn <- open dbPath
     let reqYears =
             [ (population, Year 2024)
@@ -63,7 +65,7 @@ exp5a regOrder   = do
             , (gnpPP, Year 2021)
             , (gdpPPpc, Year 2021) -- per capita, intensive
             ]
-    c3 <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
+    c3 <- mapM (uncurry $ lookupCountryPak conn) reqYears
     let [pop3, surf3, gdp3, gnpPc3] = c3
 
     let gdp5 = makePakExtensive gnpPc3 (Year 2021)
@@ -72,10 +74,10 @@ exp5a regOrder   = do
 
     let c4 = c3 ++ [gdp5]
         reg4tot :: [RegionPak3]
-        reg4tot = country2regionPak regionMembers2 c4
+        reg4tot = countryToRegionPaks regionMembers2 c4
 
         mdRegion4 = map wrapMdCol1 reg4tot
-        mdRegion = markdownTable regionNames2 regOrder  mdRegion4
+        mdRegion = markdownTable regionNames2 regOrder mdRegion4
     putStrLn mdRegion
     -- print mdRegion
     return mdRegion
@@ -87,10 +89,11 @@ exp5a regOrder   = do
 -- -- print md1
 -- return md1
 
-
 exp6 :: IO ()
--- | check the conversion to extensive for gdp per cap, compare with gnp....
--- test countries 
+
+{- | check the conversion to extensive for gdp per cap, compare with gnp....
+test countries
+-}
 exp6 = do
     _ <-
         exp6b
@@ -98,8 +101,8 @@ exp6 = do
             (map CountryId ["FIN", "CYP", "PRT", "AUT", "BRA", "USA", "RUS"])
     return ()
 
-exp6b ::  [CountryId] -> IO String
-exp6b  countries = do
+exp6b :: [CountryId] -> IO String
+exp6b countries = do
     let regionDef = RBT.regionMembers -- g7, eu, russia
     conn <- open dbPath
     let reqYears =
@@ -108,7 +111,7 @@ exp6b  countries = do
             , (gnpPP, Year 2021)
             , (gdpPPpc, Year 2021) -- per capita, intensive
             ]
-    c3 <- mapM (uncurry $ lookupCountryTable3 conn) reqYears
+    c3 <- mapM (uncurry $ lookupCountryPak conn) reqYears
     let [pop3, surf3, gdp3, gnpPc3] = c3
 
     let gdp5 = makePakExtensive gnpPc3 (Year 2021)
@@ -130,7 +133,6 @@ less1m = map CountryId R3.less1mTax
 avcountries = map CountryId ["FIN", "CYP", "PRT"] -- "AUT", "BRA", "BGD", "RUS"]
 
 avregionOrder2 = take 6 $ map terryId regionNames2
-
 
 -- writeTab1Table :: FilePath -> String -> IO ()
 -- writeTab1Table filename contents = do

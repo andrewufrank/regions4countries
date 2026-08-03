@@ -1,41 +1,139 @@
 -----------------------------------------------------------------------------
 --
--- Module      :  Pak
---  datastructures of the type
---  data Pak t v = Pak { pDataSet :: Dataset, pTerryTable :: TerryTable t v }
+-- Module      :  R4C.Pak
+-- Description :  Dataset-aware construction and transformation of 'Pak's
+--
+-- A 'Pak' keeps a dataset descriptor together with its territory values.
+-- The operations in this module update both parts together.
 -----------------------------------------------------------------------------
 
-module R4C.Pak where
+module R4C.Pak (
+    -- * Construction
+    lookupCountryPak,
 
--- import Study.Config
--- import Study.Descriptor
--- import Data.List
--- import R4C.Import.Instances
-import qualified Data.Map.Strict as M
+    -- * Transformations
+    scalePak,
+    setPakShortName,
+    setPakUnitScale,
+    makePakExtensive,
+
+    -- * Combining packages
+    sumPaks,
+    combinePaks,
+
+    -- * Territory conversion
+    countryToRegionPaks,
+) where
+
 import qualified Data.Text as T
-import Database.SQLite.Simple
-import R4C.Country
-import R4C.Import.Database
+import Database.SQLite.Simple (Connection)
+import R4C.Import.Database (lookupTable)
 import R4C.Model
-import R4C.Territory
+import R4C.Territory (countryTable, regtab3_regtab1)
 import R4C.TerryTable
 import UniformBase
 
+{- | Load the country values for a dataset and attach the weights required by
+its configured aggregation method.
+-}
+lookupCountryPak ::
+    Connection ->
+    Dataset ->
+    Year ->
+    IO CountryPak3
+lookupCountryPak conn dataset year =
+    case dsAggregation dataset of
+        Sum -> do
+            values <- lookupTable conn (dsIndicator dataset) year
+            pure (Pak dataset (mkUnitWeight values))
+        WeightedBy weightIndicator -> do
+            values <- lookupTable conn (dsIndicator dataset) year
+            weights <- lookupTable conn weightIndicator year
+            pure (Pak dataset (mkWeighted values weights))
 
--- scalePak :: (Ord t, Show t) => (a, Double) -> MdColumn t v -> (a, MdColumn t v)
+-- | Scale every value while retaining the dataset descriptor and weights.
 scalePak ::
-    (Ord t, Show t, ScaleByDouble v) =>
+    (ScaleByDouble v) =>
     Double ->
     Pak t v ->
     Pak t v
-scalePak f (Pak ds tab) = Pak ds (scaleTerryTable f tab)
+scalePak factor (Pak dataset table) =
+    Pak dataset (scaleTerryTable factor table)
 
-sumPak3 ::
-    Ord t =>
+-- | Replace the display name in a package's dataset descriptor.
+setPakShortName :: T.Text -> Pak t v -> Pak t v
+setPakShortName shortName pak =
+    pak
+        { pDataSet =
+            (pDataSet pak)
+                { dsShortName = shortName
+                }
+        }
+
+{- | Replace the Unit and Scale in a package's dataset descriptor.
+setPakShortName :: T.Text -> Pak t v -> Pak t v
+-}
+setPakUnitScale :: Text -> Pak t v -> Pak t v
+setPakUnitScale un pak =
+    pak
+        { pDataSet =
+            (pDataSet pak)
+                { dsUnit = un
+                }
+        }
+
+{- | Convert an intensive country package to an extensive one using the
+weights already stored in its table. Packages configured with 'Sum' are
+returned unchanged.
+
+The year is retained in the API to identify the weight dataset used when
+the package was constructed; the conversion itself does not perform IO.
+-}
+makePakExtensive ::
+    Pak CountryId (WObs Double) ->
+    Year ->
+    Pak CountryId (WObs Double)
+makePakExtensive pak@(Pak dataset _) _year =
+    case dsAggregation dataset of
+        Sum -> pak
+        WeightedBy weightIndicator ->
+            makePakExtensiveWith weightIndicator pak
+
+makePakExtensiveWith ::
+    IndicatorId ->
+    Pak CountryId (WObs Double) ->
+    Pak CountryId (WObs Double)
+makePakExtensiveWith weightIndicator (Pak dataset table) =
+    Pak extensiveDataset (createTableExtensive table)
+  where
+    extensiveDataset =
+        dataset
+            { dsIndicator =
+                IndicatorId
+                    ( "extensive of "
+                        <> unIndicatorId (dsIndicator dataset)
+                    )
+            , dsShortName = dsShortName dataset <> " extensive"
+            , dsUnit = extensiveUnit weightIndicator (dsUnit dataset)
+            , dsAggregation = Sum
+            }
+
+    extensiveUnit (IndicatorId "SP.POP.TOTL") unit =
+        maybe unit id (T.stripSuffix "/P" unit)
+    extensiveUnit (IndicatorId "AG.SRF.TOTL.K2") _ = "km\178"
+    extensiveUnit indicator unit = unit <> " * " <> showT indicator
+
+{- | Sum packages and derive a matching descriptor for the result.
+
+All packages must use compatible territory identifiers and weights. An
+empty list is rejected because there is no descriptor to derive.
+-}
+sumPaks ::
+    (Ord t) =>
     [Pak t (WObs Double)] ->
     Pak t (WObs Double)
-sumPak3 [] = error "sumPak3: cannot derive a dataset from an empty list"
-sumPak3 paks@(Pak firstDataset _ : _) =
+sumPaks [] = error "sumPaks: cannot derive a dataset from an empty list"
+sumPaks paks@(Pak firstDataset _ : _) =
     Pak sumDataset summedTable
   where
     summedTable = sumTerryTables (map pTerryTable paks)
@@ -45,21 +143,23 @@ sumPak3 paks@(Pak firstDataset _ : _) =
 
     sumDataset =
         firstDataset
-            { dsIndicator = IndicatorId ("sum of " <> T.intercalate " + " indicators)
+            { dsIndicator =
+                IndicatorId ("sum of " <> T.intercalate " + " indicators)
             , dsShortName = T.intercalate " + " shortNames
             , dsAggregation = Sum
             }
 
-combinePak3 ::
-    Ord t =>
+{- | Combine two packages arithmetically and derive the descriptor of the
+result. Weighted packages can only be combined when their weights are
+compatible; see @docs/weightedAverage.md@.
+-}
+combinePaks ::
+    (Ord t) =>
     Operation ->
     Pak t (WObs Double) ->
     Pak t (WObs Double) ->
     Pak t (WObs Double)
--- | combines two pak with a function. 
--- combining weighted datasets works only for linear (specific affine) functions.
--- see document weightedAverage.md
-combinePak3 operation left right =
+combinePaks operation left right =
     Pak combinedDataset combinedTable
   where
     combinedTable =
@@ -76,15 +176,24 @@ combinePak3 operation left right =
         Subtract -> extensive leftDataset && extensive rightDataset
         Multiply -> extensive leftDataset /= extensive rightDataset
         Divide -> extensive leftDataset && not (extensive rightDataset)
+        ToPercentOf -> False
+        FromPercentOf -> extensive rightDataset
     extensive dataset = dsAggregation dataset == Sum
     aggregation
+        | isPercentOf = Mean
         | isExtensive = Sum
-        | dsAggregation leftDataset == dsAggregation rightDataset = dsAggregation leftDataset
+        | dsAggregation leftDataset == dsAggregation rightDataset =
+            dsAggregation leftDataset
         | otherwise = Mean
+    isPercentOf = case operation of
+        ToPercentOf -> True
+        _ -> False
     unit = case operation of
         Add | dsUnit leftDataset == dsUnit rightDataset -> dsUnit leftDataset
         Subtract | dsUnit leftDataset == dsUnit rightDataset -> dsUnit leftDataset
         Divide | dsUnit leftDataset == dsUnit rightDataset -> ""
+        ToPercentOf -> "%"
+        FromPercentOf -> dsUnit rightDataset
         _ -> dsUnit leftDataset <> symbol <> dsUnit rightDataset
 
     combinedDataset =
@@ -92,7 +201,9 @@ combinePak3 operation left right =
             { dsIndicator =
                 IndicatorId
                     ( unIndicatorId (dsIndicator leftDataset)
-                        <> " " <> symbol <> " "
+                        <> " "
+                        <> symbol
+                        <> " "
                         <> unIndicatorId (dsIndicator rightDataset)
                     )
             , dsShortName = combineText dsShortName
@@ -100,135 +211,30 @@ combinePak3 operation left right =
             , dsAggregation = aggregation
             }
 
-makePakExtensive ::
-    Pak CountryId (WObs Double) ->
-    Year ->
-    Pak CountryId (WObs Double)
-
-{- | Make a dataset extensive using its configured weight indicator.
-The descriptor of the result is derived from the source dataset.
-the year indicates which dataset be used for the weight dataset
+{- | Aggregate country packages into region packages according to the supplied
+region membership definition. The resulting packages retain weights so
+that regions can be aggregated again.
 -}
-makePakExtensive pak1@(Pak ds1 _) yearDs =
-    case dsAggregation ds1 of
-        Sum -> pak1
-        WeightedBy weightIndicator ->
-            makePakExtensive2
-                pak1
-                yearDs
-                weightIndicator
-
-makePakExtensive2 ::
-    Pak CountryId (WObs Double) ->
-    Year ->
-    IndicatorId ->
-    Pak CountryId (WObs Double)
-makePakExtensive2 (Pak ds1 tab1) _year weightIndicatorId =
-    Pak extensiveDs extensiveTable
-  where
-    extensiveTable = createTableExtensive tab1
-    extensiveDs =
-        ds1
-            { dsIndicator =
-                IndicatorId
-                    ( "extensive of "
-                        <> unIndicatorId (dsIndicator ds1)
-                    )
-            , dsShortName =
-                dsShortName ds1 <> " extensive"
-            , dsUnit = extensiveUnit weightIndicatorId (dsUnit ds1)
-            , dsAggregation = Sum
-            }
-
-    extensiveUnit (IndicatorId "SP.POP.TOTL") unit =
-        maybe unit id (T.stripSuffix "/P" unit)
-    extensiveUnit (IndicatorId "AG.SRF.TOTL.K2") _ = "km\178"
-    extensiveUnit indicator unit = unit <> " * " <> showT indicator
-
-
--- lookupRegionTable3 ::
---     Connection ->
---     [(RegionId, [CountryId])] ->
---     Dataset ->
---     Year ->
---     IO RegionTable3
--- -- fill for each region a countryTable with only its countries
--- lookupRegionTable3 conn regionDef ds yr = do
---     worldTab <- lookupTable conn (dsIndicator ds) yr
---     let regTab =
---             (ds, map (\(reg, cts) -> (reg, countryTable worldTab cts)) regionDef)
---     return regTab
-
--- lookupCountryTable3 :: Connection ->   Dataset -> Year -> IO CountryPak3
--- fill for each region a countryTable with only its countries
--- lookupCountryTable3 :: Connection -> Dataset -> Year -> IO (Dataset, [TerryValue CountryId ( Double)])
-
-lookupCountryTable3 ::
-    Connection ->
-    Dataset ->
-    Year ->
-    IO CountryPak3
--- lookupCountryTable3 :: Connection -> Dataset -> Year -> IO (Dataset, [TerryValue CountryId v])
-lookupCountryTable3 conn ds yr = do
-    case dsAggregation ds of
-        Sum -> do
-            worldTab <- lookupTable conn (dsIndicator ds) yr
-            let combTab = mkUnitWeight worldTab
-                ctTab = Pak ds combTab
-            return ctTab
-        WeightedBy indicatorId -> do
-            worldTab <- lookupTable conn (dsIndicator ds) yr
-            weightTab <- lookupTable conn indicatorId yr -- issue TODO ??
-            let combTab =
-                    mkWeighted worldTab weightTab :: [TerryValue CountryId (WObs Double)]
-                ctTab = Pak ds combTab
-            return ctTab
-
--- combinesCountryTable3 :: (Ord t, Show t)
---     => Dataset -> (Double -> Double -> Double) -> (Dataset, TerryTable t Double) -> (Dataset, TerryTable t Double)
---     -> (Dataset, TerryTable t Double)
--- combinesCountryTable3 :: (Ord t, CombineVal v) => Dataset -> (CombineBase v -> CombineBase v -> CombineBase v) -> Pak t v -> Pak t v -> Pak t v
--- combinesCountryTable3 dsx f tab1 tab2 =
---     Pak dsx (combineTerryTables f (pTerryTable tab1) (pTerryTable tab2))
-
--- combining weighted datasets works only for linear (specific affine) functions.
--- see document weightedAverage.md
-
-reg3CountryTable4 ::
-    (Eq ct) =>
-    [(rg, [ct])] ->
-    [Pak ct v] ->
-    [(Dataset, [(rg, TerryTable ct v)])]
--- construct region tables from country tables, does not aggregate values
-reg3CountryTable4 regionMembers tabs =
-    map (\(Pak ds tab) -> reg2 ds regionMembers tab) tabs
-  where
-    regTab1pop ::
-        (Eq ct) =>
-        TerryTable ct v ->
-        (rg, [ct]) ->
-        (rg, TerryTable ct v)
-    -- make a single region  taboe
-    regTab1pop tab (reg, cts) = (reg, countryTable tab cts)
-
-    reg2 ::
-        (Eq ct) =>
-        Dataset ->
-        [(rg, [ct])] ->
-        TerryTable ct v ->
-        (Dataset, [(rg, TerryTable ct v)])
-    -- make all regions for a dataset  -> RegionTable3
-    reg2 ds regionMembers tab = (ds, map (regTab1pop tab) regionMembers)
-
-country2regionPak ::
-    Eq ct =>
-    [(rg, [ct])] ->
-    [Pak ct (WObs Double)] ->
-    [Pak rg (WObs Double)]
-country2regionPak regionMembers =
+countryToRegionPaks ::
+    (Eq country) =>
+    [(region, [country])] ->
+    [Pak country (WObs Double)] ->
+    [Pak region (WObs Double)]
+countryToRegionPaks regionMembers =
     map (\(dataset, table) -> Pak dataset table)
         . regtab3_regtab1
-        . reg3CountryTable4 regionMembers
+        . countryPaksByRegion regionMembers
 
--- reg3CountryTable3 :: (Eq ct) => [(rg, [ct])] -> (Dataset, TerryTable ct ( v)) -> (Dataset, [(rg, TerryTable ct v)] )
--- reg3CountryTable3 regionMembers (ds, tab)  = reg2 ds regionMembers tab
+countryPaksByRegion ::
+    (Eq country) =>
+    [(region, [country])] ->
+    [Pak country value] ->
+    [(Dataset, [(region, TerryTable country value)])]
+countryPaksByRegion regionMembers =
+    map splitPak
+  where
+    splitPak (Pak dataset table) =
+        (dataset, map (restrictTable table) regionMembers)
+
+    restrictTable table (region, countries) =
+        (region, countryTable table countries)

@@ -50,7 +50,7 @@ exp5a countries regionDef = do
     conn <- open dbPath 
     let  reqYears =  [(population, Year 2024), (gnpPP, Year 2021),  (gdpPPpc, Year 2021)]
 
-    countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+    countryTables :: [CountryTable3] <- mapM (\(d,y) -> lookupCountryPak conn ( d) y) reqYears
     close conn
     let mdC = wrapMdCol3 countryTables
     let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]

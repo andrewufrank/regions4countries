@@ -15,6 +15,7 @@ import qualified Data.Text as T
 import Numeric (showFFloat)
 import qualified Data.Scientific as Sc
 import R4C.Model
+import R4C.Territory (wrapMdCol1)
 import qualified Data.Map.Strict as Map 
 import UniformBase 
 import qualified Data.Map.Strict as Map
@@ -82,6 +83,16 @@ markdownTable names regions cols =
                     
     -- showRegion (RegionId t) =
     --     T.unpack t
+
+-- | Render packages directly as a Markdown table.
+markdownPakTable ::
+    (Eq id, Show id, ShowTerryId id, ShowCell v, Magnitude v) =>
+    [TerryName id] ->
+    [id] ->
+    [Pak id v] ->
+    String
+markdownPakTable names territories =
+    markdownTable names territories . map wrapMdCol1
 
 
 title_units :: Col t v -> [Char]

@@ -24,6 +24,7 @@ import R4C.Territory
 import R4C.TerryTable
 import System.FilePath ((</>))
 import UniformBase hiding (uncurry, (</>))
+import R4C.Country (lookupCountries)
 
 regionMembers :: RegionMembers
 regionMembers = regionMembers3 ++ extraRegions3 :: RegionMembers
@@ -38,59 +39,45 @@ getData11 :: IO ()
 -- fig11 -- Flaeche , Nutzbare flaeche
 getData11 = do
     conn <- open dbPath
-    pop3 <- lookupCountryTable3 conn (population) (Year 2024)
-    surf3 <- lookupCountryTable3 conn (surfaceArea) (Year 2023)
-    forest3 <- lookupCountryTable3 conn forest (Year 2023)
-    urban3 <- lookupCountryTable3 conn urban (Year 2015)
-    agriPerc3 <- lookupCountryTable3 conn agriPercent (Year 2023)
+    pop3 <- lookupCountryPak conn (population) (Year 2024)
+    surf3 <- lookupCountryPak conn (surfaceArea) (Year 2023)
+    forest3 <- lookupCountryPak conn forest (Year 2023)
+    urban3 <- lookupCountryPak conn urban (Year 2015)
+    agriPerc3 <- lookupCountryPak conn agriPercent (Year 2023)
 
     close conn
 
     let c3 = [pop3, surf3, forest3, urban3, agriPerc3] :: [CountryPak3]
 
-    let agriFactor = scalePak 0.01 agriPerc3
-        agri3 = makePakExtensive agriFactor (Year 2023) -- surfarea
-        use3 = sumPak3 [forest3, urban3, agri3]
-        useF3 = combinePak3 Divide use3  surf3
+        agri3 =
+            setPakShortName "Landwirtschaft" $
+                combinePaks FromPercentOf agriPerc3 surf3
+                -- could take the base dataset from the weighted value
+        use3 = setPakShortName "Nutzbar" $ sumPaks [forest3, urban3, agri3]
+        useF3 =
+            setPakShortName "Nutzbar" $
+                combinePaks ToPercentOf use3 surf3
         c3' = c3 ++ [agri3, use3, useF3] :: [CountryPak3]
 
+    -- from here to produce country table
 
-    -- from here to produce country table     
-    let mc4 = map wrapMdCol1 c3' :: [Col CountryId (WObs Double)]
-
-        [pop4, surf4, forest4, urban4, agriPerc4, agri4, use4, useF4] = mc4
-        -- agri4 = wrapMdCol1 agri3
-        -- use4 = wrapMdCol1 use3
-        
-        -- useFactor4 =
-        --     combineMdTables Divide use4
-        --         surf4 {cMd = (cMd surf4) {colScale = Micro, colDecimals = 5}}
-
-                -- combine the mdtables, to edit the cols, but no need for a dataset def 
-    -- print all tables for testing
-    let mdBase = markdownTable allCodeNames xcountries (mc4) -- less1m mdC
-    let mdUse = markdownTable allCodeNames xcountries [surf4, agri4, forest4 , urban4, use4, useF4 ]
+    let mdBase = markdownPakTable allCodeNames xcountries c3'
+    let mdUse =
+            markdownPakTable
+                allCodeNames xcountries tab11paks
+                
+        tab11paks = [surf3, agri3, forest3, urban3, use3, useF3]
     -- make selection of region or country names automatic
     putStrLn mdBase
-    putStrLn mdUse 
+    putStrLn mdUse
 
     -- make region tables
 
-    --     -- usePerc4 = combinesCountryTable3 useableLandPerCent (toPercent) use4 surf4
-    --     -- usePC4 = (useableLandPC, combineTerryTables (haPC) (snd use4) (snd pop4))
+    let reg5 = countryToRegionPaks regionMembers2 tab11paks :: [RegionPak3]
 
-    let reg5 = country2regionPak regionMembers2 (c3' ++ [useF3]) :: [RegionPak3]
-    let mreg5 = map wrapMdCol1 reg5 --(reg4tot ++ [usePerc4, usePC4]) ::
-        -- [pop5, surf5, forest5, urban5, agriPerc5, agri5, use5, useFactor5] = mreg5 
-    --             [MdColumn RegionId Double]
-
-    let mdRegion1 = markdownTable regionNames2 regionOrder2 mreg5
-            -- [surf5, agri5, forest5, urban5, use5, useFactor5]
-
-            -- merge the wrap and markdownTable; they are polymorph 
-
+    let mdRegion1 = markdownPakTable regionNames2 regionOrder2 reg5
+ 
     putStrLn mdRegion1
-
 
 -- writeTab1Table "tab11" mdRegion
 
@@ -113,55 +100,59 @@ getData12 :: IO ()
 getData12 = do
     conn <- open dbPath
 
-    pop3  <- lookupCountryTable3 conn (population)(Year 2024)
-    popGrowth3 <- lookupCountryTable3 conn ( population) (Year 2023)
-    fertRate3 <- lookupCountryTable3 conn fertilityRate (Year 2024)
-    mignet3 <- lookupCountryTable3 conn migrationNet (Year 2024)
+    pop3 <- lookupCountryPak conn (population) (Year 2024)
+    popGrowth3 <- lookupCountryPak conn (population) (Year 2023)
+    fertRate3 <- lookupCountryPak conn fertilityRate (Year 2024)
+    mignet3 <- lookupCountryPak conn migrationNet (Year 2024)
+    popGrowthPercent <- lookupCountryPak conn populationGrowthRate (Year 2024)
     close conn
 
     let c3 :: [CountryPak3]
-        c3 = [pop3, popGrowth3, fertRate3, mignet3]
+        c3 = [pop3, popGrowth3, fertRate3, mignet3, popGrowthPercent]
 
     -- test data availability
     let mcountry3 = map wrapMdCol1 c3
-        mdCountry = markdownTable allCodeNames xcountries mcountry3  --less1m mdC
+        mdCountry = markdownTable allCodeNames xcountries mcountry3 -- less1m mdC
     putStrLn mdCountry
 
-    --olf     conn <- open dbPath
+    -- olf     conn <- open dbPath
     -- let req = [population, populationGrowthRate, fertilityRate, migrationNet]
     --     years = map Year [2024, 2024, 2024, 2024]
     --     reqYears = zip req years
 
     -- c3@ :: [CountryPak3]
-    --         <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+    --         <- mapM (\(d,y) -> lookupCountryPak conn ( d) y) reqYears
     -- close conn
 
-    let -- women3 = second (scaleRegionTable (0.5*20)) pop3
+    let
+        -- women3 = second (scaleRegionTable (0.5*20)) pop3
         -- fertilityCount3  = (fertilityCount, combineTerryTables (*) (snd pop3) (snd fertRate3))
-        popGrowthCount3 = combinePak3 Multiply pop3 fertRate3
-        netmigPMP3 = combinePak3 Divide mignet3 pop3
-            -- Pak netMigrationCount
-            --     (combineTerryTables
-            --         (\a b -> (10 ** 6) * a / b)
-            --         (pTerryTable mignet3)
-            --         (pTerryTable pop3))
+        popGrowthCount3 = combinePaks Multiply pop3 fertRate3
+        netmigPMP3 = combinePaks Divide mignet3 pop3
+        -- Pak netMigrationCount
+        --     (combineTerryTables
+        --         (\a b -> (10 ** 6) * a / b)
+        --         (pTerryTable mignet3)
+        --         (pTerryTable pop3))
         c4 :: [CountryPak3]
-        c4 = c3 ++ [ popGrowthCount3, netmigPMP3 ]
+        c4 = c3 ++ [popGrowthCount3, netmigPMP3]
     -- -- let fertility2 = zip regionsList fertility
 
     -- putStrLn $ show popGrowthCount3
     let mcountry4 = map wrapMdCol1 c4
-        mdCountry = markdownTable allCodeNames xcountries mcountry4  --less1m mdC
+        mdCountry = markdownTable allCodeNames xcountries mcountry4 -- less1m mdC
     putStrLn mdCountry
 
-    let [pop4, popGrowth4, fertRate4, mignet4, popGrowthCount4, netmigPM4]
-            = reg4tot
-        reg4tot = country2regionPak regionMembers2 c4 :: [RegionPak3]
+    let [pop4, popGrowth4, fertRate4, mignet4, popGrowthCount4, netmigPM4] =
+            reg4tot
+        reg4tot = countryToRegionPaks regionMembers2 c4 :: [RegionPak3]
 
-        fertRate4x = combinePak3 Divide popGrowthCount4 pop4
-        mdRegion4 = map wrapMdCol1 (reg4tot ++ [fertRate4x]) :: [Col RegionId (WObs Double)]
+        fertRate4x = combinePaks Divide popGrowthCount4 pop4
+        mdRegion4 =
+            map wrapMdCol1 (reg4tot ++ [fertRate4x]) ::
+                [Col RegionId (WObs Double)]
 
-        mdRegion = markdownTable  regionNames2 regionOrder2 mdRegion4
+        mdRegion = markdownTable regionNames2 regionOrder2 mdRegion4
 
     putStrLn mdRegion
 

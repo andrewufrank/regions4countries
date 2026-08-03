@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+
 -----------------------------------------------------------------------------
 --
 -- Module      :   R4C.TerryTable
@@ -30,7 +31,8 @@ instance Magnitude Double where
 instance Magnitude (WObs Double) where
     magnitude = abs . wobs
 
-constructDataset :: Magnitude v => Dataset -> TerryTable t v -> Col t v
+constructDataset ::
+    (Magnitude v) => Dataset -> TerryTable t v -> Col t v
 constructDataset dataset table =
     Col
         { cMd =
@@ -43,7 +45,8 @@ constructDataset dataset table =
         , cTerrryTable = table
         }
   where
-    largestValue = maximum (0 : [magnitude value | TerryValue _ (Just value) <- table])
+    largestValue =
+        maximum (0 : [magnitude value | TerryValue _ (Just value) <- table])
 
     scaleForMagnitude value
         | value < 10 ** 5 = Unit
@@ -136,24 +139,25 @@ mkWeighted valueTable weightTable =
 valueToDouble :: Value -> Double
 valueToDouble (Value v) =
     Sc.toRealFloat v
+
 --
 class ScaleByDouble v where
     scaleByDouble :: Double -> v -> v
-    
+
 instance ScaleByDouble Double where
-  scaleByDouble k x = k * x
+    scaleByDouble k x = k * x
 
-instance ScaleByDouble v => ScaleByDouble (WObs v) where
-  scaleByDouble k (WObs x weight) =
-      WObs
-          (scaleByDouble k x)
-          weight
+instance (ScaleByDouble v) => ScaleByDouble (WObs v) where
+    scaleByDouble k (WObs x weight) =
+        WObs
+            (scaleByDouble k x)
+            weight
 
-scaleTerryTable
-    :: ScaleByDouble v
-    => Double
-    -> TerryTable t v
-    -> TerryTable t v
+scaleTerryTable ::
+    (ScaleByDouble v) =>
+    Double ->
+    TerryTable t v ->
+    TerryTable t v
 scaleTerryTable k =
     map scaleValue
   where
@@ -164,8 +168,12 @@ scaleTerryTable k =
 
 -- | combine two MdColumns t v with a functioin
 combineMdTables ::
-    (Ord t, Show t, Eq t
-      , CombineVal v, CombineBase v ~ Double) =>
+    ( Ord t
+    , Show t
+    , Eq t
+    , CombineVal v
+    , CombineBase v ~ Double
+    ) =>
     Operation ->
     Col t v ->
     Col t v ->
@@ -176,8 +184,14 @@ combineMdTables f xs ys =
             MdCol
                 { colTitle = colTitle xmd <> colTitle ymd
                 , colDecimals = min (colDecimals xmd) (colDecimals ymd)
-                , colUnit = colUnit xmd <> s2t (operationSymbol f) <> colUnit ymd
-                , colScale = min (colScale xmd) (colScale ymd)
+                , colUnit = case f of
+                    ToPercentOf -> "%"
+                    FromPercentOf -> colUnit ymd
+                    _ -> colUnit xmd <> s2t (operationSymbol f) <> colUnit ymd
+                , colScale = case f of
+                    ToPercentOf -> Unit
+                    FromPercentOf -> colScale ymd
+                    _ -> min (colScale xmd) (colScale ymd)
                 }
         , cTerrryTable = xyt
         }
@@ -254,19 +268,29 @@ sumTerryTables [t] = t
 sumTerryTables (t : u : ts) =
     sumTerryTables (combineTerryTables (+) t u : ts)
 
-data Operation = Add | Subtract | Multiply | Divide
+data Operation
+    = Add
+    | Subtract
+    | Multiply
+    | Divide
+    | ToPercentOf
+    | FromPercentOf
 
 operationFunction :: Operation -> Double -> Double -> Double
 operationFunction Add = (+)
 operationFunction Subtract = (-)
 operationFunction Multiply = (*)
 operationFunction Divide = (/)
+operationFunction ToPercentOf = \a b -> 100 * a / b
+operationFunction FromPercentOf = \percentage base -> percentage * base / 100
 
 operationSymbol :: Operation -> String
 operationSymbol Add = "+"
 operationSymbol Subtract = "-"
 operationSymbol Multiply = "*"
 operationSymbol Divide = "/"
+operationSymbol ToPercentOf = "% of"
+operationSymbol FromPercentOf = "% of"
 
 -- toDTable :: [(RegionId, Maybe Value)] -> RegionTable
 -- toDTable = map convert

@@ -70,19 +70,19 @@ main = allTables
 -- getData11 = do
 --     conn <- open dbPath
 
---     pop3  <- lookupCountryTable3 conn (population)(Year 2024)
---     surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
---     forest3 <- lookupCountryTable3 conn forest (Year 2023)
---     urban3 <- lookupCountryTable3 conn urban (Year 2015)
---     agriPerc3 <- lookupCountryTable3 conn agriPercent (Year 2023)
---     -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
+--     pop3  <- lookupCountryPak conn (population)(Year 2024)
+--     surf3 <- lookupCountryPak conn ( surfaceArea) (Year 2023)
+--     forest3 <- lookupCountryPak conn forest (Year 2023)
+--     urban3 <- lookupCountryPak conn urban (Year 2015)
+--     agriPerc3 <- lookupCountryPak conn agriPercent (Year 2023)
+--     -- gnp3 <- lookupCountryPak conn gnp (Year 2021)
 
 --     --  let req = [population, surfaceArea, forest, urban, agriPercent]
 --     --     years = map Year [2023,  2023, 2023, 2015, 2023]
 --     --     reqYears = zip req years
 --     let c3 :: [(Dataset, [TerryValue CountryId (WObs Double)])]
 --         c3 = [pop3, surf3, forest3, urban3, agriPerc3] :: [CountryPak3]
---             -- <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+--             -- <- mapM (\(d,y) -> lookupCountryPak conn ( d) y) reqYears
 
 --     close conn
 
@@ -104,7 +104,6 @@ main = allTables
 --     -- :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
 --         reg4tot@[pop4, surf4,forest4,urban4,agriPerc4, agri4, use4]
 --                  =  regtab3_regtab1 reg4 -- :: [(Dataset, [TerryValue RegionId Double])]
---         usePerc4 = combinesCountryTable3 useableLandPerCent (toPercent)  use4 surf4
 --         usePC4 = (useableLandPC, combineTerryTables  (haPC) (snd use4) (snd pop4))
 --         mdRegion4 = map wrapMdCol1 (reg4tot ++ [usePerc4, usePC4]) :: [MdColumn RegionId Double]
 
@@ -136,7 +135,7 @@ main = allTables
 -- --         reqYears = zip req years
 
 -- --     c3@[pop3, popGrowth3, fertRate3, mignet3] :: [CountryPak3]
--- --             <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+-- --             <- mapM (\(d,y) -> lookupCountryPak conn ( d) y) reqYears
 -- --     close conn
 
 -- --     let -- women3 = second (scaleRegionTable (0.5*20)) pop3
@@ -153,7 +152,6 @@ main = allTables
 -- --     let reg4  :: [(Dataset, [(RegionId, TerryTable CountryId Double)])]
 -- --         reg4tot@[pop4, popGrowth4, fertRate4, mignet4, fertilityCount4, popGrowthCount4, netmigPM4] =  regtab3_regtab1 reg4 :: [(Dataset, [TerryValue RegionId Double])]
 
--- --         fertRate4x = combinesCountryTable3 fertilityRate (/) fertilityCount4 pop4
 -- --         mdRegion4 = map wrapMdCol1 (reg4tot ++ [fertRate4x] ) :: [MdColumn RegionId Double]
 
 -- --         mdRegion = markdownTable  regionNames2 regionOrder2 mdRegion4

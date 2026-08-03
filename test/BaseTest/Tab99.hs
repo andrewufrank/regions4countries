@@ -56,7 +56,7 @@ exp1a countries = do
         years = map Year [2024, 2021, 2023]
         reqYears = zip (req) years -- :: [(Dataset, Year)]
     countryTables :: [CountryPak3] <-
-        mapM (\(d, y) -> lookupCountryTable3 conn (d) y) reqYears
+        mapM (\(d, y) -> lookupCountryPak conn (d) y) reqYears
     close conn
 
     let mdC = map wrapMdCol1 countryTables
@@ -66,7 +66,8 @@ exp1a countries = do
     print md
     return (md)
 
-threeCountries = [CountryId "MAF", CountryId "PLW", CountryId "NRU", CountryId "TUV"]
+threeCountries =
+    [CountryId "MAF", CountryId "PLW", CountryId "NRU", CountryId "TUV"]
 less1m = map CountryId R3.less1mTax
 
 avcountries = map CountryId ["FIN", "CYP", "PRT", "AUT", "BRA", "BGD", "RUS"]
@@ -98,18 +99,18 @@ exp3a regOrder countries = do
             , (gdpPPpc, Year 2021) -- intensional, weighted by population
             ]
     [pop3, surf3, gdp3, gnp3] <-
-        mapM (uncurry $ lookupCountryTable3 conn) reqYears
-    -- pop3  <- lookupCountryTable3 conn (population)(Year 2024)
-    -- surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
-    -- gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
-    -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
+        mapM (uncurry $ lookupCountryPak conn) reqYears
+    -- pop3  <- lookupCountryPak conn (population)(Year 2024)
+    -- surf3 <- lookupCountryPak conn ( surfaceArea) (Year 2023)
+    -- gdp3 <- lookupCountryPak conn gdpPPpc (Year 2023)
+    -- gnp3 <- lookupCountryPak conn gnp (Year 2021)
     -- close conn
 
     let c3 = [pop3, surf3, gdp3, gnp3]
     let c4 = c3
     let
         reg4tot :: [RegionPak3]
-        reg4tot = country2regionPak regionMembers2 c4
+        reg4tot = countryToRegionPaks regionMembers2 c4
 
         mdRegion4 = map wrapMdCol1 reg4tot
         mdRegion = markdownTable regionNames2 avregionOrder2 mdRegion4
@@ -143,12 +144,12 @@ exp3b regOrder countries = do
             , (gdpPPpc, Year 2021)
             ]
     [pop3, surf3, gnp3, gdp3] <-
-        mapM (uncurry $ lookupCountryTable3 conn) reqYears
+        mapM (uncurry $ lookupCountryPak conn) reqYears
 
-    -- pop3  <- lookupCountryTable3 conn (population)(Year 2024)
-    -- surf3 <- lookupCountryTable3 conn ( surfaceArea) (Year 2023)
-    -- gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2023)
-    -- gnp3 <- lookupCountryTable3 conn gnp (Year 2021)
+    -- pop3  <- lookupCountryPak conn (population)(Year 2024)
+    -- surf3 <- lookupCountryPak conn ( surfaceArea) (Year 2023)
+    -- gdp3 <- lookupCountryPak conn gdpPPpc (Year 2023)
+    -- gnp3 <- lookupCountryPak conn gnp (Year 2021)
     close conn
 
     let c3 = [pop3, surf3, gdp3, gnp3]

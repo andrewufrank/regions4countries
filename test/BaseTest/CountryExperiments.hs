@@ -13,6 +13,7 @@ where
 import qualified Data.Text as T
 import Database.SQLite.Simple -- for debug
 -- import Study.Indicator
+
 import R4C.Model
 
 import Eins.Config
@@ -55,9 +56,9 @@ exp7a ::
 exp7a countries regionDef = do
     conn <- open dbPath
     -- let  reqYears =  [(population, Year 2024), (surfaceArea, Year 2023), (gdpPPpc, Year 2021)]
-    pop3 <- lookupCountryTable3 conn population (Year 2024)
-    surf3 <- lookupCountryTable3 conn surfaceArea (Year 2023)
-    gdp3 <- lookupCountryTable3 conn gdpPPpc (Year 2024) -- gdp per capita in PP
+    pop3 <- lookupCountryPak conn population (Year 2024)
+    surf3 <- lookupCountryPak conn surfaceArea (Year 2023)
+    gdp3 <- lookupCountryPak conn gdpPPpc (Year 2024) -- gdp per capita in PP
     close conn
     let c3 = [pop3, surf3, gdp3]
 
@@ -75,11 +76,12 @@ exp7a countries regionDef = do
     let md = markdownTable allCodeNames countries mc4 -- less1m mdC
     putStrLn md
 
-    let reg4tot@[pop4, surf4, gnp4] = country2regionPak regionDef c4
+    let reg4tot@[pop4, surf4, gnp4] = countryToRegionPaks regionDef c4
         -- gnpPC4 = (ds2, combineTerryTables (/) (snd gnp4) (snd pop4))
-        gnpPC4 = combinePak3 Divide gnp4 pop4
+        gnpPC4 = combinePaks Divide gnp4 pop4
         -- to test comp gdp per cap aus gpc4 and pop3
-        md4 = map wrapMdCol1 (reg4tot ++ [gnpPC4]) :: [Col RegionId (WObs Double)]
+        md4 =
+            map wrapMdCol1 (reg4tot ++ [gnpPC4]) :: [Col RegionId (WObs Double)]
     let md2 = markdownTable RBT.regionNames RBT.regionOrder md4 -- less1m mdC
     putStrLn md2
     -- print md2
@@ -180,7 +182,7 @@ exp7a countries regionDef = do
 --     conn <- open dbPath
 --     let  reqYears =  [(population, Year 2024), (gnpPP, Year 2021),  (gdpPPpc, Year 2021)]
 
---     countryTables :: [CountryPak3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+--     countryTables :: [CountryPak3] <- mapM (\(d,y) -> lookupCountryPak conn ( d) y) reqYears
 --     close conn
 --     let mdC = map wrapMdCol1 countryTables
 --     let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
@@ -238,7 +240,7 @@ exp7a countries regionDef = do
 --     conn <- open dbPath
 --     let  reqYears =  [(population, Year 2024), (gnpPP, Year 2021),  (gdpPPpc, Year 2021)]
 
---     countryTables :: [CountryPak3] <- mapM (\(d,y) -> lookupCountryTable3 conn ( d) y) reqYears
+--     countryTables :: [CountryPak3] <- mapM (\(d,y) -> lookupCountryPak conn ( d) y) reqYears
 --     close conn
 --     let mdC = map wrapMdCol1 countryTables
 --     let [pop3, g3, gpc3] = mdC :: [MdColumn CountryId Double]
@@ -334,4 +336,5 @@ exp1a_ countries = do
     -- putStrLn . show $ sortedRegions
     return (md)
 
-threeCountries = [CountryId "MAF", CountryId "PLW", CountryId "NRU", CountryId "TUV"]
+threeCountries =
+    [CountryId "MAF", CountryId "PLW", CountryId "NRU", CountryId "TUV"]
