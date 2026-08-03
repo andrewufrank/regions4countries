@@ -43,7 +43,7 @@ scale2divisor s = case s of
 
 
 markdownTable ::  (Eq id, Show id,   ShowTerryId id, ShowCell v) 
-    => [TerryName id] -> [id] -> [MdColumn id v] -> String
+    => [TerryName id] -> [id] -> [Col id v] -> String
 -- markdownTable :: [TerryName RegionId] -> [RegionId] -> [MdColumn RegionId Double] -> String
 markdownTable names regions cols =
     unlines (header : separator : map row regions)
@@ -61,7 +61,7 @@ markdownTable names regions cols =
 
     -- cell :: (Eq id, Show id, ShowCell id) => id -> MdColumn id Double -> String 
     cell r col =
-        case lookupTerry r (colValues col) of
+        case lookupTerry r (cTerrryTable col) of
             Nothing -> ""
             Just rv ->
                 case tvValue rv of
@@ -84,31 +84,33 @@ markdownTable names regions cols =
     --     T.unpack t
 
 
-title_units :: MdColumn t v -> [Char]
-title_units col = colTitle col ++ "(" ++ (show1scale  . colScale $ col) ++ (t2s . colUnit $ col) ++ ")"
+title_units :: Col t v -> [Char]
+title_units col = colTitle md ++ "(" ++ show1scale (colScale md) ++ t2s (colUnit md) ++ ")"
+  where
+    md = cMd col
 -------------
 class ShowCell a where
-    showCell :: MdColumn i a -> a -> String
+    showCell :: Col i a -> a -> String
 
 instance ShowCell Double where
-    showCell :: MdColumn i Double -> Double -> String
+    showCell :: Col i Double -> Double -> String
     showCell col x =
         showFFloat
-            (Just (colDecimals col))
-            (x / scale2divisor (colScale col))
+            (Just (colDecimals (cMd col)))
+            (x / scale2divisor (colScale (cMd col)))
             ""
 
 instance ShowCell (WObs Double) where
-    showCell :: MdColumn i (WObs Double) -> (WObs Double) -> String
+    showCell :: Col i (WObs Double) -> (WObs Double) -> String
     showCell col (WObs x _) =
         showFFloat
-            (Just (colDecimals col))
-            (x / scale2divisor (colScale col))
+            (Just (colDecimals (cMd col)))
+            (x / scale2divisor (colScale (cMd col)))
             ""
 
 
 instance ShowCell Text where
-    showCell :: MdColumn i Text -> Text -> String
+    showCell :: Col i Text -> Text -> String
     showCell _ = T.unpack
 
 

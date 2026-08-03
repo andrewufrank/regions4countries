@@ -25,7 +25,7 @@ aggregate
     -> Connection
     -> Dataset
     -> Year
-    -> IO (MdColumn RegionId Double)
+    -> IO (Col RegionId Double)
 -- | produce a table with for each region the value for the dataset 
 -- retrieves the dataset and possibly the weight 
 aggregate memberships conn dataset year = do
@@ -47,11 +47,17 @@ aggregate memberships conn dataset year = do
                     (aggregationFunction agg)
                     memberships
                     table
-    return (MdColumn {colTitle = t2s $ dsShortName dataset 
-                    , colScale = Mega 
-                    , colUnit = dsUnit dataset 
+    return
+        Col
+            { cMd =
+                MdCol
+                    { colTitle = t2s $ dsShortName dataset
+                    , colScale = Mega
+                    , colUnit = dsUnit dataset
                     , colDecimals = dsDecimals dataset
-                    , colValues = regTab})
+                    }
+            , cTerrryTable = regTab
+            }
 
 aggregationFunction
     :: Aggregation
@@ -115,7 +121,7 @@ regionCorrelation1 pairs =
     pearson $
         terryValues $ pairs
    
-regionCorrelation2 :: (Eq t, Show t) => MdColumn t Double -> MdColumn t Double -> Maybe Double
+regionCorrelation2 :: (Eq t, Show t) => Col t Double -> Col t Double -> Maybe Double
 regionCorrelation2 tab1 tab2 = regionCorrelation1 (terryTables2pairs tab1 tab2)
 
 weightedMean2

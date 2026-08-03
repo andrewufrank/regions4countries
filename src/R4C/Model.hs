@@ -198,7 +198,7 @@ type RegionPak3 = Pak RegionId (WObs Double)
         -- Retaining weights allows regions to be aggregated again.
 
 type RegionValue = TerryValue RegionId Double -- RegionValueX Double
-type RegionTable = MdColumn RegionId Double -- TerryTable RegionId ( Double) -- [RegionValue]
+type RegionTable = Col RegionId Double -- TerryTable RegionId ( Double) -- [RegionValue]
 -- depreciate
 
 type RegionTable1 = TerryTable RegionId Double
@@ -244,11 +244,16 @@ show1scale s = case s of
 
 -- _ -> ""
 
-data MdColumn t v = MdColumn
+data MdCol = MdCol
     { colTitle :: String
     , colScale :: Scale
     , colUnit :: Text
     , colDecimals :: Int
-    , colValues :: TerryTable t v
+    }
+    deriving (Eq, Ord, Show)
+
+data Col t v = Col
+    { cMd :: MdCol
+    , cTerrryTable :: TerryTable t v
     }
     deriving (Eq, Ord, Show)

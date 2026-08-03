@@ -86,7 +86,7 @@ exp7a countries regionDef = do
                 , dsDecimals = 0
                 }
         -- to test comp gdp per cap aus gpc4 and pop3
-        md4 = wrapMdCol3 (reg4tot ++ [gnpPC4]) :: [MdColumn RegionId (WObs Double)]
+        md4 = wrapMdCol3 (reg4tot ++ [gnpPC4]) :: [Col RegionId (WObs Double)]
     let md2 = markdownTable RBT.regionNames RBT.regionOrder md4 -- less1m mdC
     putStrLn md2
     -- print md2
@@ -331,7 +331,7 @@ exp1a_ countries = do
 
     let mdC =
             map (\(t, d) -> wrapMdCol d t) $ zip countryTables req ::
-                [MdColumn CountryId Double]
+                [Col CountryId Double]
     -- the operations on the tables must be with the mdcol data!
     -- let sortedRegions = sortTerryByColumn Descending  (headNote "wewer" countryTables)
     let md = markdownTable allCodeNames countries mdC -- less1m mdC

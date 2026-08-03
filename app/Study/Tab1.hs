@@ -80,18 +80,21 @@ getData11 = do
 
 
     -- from here to produce country table     
-    let mc4 = wrapMdCol3 c3 :: [MdColumn CountryId (WObs Double)]
+    let mc4 = map wrapMdCol1 c3 :: [Col CountryId (WObs Double)]
 
         [pop4, surf4, forest4, urban4, agriPerc4] = mc4
         agri4 = wrapMdCol1 agri3
         use4 = wrapMdCol1 use3
         
-        useFactor4 = combineMdTables Divide (use4 ) (surf4){colScale=Micro, colDecimals=5}
+        useFactor4 =
+            combineMdTables Divide use4
+                surf4 {cMd = (cMd surf4) {colScale = Micro, colDecimals = 5}}
 
                 -- combine the mdtables, to edit the cols, but no need for a dataset def 
     -- print all tables for testing
     let mdBase = markdownTable allCodeNames xcountries (mc4) -- less1m mdC
     let mdUse = markdownTable allCodeNames xcountries [surf4, agri4, forest4 , urban4, use4, useFactor4 ]
+    -- make selection of region or country names automatic
     putStrLn mdBase
     putStrLn mdUse 
 

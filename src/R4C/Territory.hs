@@ -61,20 +61,26 @@ aggregateTery op memberships table  = op (catMaybes values)
             valuesInTable memberships table  
 
 
-wrapMdCol3 :: [Pak t v] -> [MdColumn t v]
+wrapMdCol3 :: [Pak t v] -> [Col t v]
 wrapMdCol3 rt3s = map wrapMdCol1 rt3s
 
-wrapMdCol1 :: Pak t v -> MdColumn t v
+wrapMdCol1 :: Pak t v -> Col t v
 wrapMdCol1 (Pak ds t) = wrapMdCol ds t
     -- map (\(t,d) -> wrapMdCol d t) $ zip rct2 req
 
 
-wrapMdCol :: Dataset -> TerryTable t v -> MdColumn t v
-wrapMdCol dataset ct = MdColumn {colTitle = t2s $ dsShortName dataset 
-                    , colScale = dsScale dataset
-                    , colUnit =  dsUnit dataset 
-                    , colDecimals =  dsDecimals dataset
-                    , colValues = ct}
+wrapMdCol :: Dataset -> TerryTable t v -> Col t v
+wrapMdCol dataset ct =
+    Col
+        { cMd =
+            MdCol
+                { colTitle = t2s $ dsShortName dataset
+                , colScale = dsScale dataset
+                , colUnit = dsUnit dataset
+                , colDecimals = dsDecimals dataset
+                }
+        , cTerrryTable = ct
+        }
 
 -- convert RegionTable3 = (Dataset, [(RegionId, CountryTable)]) to (Dataset, RegionTable1)
 -- regtab3_regtab1 (ds, tab) = (ds, sumCountryTables tab)
@@ -140,7 +146,7 @@ oneRow (r, ct) = TerryValue {tvCode = r, tvValue = aggregate observations}
 
 
   
-getOneRegionMany3 ::   [RegionTable3] -> RegionId -> [MdColumn CountryId Double]
+getOneRegionMany3 ::   [RegionTable3] -> RegionId -> [Col CountryId Double]
 -- pack multiple regionTable from different datasets in MdColumn to convert to Md 
 getOneRegionMany3 rct regid  = catMaybes $ map (\tab -> getOneRegion regid (fst tab)  (snd tab))  rct
   where
@@ -148,7 +154,7 @@ getOneRegionMany3 rct regid  = catMaybes $ map (\tab -> getOneRegion regid (fst 
 type RegionTable2 = [(RegionId, CountryTable)] -- nur hier gebraucht
 
 
-getOneRegion :: RegionId -> Dataset -> RegionTable2 -> Maybe (MdColumn CountryId Double)
+getOneRegion :: RegionId -> Dataset -> RegionTable2 -> Maybe (Col CountryId Double)
 -- extract one country from a regionTable 
 getOneRegion  regid dataset regtab = 
     case mbCountries of 
@@ -185,8 +191,8 @@ terryTables2pairs -- matchTerryTables -- matchCountryTables
     , y <- [findTerry (tvCode x) ys]  -- fails if not found!
     ]
   where
-    xs = colValues xsc 
-    ys = colValues ysc 
+    xs = cTerrryTable xsc
+    ys = cTerrryTable ysc
 
 terryValues
 -- must be checked that not one or the other value only 

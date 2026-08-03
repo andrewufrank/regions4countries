@@ -136,21 +136,25 @@ combineMdTables ::
     (Ord t, Show t, Eq t
       , CombineVal v, CombineBase v ~ Double) =>
     Operation ->
-    MdColumn t v ->
-    MdColumn t v ->
-    MdColumn t v
+    Col t v ->
+    Col t v ->
+    Col t v
 combineMdTables f xs ys =
-    MdColumn
-        { colValues = xyt
-        , colTitle = colTitle xs <> colTitle ys --
-        , colDecimals = min (colDecimals xs) (colDecimals ys)
-        , -- , colUnit = colUnit xs <> show f <>  colUnit ys
-          colUnit = colUnit xs <> s2t (operationSymbol f) <> colUnit ys
-        , colScale = min (colScale xs) (colScale ys)
+    Col
+        { cMd =
+            MdCol
+                { colTitle = colTitle xmd <> colTitle ymd
+                , colDecimals = min (colDecimals xmd) (colDecimals ymd)
+                , colUnit = colUnit xmd <> s2t (operationSymbol f) <> colUnit ymd
+                , colScale = min (colScale xmd) (colScale ymd)
+                }
+        , cTerrryTable = xyt
         }
   where
-    xt = colValues xs
-    yt = colValues ys
+    xmd = cMd xs
+    ymd = cMd ys
+    xt = cTerrryTable xs
+    yt = cTerrryTable ys
     xyt = combineTerryTables (operationFunction f) xt yt
 
 -- -------------
