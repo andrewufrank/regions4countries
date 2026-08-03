@@ -13,6 +13,7 @@ module R4C.Pak where
 -- import R4C.Import.Instances
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
+import Data.List (nub)
 import Database.SQLite.Simple
 import R4C.Country
 import R4C.Import.Database
@@ -29,6 +30,37 @@ scalePak ::
     (Dataset, TerryTable t v) ->
     (Dataset, TerryTable t v)
 scalePak f (ds, tab) = (ds, scaleTerryTable f tab)
+
+sumPak3 ::
+    Ord t =>
+    [Pak t (WObs Double)] ->
+    Pak t (WObs Double)
+sumPak3 [] = error "sumPak3: cannot derive a dataset from an empty list"
+sumPak3 paks@((firstDataset, _) : _) =
+    (sumDataset, sumTerryTables (map snd paks))
+  where
+    datasets = map fst paks
+    shortNames = map dsShortName datasets
+    names = map dsName datasets
+    indicators = map (unIndicatorId . dsIndicator) datasets
+    years = [year | Just year <- map dsLastYear datasets]
+    organizations = nub (map dsSourceOrganization datasets)
+
+    sumDataset =
+        firstDataset
+            { dsIndicator = IndicatorId ("sum of " <> T.intercalate " + " indicators)
+            , dsShortName = T.intercalate " + " shortNames
+            , dsName = T.intercalate " + " names
+            , dsDefinition =
+                "Sum of " <> T.intercalate ", " shortNames
+            , dsAggregation = Sum
+            , dsDecimals = maximum (map dsDecimals datasets)
+            , dsExtensive = all dsExtensive datasets
+            , dsLastYear = case years of
+                [] -> Nothing
+                _ -> Just (maximum years)
+            , dsSourceOrganization = T.intercalate "; " organizations
+            }
 
 makePakExtensive ::
     Pak CountryId (WObs Double) ->

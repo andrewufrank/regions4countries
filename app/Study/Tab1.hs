@@ -74,7 +74,7 @@ getData11 = do
 
     let agriFactor = scalePak 0.01 agriPerc3
         agri3 = makePakExtensive agriFactor (Year 2023) -- surfarea
-        use3 = (useableLand, sumTerryTables $ map snd [forest3, urban3, agri3])
+        use3 = sumPak3 [forest3, urban3, agri3]
 
         c3' = c3 ++ [agri3, use3] :: [CountryPak3]
 
@@ -83,8 +83,8 @@ getData11 = do
     let mc4 = wrapMdCol3 c3 :: [MdColumn CountryId (WObs Double)]
 
         [pop4, surf4, forest4, urban4, agriPerc4] = mc4
-        agri4 = (wrapMdCol1 agri3){colScale = Kilo} -- should set scale when creating
-        use4 =  (wrapMdCol1 use3){colScale = Kilo}
+        agri4 = wrapMdCol1 agri3
+        use4 = wrapMdCol1 use3
         
         useFactor4 = combineMdTables Divide (use4 ) (surf4){colScale=Micro, colDecimals=5}
 
