@@ -190,11 +190,8 @@ type RegionName = TerryName RegionId
 type CountryValue = TerryValue CountryId Double
 type CountryTable = TerryTable CountryId (Double)
 type CountryPak3 = (Dataset, TerryTable CountryId (WObs Double))
-type RegionPak3 = (Dataset, TerryTable RegionId ( Double))  
-        -- change: wobs to allow weighted average
-        -- simplification: always WObs Double
-        -- but not clear how to set the weights?
-        -- but will reduce complexity, avoid polymorphism
+type RegionPak3 = (Dataset, TerryTable RegionId (WObs Double))
+        -- Retaining weights allows regions to be aggregated again.
 
 type RegionValue = TerryValue RegionId Double -- RegionValueX Double
 type RegionTable = MdColumn RegionId Double -- TerryTable RegionId ( Double) -- [RegionValue]

@@ -82,11 +82,11 @@ wrapMdCol dataset ct = MdColumn {colTitle = t2s $ dsShortName dataset
 -- sum the countrytables to produce region lines 
 -- canbe use for weighted averge
 -- regtab3_regtab1 :: [(Dataset, [(t1, [TerryValue t2 v])])] -> [(Dataset, [TerryValue t1 v])]
-regtab3_regtab1 :: [(a, [(t1, [TerryValue t2 (WObs Double)])])] -> [(a, [TerryValue t1 Double])]
+regtab3_regtab1 :: [(a, [(t1, [TerryValue t2 (WObs Double)])])] -> [(a, [TerryValue t1 (WObs Double)])]
 regtab3_regtab1 dstabs = map  oneTab3 dstabs
 
 -- oneTab3 :: (Dataset, [(t1, [TerryValue t2 Double])]) -> (Dataset, [TerryValue t1 Double])
-oneTab3 :: (a, [(t1, [TerryValue t2 (WObs Double)])]) -> (a, [TerryValue t1 Double])
+oneTab3 :: (a, [(t1, [TerryValue t2 (WObs Double)])]) -> (a, [TerryValue t1 (WObs Double)])
 oneTab3 (ds, tab) = (ds, sumCountryTables2  tab) 
 -- (\(ds,tab) -> (ds, val) dstabs
     -- where   isExtensive   = dsExtensive ds 
@@ -114,14 +114,28 @@ aggregateTerry3 op regionTab = map (aggregateTery2 op) (snd regionTab)
 -- sum the values (must be extensional) in the country table 
 -- and produce the sinle region value 
 -- sumCountryTables2 :: Bool -> [(t1, [TerryValue t2 Double])] -> [TerryValue t1 Double]
-sumCountryTables2 :: [(t1, [TerryValue t2 (WObs Double)])] -> [TerryValue t1 Double]
+sumCountryTables2 :: [(t1, [TerryValue t2 (WObs Double)])] -> [TerryValue t1 (WObs Double)]
 sumCountryTables2  rct = map (oneRow ) rct 
     where
 
 -- oneRow :: (rt, TerryTable ct v) -> TerryValue rt v
 -- oneRow :: Bool -> (t1, [TerryValue t2 Double]) -> TerryValue t1 Double
-oneRow :: (t1, [TerryValue t2 (WObs Double)]) -> TerryValue t1 Double
-oneRow (r, ct) =  TerryValue {tvCode = r, tvValue = wAverage2 . catMaybes . map tvValue $ ct }
+oneRow :: (t1, [TerryValue t2 (WObs Double)]) -> TerryValue t1 (WObs Double)
+oneRow (r, ct) = TerryValue {tvCode = r, tvValue = aggregate observations}
+  where
+    observations = catMaybes . map tvValue $ ct
+    aggregate [] = Nothing
+    aggregate xs = do
+        value <- wAverage2 xs
+        -- wAverage2 treats (wobs * ww) as the effective weight.  Retain an
+        -- equivalent ww so aggregating the resulting regions gives the same
+        -- value as aggregating their members directly.  Unit weights remain
+        -- unit weights because table arithmetic uses 1 as its neutral marker.
+        let weight
+                | all ((== 1) . ww) xs = 1
+                | value == 0 = 0
+                | otherwise = sum [wobs x * ww x | x <- xs] / value
+        pure (WObs value weight)
                 
 
 

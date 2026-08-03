@@ -88,7 +88,7 @@ getData11 = do
         
         useFactor4 = combineMdTables Divide (use4 ) (surf4){colScale=Micro, colDecimals=5}
 
-                -- combine tehe mdtables, to edit the cols, but no need for a dataset def 
+                -- combine the mdtables, to edit the cols, but no need for a dataset def 
     -- print all tables for testing
     let mdBase = markdownTable allCodeNames xcountries (mc4) -- less1m mdC
     let mdUse = markdownTable allCodeNames xcountries [surf4, agri4, forest4 , urban4, use4, useFactor4 ]
