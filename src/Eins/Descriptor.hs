@@ -11,7 +11,7 @@ dataset indicator shortName unit aggregation =
         , dsShortName = shortName
         , dsUnit = unit
         , dsAggregation = aggregation
-        , dsDecimals = 0
+        , dsDecimals = if unit == "%" then 2 else 0
         }
 
 population = dataset "SP.POP.TOTL" "Bevölkerung" "P" Sum
@@ -47,7 +47,7 @@ cerealProduction = dataset "AG.PRD.CREL.MT" "Getreideproduktion" "t" Sum
 arableLandPC =
     dataset
         "AG.LND.ARBL.HA.PC"
-        "Ackerland pro Person"
+        "Ackerland"
         "ha/P"
         populationWeighted
 ferilizerConsum = dataset "AG.CON.FERT.ZS" "Düngerverbrauch" "kg/ha" arableWeighted

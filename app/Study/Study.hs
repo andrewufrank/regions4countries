@@ -49,8 +49,6 @@ writeTab1Table filename contents = do
 allTables :: IO ()
 allTables = do
     getData11
-    getData12
-    -- MIGRATION TODO: re-enable when Tab2's missing Dataset descriptors exist.
     -- getData21
     -- getData22
 
