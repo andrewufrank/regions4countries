@@ -21,7 +21,6 @@ makeCountryTables countries (name, paks) =
         <> s2t (markdownPakTable allCodeNames countries paks)
 
 makeRegionTables :: (Text, [CountryPak3]) -> Text
-
 -- | print a number of regiion paks with each a tile
 makeRegionTables (name, paks) =
     "\n"

@@ -20,6 +20,7 @@ build-type:     Simple
 
 library
   exposed-modules:
+      Eins.BlocDefs
       Eins.Config
       Eins.Descriptor
       Eins.Region

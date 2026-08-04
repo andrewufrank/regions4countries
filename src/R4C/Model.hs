@@ -16,10 +16,10 @@ where
 import UniformBase
 
 import qualified Data.Scientific as Sc
-import Database.SQLite.Simple.FromField
-import Database.SQLite.Simple.FromRow
-import Database.SQLite.Simple.ToField
-import Database.SQLite.Simple.ToRow
+-- import Database.SQLite.Simple.FromField
+-- import Database.SQLite.Simple.FromRow
+-- import Database.SQLite.Simple.ToField
+-- import Database.SQLite.Simple.ToRow
 
 -- import Database.SQLite.Simple
 import qualified Data.Text as Text
@@ -145,6 +145,9 @@ type RegionValueX = TerryValue RegionId Double
 class ShowTerryId a where
     showTerryId :: a -> Text
 
+instance ShowTerryId BlocId where 
+    showTerryId :: BlocId -> Text
+    showTerryId (BlocId c) = c    
 instance ShowTerryId RegionId where
     showTerryId :: RegionId -> Text
     showTerryId (RegionId c) = c
@@ -203,6 +206,27 @@ countriesInRegion memberships region =
     case lookup region memberships of
         Just cs -> cs
         Nothing -> []
+
+
+newtype BlocId = BlocId Text
+    deriving (Eq, Ord, Show) 
+
+data Bloc = Bloc
+    { blocId :: BlocId
+    , blocName :: Text
+    }
+    deriving (Eq, Ord, Show)
+
+type BlocMembers = [(BlocId, [RegionId])]
+
+countriesInBloc :: BlocMembers -> BlocId -> [RegionId]
+-- get all countries in a Bloc (could be a map but list is short)
+countriesInBloc memberships bloc =
+    case lookup bloc memberships of
+        Just cs -> cs
+        Nothing -> []
+
+--------------------
 
 data Pak t v = Pak
     { pDataSet :: Dataset
