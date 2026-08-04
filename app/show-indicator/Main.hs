@@ -10,7 +10,7 @@ import Control.Exception (bracket)
 import Database.SQLite.Simple (Only(..), query)
 import R4C.Import.Database (closeDB)
 import Data.Foldable (for_)
-import Study.Config
+import Eins.Config
 import qualified Data.Text as T
 
 main :: IO ()

@@ -2,22 +2,23 @@
 --
 -- Module      :   instances for database sqlite
 
- 
 -----------------------------------------------------------------------------
 
-module R4C.Import.Instances  
-     where
-import UniformBase  
+module R4C.Import.Instances
+where
+
+import UniformBase
 
 import qualified Data.Scientific as Sc
 import Database.SQLite.Simple.FromField
-import Database.SQLite.Simple.ToField
 import Database.SQLite.Simple.FromRow
+import Database.SQLite.Simple.ToField
 import Database.SQLite.Simple.ToRow
--- import Database.SQLite.Simple 
+
+-- import Database.SQLite.Simple
 import qualified Data.Text as Text
-import Text.Read (readMaybe)
 import R4C.Model
+import Text.Read (readMaybe)
 
 ----------
 instance ToField CountryId where
@@ -37,6 +38,23 @@ instance ToField IndicatorId where
 
 instance FromField IndicatorId where
     fromField f = IndicatorId <$> fromField f
+
+instance ToField DataSource where
+    toField = toField . Text.pack . show
+
+instance FromField DataSource where
+    fromField f = do
+        txt <- fromField f
+        case readMaybe (Text.unpack txt) of
+            Just dataSource -> pure dataSource
+            Nothing ->
+                returnError
+                    ConversionFailed
+                    f
+                    ("invalid data source: " ++ Text.unpack txt)
+
+instance ToRow IndicatorRef where
+    toRow ref = [toField (refSource ref), toField (refIndicator ref)]
 
 instance ToField Year where
     toField (Year y) = toField y
@@ -64,24 +82,26 @@ instance FromField Value where
 
 --------
 instance FromRow CountryValue where
-    fromRow = TerryValue <$> field <*>  field
-    
+    fromRow = TerryValue <$> field <*> field
+
 instance FromRow Observation where
     fromRow =
-        Observation
+        ( \country source indicator -> Observation country (IndicatorRef source indicator)
+        )
             <$> field
             <*> field
             <*> field
             <*> field
-
+            <*> field
 
 instance ToRow Observation where
     toRow o =
-      [ toField (obsCountry o)
-      , toField (obsIndicator o)
-      , toField (obsYear o)
-      , toField (obsValue o)
-      ]
+        [ toField (obsCountry o)
+        , toField (refSource (obsIndicator o))
+        , toField (refIndicator (obsIndicator o))
+        , toField (obsYear o)
+        , toField (obsValue o)
+        ]
 
 instance FromRow YearValue where
     fromRow =
@@ -105,7 +125,7 @@ instance FromRow Country where
             <*> field
             <*> field
             <*> field
-            <*> field                       
+            <*> field
 
 -- instance ToField Aggregation where
 --     toField =
@@ -121,32 +141,34 @@ instance FromRow Country where
 --                     ConversionFailed
 --                     f
 --                     "invalid aggregation"
-aggregationToText
-    :: Aggregation
-    -> Text
+aggregationToText ::
+    Aggregation ->
+    Text
 aggregationToText Sum =
     "Sum"
-
 aggregationToText Mean =
     "Mean"
-
 aggregationToText (WeightedBy ind) =
-    "WeightedBy:" <> unIndicatorId ind
+    "WeightedBy:"
+        <> Text.pack (show (refSource ind))
+        <> ":"
+        <> unIndicatorId (refIndicator ind)
 
-textToAggregation
-    :: Text
-    -> Aggregation
+textToAggregation ::
+    Text ->
+    Aggregation
 textToAggregation "Sum" =
     Sum
-
 textToAggregation "Mean" =
     Mean
-
 textToAggregation txt
     | "WeightedBy:" `Text.isPrefixOf` txt =
-        WeightedBy
-            (IndicatorId (Text.drop 11 txt))
-
+        case Text.splitOn ":" (Text.drop 11 txt) of
+            [sourceText, code] ->
+                case readMaybe (Text.unpack sourceText) of
+                    Just dataSource -> WeightedBy (IndicatorRef dataSource (IndicatorId code))
+                    Nothing -> error ("Unknown data source: " ++ Text.unpack sourceText)
+            _ -> error ("Invalid weighted aggregation: " ++ Text.unpack txt)
     | otherwise =
         error ("Unknown aggregation: " ++ Text.unpack txt)
 
@@ -166,4 +188,7 @@ instance FromRow Indicator where
             <*> field
             <*> field
             <*> field
-            -- <*> (read <$> field)
+            <*> field
+            <*> field
+
+-- <*> (read <$> field)

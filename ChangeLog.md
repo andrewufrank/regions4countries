@@ -1,5 +1,10 @@
 # ChangeLog for EconomyDiffEq
-0.0.6 use app more
+
+0.0.6 moved the study to the app
+    made Tab1 and Tab2
+    use fourmolu for formatting
+    reorganized Pak and Col, made always use WObs (but still polymorphic)
+    add other sources than WorldBank (e.g. Energy Institute)
 
 0.0.5 changed the organisation of the region table to include the data and summmarize later 
     removed the automatic management of database descriptive records

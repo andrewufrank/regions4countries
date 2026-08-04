@@ -247,7 +247,7 @@ testlatest = do
         latestObservation
             conn
             (CountryId "AUT")
-            (IndicatorId "NY.GDP.PCAP.PP.CD")
+            (IndicatorRef WorldBank (IndicatorId "NY.GDP.PCAP.PP.CD"))
     case mObs of
         Nothing ->
             print "nothing found"

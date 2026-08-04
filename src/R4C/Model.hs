@@ -32,6 +32,15 @@ newtype IndicatorId
     }
     deriving (Eq, Ord, Show, Read)
 
+{- | A source-qualified indicator identifier. Indicator codes are only unique
+within their provider.
+-}
+data IndicatorRef = IndicatorRef
+    { refSource :: DataSource
+    , refIndicator :: IndicatorId
+    }
+    deriving (Eq, Ord, Show, Read)
+
 -- data Unit
 --     = Persons
 --     | Percent
@@ -43,22 +52,33 @@ newtype IndicatorId
 data Aggregation
     = Sum
     | Mean
-    | WeightedBy IndicatorId
+    | WeightedBy IndicatorRef
+    deriving (Eq, Ord, Show, Read)
+
+-- | Provider from which an indicator originates.
+data DataSource
+    = WorldBank
+    | EnergyInstitute
+    | Derived
     deriving (Eq, Ord, Show, Read)
 
 data Indicator = Indicator
     -- What is observed
-    { indicatorId :: IndicatorId
+    { source :: DataSource
+    , indicatorId :: IndicatorId
     , indicatorName :: Text
     , sourceNote :: Text
     , sourceOrganization :: Text
-    -- , aggregation   :: Aggregation  -- is not from WB and perhaps not belongs here?
+    , aggregation :: Aggregation
     }
     deriving (Eq, Ord, Show)
 
+indicatorRef :: Indicator -> IndicatorRef
+indicatorRef ind = IndicatorRef (source ind) (indicatorId ind)
+
 -- | Dataset is my description (indicaor is the WorldBank description)
 data Dataset = Dataset
-    { dsIndicator :: IndicatorId
+    { dsIndicator :: IndicatorRef
     , dsShortName :: Text
     , -- , dsName :: Text
       -- , dsDefinition :: Text
@@ -91,7 +111,7 @@ newtype Value = Value Sc.Scientific
 
 data Observation = Observation
     { obsCountry :: CountryId
-    , obsIndicator :: IndicatorId
+    , obsIndicator :: IndicatorRef
     , obsYear :: Year
     , obsValue :: Value
     }

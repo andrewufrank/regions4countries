@@ -1,10 +1,12 @@
 -----------------------------------------------------------------------------
 --
 -- Module      :   Database.hs
--- store (bulk load) the observations from the read CSV file 
+-- store (bulk load) the observations from the read CSV file
 -----------------------------------------------------------------------------
 
-module R4C.Import.Database   
+module R4C.Import.Database
+where
+
 -- ( openDB
 --   , closeDB
 --   , createSchema
@@ -17,16 +19,15 @@ module R4C.Import.Database
 --   , CountryTable
 --   , CountryValue(..)
 --   , lookupTable
---   ) 
-  where
+--   )
 
 import Database.SQLite.Simple
 
-import Database.SQLite.Simple.ToField
 import Database.SQLite.Simple.FromField
+import Database.SQLite.Simple.ToField
 
-import R4C.Model
 import R4C.Import.Instances
+import R4C.Model
 
 openDB :: FilePath -> IO Connection
 openDB = open
@@ -37,8 +38,8 @@ closeDB = close
 createSchema :: Connection -> IO ()
 createSchema conn =
     withTransaction conn $ do
-
-        execute_ conn
+        execute_
+            conn
             "CREATE TABLE IF NOT EXISTS country (\
             \ country TEXT PRIMARY KEY,\
             \ name TEXT NOT NULL,\
@@ -47,7 +48,8 @@ createSchema conn =
             \ specialNotes TEXT NOT NULL\
             \)"
 
-        execute_ conn
+        execute_
+            conn
             "CREATE TABLE IF NOT EXISTS region (\
             \ region TEXT PRIMARY KEY,\
             \ name TEXT NOT NULL\
@@ -65,35 +67,41 @@ createSchema conn =
         --     \ indicator TEXT PRIMARY KEY,\
         --     \ name TEXT NOT NULL\
         --     \)"
-        execute_ conn
+        execute_
+            conn
             "CREATE TABLE IF NOT EXISTS indicator (\
-            \ indicator TEXT PRIMARY KEY,\
+            \ source TEXT NOT NULL,\
+            \ indicator TEXT NOT NULL,\
             \ name TEXT NOT NULL,\
             \ sourceNote TEXT NOT NULL,\
-            \ sourceOrganization TEXT NOT NULL\
+            \ sourceOrganization TEXT NOT NULL,\
+            \ aggregation TEXT NOT NULL,\
+            \ PRIMARY KEY(source, indicator)\
             \)"
-            -- \ aggregation TEXT NOT NULL\
+        -- \ aggregation TEXT NOT NULL\
 
-        execute_ conn
+        execute_
+            conn
             "CREATE TABLE IF NOT EXISTS observation (\
             \ country TEXT NOT NULL,\
+            \ source TEXT NOT NULL,\
             \ indicator TEXT NOT NULL,\
             \ year INTEGER NOT NULL,\
             \ value REAL NOT NULL,\
-            \ PRIMARY KEY(country, indicator, year)\
+            \ PRIMARY KEY(source, country, indicator, year)\
             \)"
 
-        -- indexes probably not needed - later?
-        -- execute_ conn
-        --     "CREATE TABLE IF NOT EXISTS observation (...)"
+-- indexes probably not needed - later?
+-- execute_ conn
+--     "CREATE TABLE IF NOT EXISTS observation (...)"
 
-        -- execute_ conn
-        --     "CREATE INDEX IF NOT EXISTS obs_indicator \
-        --     \ON observation(indicator)"
+-- execute_ conn
+--     "CREATE INDEX IF NOT EXISTS obs_indicator \
+--     \ON observation(indicator)"
 
-        -- execute_ conn
-        --     "CREATE INDEX IF NOT EXISTS obs_year \
-        --     \ON observation(year)"
+-- execute_ conn
+--     "CREATE INDEX IF NOT EXISTS obs_year \
+--     \ON observation(year)"
 
 -- data CountryValue = CountryValue
 --     { cvCountry :: CountryId
@@ -105,31 +113,34 @@ createSchema conn =
 
 -- type CountryTable = [CountryValue]
 
-lookupTable
-    :: Connection
-    -> IndicatorId
-    -> Year
-    -> IO CountryTable
+lookupTable ::
+    Connection ->
+    IndicatorRef ->
+    Year ->
+    IO CountryTable
 -- lookupTable :: () => Connection -> IndicatorId -> Year -> IO [TerryTable CountryId v]
 -- lookupTable :: (ToField IndicatorId, ToField Year, Show a1, Show Year, Show v) => Connection -> IndicatorId -> Year -> IO [TerryTable CountryId v]
-lookupTable conn ind yr = do 
-    res <- query conn
-        "SELECT country, value \
-        \FROM observation \
-        \WHERE indicator = ? AND year = ?"
-        (ind, yr)
-    if length res == 0 
-        then putStrLn ("lookupTable empty for " ++ show ind ++ show yr)
-        else putStrLn ("lookupTable for " ++ show ind)
+lookupTable conn ref yr = do
+    res <-
+        query
+            conn
+            "SELECT country, value \
+            \FROM observation \
+            \WHERE source = ? AND indicator = ? AND year = ?"
+            (refSource ref, refIndicator ref, yr)
+    if length res == 0
+        then putStrLn ("lookupTable empty for " ++ show ref ++ show yr)
+        else putStrLn ("lookupTable for " ++ show ref)
     return res -- :: IO [TerryTable CountryId v]
-------------------------------------------------------Country record 
-insertCountry
-    :: Connection
-    -> Country
-    -> IO ()
+    ------------------------------------------------------Country record
 
+insertCountry ::
+    Connection ->
+    Country ->
+    IO ()
 insertCountry conn country =
-    execute conn
+    execute
+        conn
         "INSERT OR REPLACE INTO country \
         \VALUES (?,?,?,?,?)"
         ( countryId country
@@ -139,69 +150,73 @@ insertCountry conn country =
         , countrySpecialNotes country
         )
 
-insertCountries
-    :: Connection
-    -> [Country]
-    -> IO ()
-
+insertCountries ::
+    Connection ->
+    [Country] ->
+    IO ()
 insertCountries conn =
-    executeMany conn
+    executeMany
+        conn
         "INSERT OR REPLACE INTO country \
         \VALUES (?,?,?,?,?)"
 
-countries4db
-    :: Connection
-    -> IO [Country]
-
+countries4db ::
+    Connection ->
+    IO [Country]
 countries4db conn =
-    query_ conn
+    query_
+        conn
         "SELECT country, name, region, incomeGroup, specialNotes \
         \FROM country"
 
 ----------------------------------- indicators
 
-insertIndicator
-    :: Connection
-    -> Indicator
-    -> IO ()
+insertIndicator ::
+    Connection ->
+    Indicator ->
+    IO ()
 insertIndicator conn ind =
-    execute conn
+    execute
+        conn
         "INSERT OR REPLACE INTO indicator \
-        \VALUES (?,?,?,?)"
-        ( indicatorId ind
+        \VALUES (?,?,?,?,?,?)"
+        ( source ind
+        , indicatorId ind
         , indicatorName ind
         , sourceNote ind
         , sourceOrganization ind
-        -- , show (aggregation ind)  -- fills with sum
+        , aggregation ind
         )
 
-indicators4db
-    :: Connection
-    -> IO [Indicator]
-
+indicators4db ::
+    Connection ->
+    IO [Indicator]
 indicators4db conn =
-    query_ conn "SELECT indicator, name, sourceNote, sourceOrganization FROM indicator"
-        
-        -- \       aggregation \
------------------------------------observations
-insertObservation
-    :: Connection
-    -> Observation
-    -> IO ()
-insertObservation conn =
-    execute conn
-      "INSERT OR REPLACE INTO observation \
-      \VALUES (?,?,?,?)"
-      
+    query_
+        conn
+        "SELECT source, indicator, name, sourceNote, sourceOrganization, aggregation FROM indicator"
 
-insertObservations
-    :: Connection
-    -> [Observation]
-    -> IO ()
-insertObservations conn =
-    executeMany conn
+-- \       aggregation \
+-----------------------------------observations
+insertObservation ::
+    Connection ->
+    Observation ->
+    IO ()
+insertObservation conn =
+    execute
+        conn
         "INSERT OR REPLACE INTO observation \
-        \VALUES (?,?,?,?)"
+        \VALUES (?,?,?,?,?)"
+
+insertObservations ::
+    Connection ->
+    [Observation] ->
+    IO ()
+insertObservations conn =
+    executeMany
+        conn
+        "INSERT OR REPLACE INTO observation \
+        \VALUES (?,?,?,?,?)"
 
 -- insertIndicator
 --     :: Connection
@@ -212,43 +227,46 @@ insertObservations conn =
 --         "INSERT OR REPLACE INTO indicator VALUES (?,?)"
 --         (indicatorId ind, indicatorName ind)
 
-observations
-    :: Connection
-    -> IO [Observation]
+observations ::
+    Connection ->
+    IO [Observation]
 observations conn =
-    query_ conn
-      "SELECT country,indicator,year,value \
-      \FROM observation"
+    query_
+        conn
+        "SELECT country,source,indicator,year,value \
+        \FROM observation"
 
-observationsForCountry
-    :: Connection
-    -> CountryId
-    -> IO [Observation]
+observationsForCountry ::
+    Connection ->
+    CountryId ->
+    IO [Observation]
 observationsForCountry conn c =
-    query conn
-      "SELECT country,indicator,year,value \
-      \FROM observation \
-      \WHERE country=?"
-      (Only c)
+    query
+        conn
+        "SELECT country,source,indicator,year,value \
+        \FROM observation \
+        \WHERE country=?"
+        (Only c)
 
-observationsForIndicator
-    :: Connection
-    -> IndicatorId
-    -> IO [Observation]
-observationsForIndicator conn i =
-    query conn
-      "SELECT country,indicator,year,value \
-      \FROM observation \
-      \WHERE indicator=?"
-      (Only i)
-      
+observationsForIndicator ::
+    Connection ->
+    IndicatorRef ->
+    IO [Observation]
+observationsForIndicator conn ref =
+    query
+        conn
+        "SELECT country,source,indicator,year,value \
+        \FROM observation \
+        \WHERE source=? AND indicator=?"
+        (refSource ref, refIndicator ref)
+
 -- test examples, move to where used
 
--- x1 = do 
---     conn <- open dbPath 
+-- x1 = do
+--     conn <- open dbPath
 --     t <- lookupTable conn (IndicatorId "NY.GNP.MKTP.PP.KD") (Year 2023)
 --     putIOwords [showT t]
--- x2 = do 
---     conn <- open dbPath 
+-- x2 = do
+--     conn <- open dbPath
 --     t <- lookupTable conn (IndicatorId "NY.GDP.PCAP.PP.CD") (Year 2023)
 --     putIOwords [showT t]

@@ -100,7 +100,7 @@ makePakExtensive pak@(Pak dataset _) _year =
             makePakExtensiveWith weightIndicator pak
 
 makePakExtensiveWith ::
-    IndicatorId ->
+    IndicatorRef ->
     Pak CountryId (WObs Double) ->
     Pak CountryId (WObs Double)
 makePakExtensiveWith weightIndicator (Pak dataset table) =
@@ -109,18 +109,21 @@ makePakExtensiveWith weightIndicator (Pak dataset table) =
     extensiveDataset =
         dataset
             { dsIndicator =
-                IndicatorId
-                    ( "extensive of "
-                        <> unIndicatorId (dsIndicator dataset)
+                IndicatorRef
+                    Derived
+                    ( IndicatorId
+                        ( "extensive of "
+                            <> unIndicatorId (refIndicator (dsIndicator dataset))
+                        )
                     )
             , dsShortName = dsShortName dataset <> " extensive"
             , dsUnit = extensiveUnit weightIndicator (dsUnit dataset)
             , dsAggregation = Sum
             }
 
-    extensiveUnit (IndicatorId "SP.POP.TOTL") unit =
+    extensiveUnit (IndicatorRef WorldBank (IndicatorId "SP.POP.TOTL")) unit =
         maybe unit id (T.stripSuffix "/P" unit)
-    extensiveUnit (IndicatorId "AG.SRF.TOTL.K2") _ = "km\178"
+    extensiveUnit (IndicatorRef WorldBank (IndicatorId "AG.SRF.TOTL.K2")) _ = "km\178"
     extensiveUnit indicator unit = unit <> " * " <> showT indicator
 
 {- | Sum packages and derive a matching descriptor for the result.
@@ -139,12 +142,14 @@ sumPaks paks@(Pak firstDataset _ : _) =
     summedTable = sumTerryTables (map pTerryTable paks)
     datasets = map pDataSet paks
     shortNames = map dsShortName datasets
-    indicators = map (unIndicatorId . dsIndicator) datasets
+    indicators = map (unIndicatorId . refIndicator . dsIndicator) datasets
 
     sumDataset =
         firstDataset
             { dsIndicator =
-                IndicatorId ("sum of " <> T.intercalate " + " indicators)
+                IndicatorRef
+                    Derived
+                    (IndicatorId ("sum of " <> T.intercalate " + " indicators))
             , dsShortName = T.intercalate " + " shortNames
             , dsAggregation = Sum
             }
@@ -199,12 +204,15 @@ combinePaks operation left right =
     combinedDataset =
         leftDataset
             { dsIndicator =
-                IndicatorId
-                    ( unIndicatorId (dsIndicator leftDataset)
-                        <> " "
-                        <> symbol
-                        <> " "
-                        <> unIndicatorId (dsIndicator rightDataset)
+                IndicatorRef
+                    Derived
+                    ( IndicatorId
+                        ( unIndicatorId (refIndicator (dsIndicator leftDataset))
+                            <> " "
+                            <> symbol
+                            <> " "
+                            <> unIndicatorId (refIndicator (dsIndicator rightDataset))
+                        )
                     )
             , dsShortName = combineText dsShortName
             , dsUnit = unit

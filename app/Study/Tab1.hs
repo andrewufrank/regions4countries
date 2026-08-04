@@ -110,7 +110,8 @@ getData11 = do
 
 -- writeTab1Table "tab11" mdRegion
 makeCountryTables :: (Text ,  [CountryPak3]) -> Text
-makeCountryTables (name, regs) = "\n" <> name <> "\n" <> s2t  (markdownPakTable regionNames2 regionOrder2 regs)
+makeCountryTables (name, regs) = "\n" <> name <> "\n" 
+            <> s2t  (markdownPakTable allCodeNames xcountries regs)
 
 
 -- makeRegionTabs :: [Pak CountryId (WObs Double)] -> String

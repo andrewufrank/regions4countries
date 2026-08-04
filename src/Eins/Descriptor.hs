@@ -4,15 +4,26 @@ module Eins.Descriptor where
 import Data.Text (Text)
 import R4C.Model
 
-dataset :: Text -> Text -> Text -> Aggregation -> Dataset
-dataset indicator shortName unit aggregation =
+sourcedDataset ::
+    DataSource -> Text -> Text -> Text -> Aggregation -> Dataset
+sourcedDataset source indicator shortName unit aggregation =
     Dataset
-        { dsIndicator = IndicatorId indicator
+        { dsIndicator = IndicatorRef source (IndicatorId indicator)
         , dsShortName = shortName
         , dsUnit = unit
         , dsAggregation = aggregation
         , dsDecimals = if unit == "%" then 2 else 0
         }
+
+dataset :: Text -> Text -> Text -> Aggregation -> Dataset
+dataset = sourcedDataset WorldBank
+
+derivedDataset :: Text -> Text -> Text -> Aggregation -> Dataset
+derivedDataset = sourcedDataset Derived
+
+energyInstituteDataset ::
+    Text -> Text -> Text -> Aggregation -> Dataset
+energyInstituteDataset = sourcedDataset EnergyInstitute
 
 population = dataset "SP.POP.TOTL" "Bevölkerung" "P" Sum
 migrationNet = dataset "SM.POP.NETM" "Netto Migration" "P/y" Sum
@@ -53,67 +64,97 @@ arableLandPC =
 ferilizerConsum = dataset "AG.CON.FERT.ZS" "Düngerverbrauch" "kg/ha" arableWeighted
 
 -- Values calculated by the Tab2 study.
-cerealFood = dataset "derived.cerealFood" "Menschliche Ernährung" "t" Sum
+cerealFood = derivedDataset "cerealFood" "Menschliche Ernährung" "t" Sum
 cerealDomesticUse =
-    dataset
-        "derived.cerealDomesticUse"
+    derivedDataset
+        "cerealDomesticUse"
         "Gesamter Getreideverbrauch"
         "t"
         Sum
 potentialCerealExport =
-    dataset
-        "derived.potentialCerealExport"
+    derivedDataset
+        "potentialCerealExport"
         "Potenzieller Getreideexport"
         "t"
         Sum
-arableLandTotal = dataset "derived.arableLandTotal" "Ackerland" "ha" Sum
+arableLandTotal = derivedDataset "arableLandTotal" "Ackerland" "ha" Sum
 fertilizerConsumptionTotal =
-    dataset
-        "derived.fertilizerConsumptionTotal"
+    derivedDataset
+        "fertilizerConsumptionTotal"
         "Düngerverbrauch gesamt"
         "kg"
         Sum
 
 -- Virtual datasets. Their identifiers document that they are derived rather
 -- than loaded directly from World Bank observations.
-agriLand = dataset "derived.agriLand" "Landwirtschaft" "km\178" Sum
-useableLand = dataset "derived.useableLand" "Nutzbares Land" "km\178" Sum
+agriLand = derivedDataset "agriLand" "Landwirtschaft" "km\178" Sum
+useableLand = derivedDataset "useableLand" "Nutzbares Land" "km\178" Sum
 useableLandPerCent =
-    dataset
-        "derived.useableLandPercent"
+    derivedDataset
+        "useableLandPercent"
         "Nutzbares Land"
         "%"
         surfaceWeighted
 useableLandPC =
-    dataset
-        "derived.useableLandPerCapita"
+    derivedDataset
+        "useableLandPerCapita"
         "Nutzbare Landflaeche"
         "a/P"
         populationWeighted
-fertilityCount = dataset "derived.fertilityCount" "Kinder geboren" "P/y" Sum
+fertilityCount = derivedDataset "fertilityCount" "Kinder geboren" "P/y" Sum
 netMigrationCount =
-    dataset
-        "derived.netMigrationRate"
+    derivedDataset
+        "netMigrationRate"
         "MigrationRate netto"
         "P/Py"
         populationWeighted
 popGrowthCount =
-    dataset
-        "derived.populationGrowthCount"
+    derivedDataset
+        "populationGrowthCount"
         "Wachstum Bevoelkerung"
         "P/y"
         Sum
-gnpcc = dataset "derived.gnpPerCountry" "GNP2c" "$x" Sum
+gnpcc = derivedDataset "gnpPerCountry" "GNP2c" "$x" Sum
 
 -- Placeholder descriptors retained for older experiments.
 surfaxc1ePerCapita = cerealProduction
-usableAxreaPerCapita1 = dataset "xxx2" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxyy"))
-xxx6 = dataset "xxx3" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxyy"))
-xxx5 = dataset "xxx4" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxyy"))
-xxx4 = dataset "xxx5" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxx6"))
-xxx33 = dataset "xxx7" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxx0"))
-xxx2 = dataset "xxx8" "xxyy" "xxyy" (WeightedBy (IndicatorId "xxx9"))
+usableAxreaPerCapita1 =
+    dataset
+        "xxx2"
+        "xxyy"
+        "xxyy"
+        (WeightedBy (IndicatorRef WorldBank (IndicatorId "xxyy")))
+xxx6 =
+    dataset
+        "xxx3"
+        "xxyy"
+        "xxyy"
+        (WeightedBy (IndicatorRef WorldBank (IndicatorId "xxyy")))
+xxx5 =
+    dataset
+        "xxx4"
+        "xxyy"
+        "xxyy"
+        (WeightedBy (IndicatorRef WorldBank (IndicatorId "xxyy")))
+xxx4 =
+    dataset
+        "xxx5"
+        "xxyy"
+        "xxyy"
+        (WeightedBy (IndicatorRef WorldBank (IndicatorId "xxx6")))
+xxx33 =
+    dataset
+        "xxx7"
+        "xxyy"
+        "xxyy"
+        (WeightedBy (IndicatorRef WorldBank (IndicatorId "xxx0")))
+xxx2 =
+    dataset
+        "xxx8"
+        "xxyy"
+        "xxyy"
+        (WeightedBy (IndicatorRef WorldBank (IndicatorId "xxx9")))
 
 populationWeighted = WeightedBy (dsIndicator population)
 surfaceWeighted = WeightedBy (dsIndicator surfaceArea)
-arableWeighted = WeightedBy (IndicatorId "AG.LND.ARBL.HA")
+arableWeighted = WeightedBy (IndicatorRef WorldBank (IndicatorId "AG.LND.ARBL.HA"))

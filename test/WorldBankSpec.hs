@@ -6,27 +6,36 @@ import Database.SQLite.Simple
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import R4C.Model
-import R4C.Import.WorldBank 
 import R4C.Import.Database
+import R4C.Import.WorldBank
+import R4C.Model
+
 -- import BaseTest.Config
-import UniformBase 
+import UniformBase
 
 tests :: TestTree
 tests =
-  testGroup "WorldBankSpec"
-    [ testCase "parseWorldBank reads multi-year CSV with Series headers" testParseWorldBank
-    , testCase "import country metadata" testCountryMeta
-    ]
+    testGroup
+        "WorldBankSpec"
+        [ testCase
+            "parseWorldBank reads multi-year CSV with Series headers"
+            testParseWorldBank
+        , testCase "import country metadata" testCountryMeta
+        , testCase "import indicator metadata with source" testIndicatorMeta
+        , testCase
+            "same indicator code is isolated by source"
+            testSourceQualifiedLookup
+        ]
 
 sampleCSV :: BL.ByteString
-sampleCSV = BL.pack $
-  unlines
-    [ "Some metadata line"
-    , "Another metadata line"
-    , "Country Name,Country Code,Series Name,Series Code,2020 [YR2020],2021 [YR2021]"
-    , "Austria,AUT,\"Population, total\",SP.POP.TOTL,8916864,8955797"
-    ]
+sampleCSV =
+    BL.pack $
+        unlines
+            [ "Some metadata line"
+            , "Another metadata line"
+            , "Country Name,Country Code,Series Name,Series Code,2020 [YR2020],2021 [YR2021]"
+            , "Austria,AUT,\"Population, total\",SP.POP.TOTL,8916864,8955797"
+            ]
 
 testParseWorldBank :: Assertion
 testParseWorldBank = do
@@ -35,13 +44,20 @@ testParseWorldBank = do
     -- indicatorId indicator @?= IndicatorId "SP.POP.TOTL"
 
     observations
-        @?=
-        [ Observation (CountryId "AUT") (IndicatorId "SP.POP.TOTL") (Year 2020) (Value 8916864)
-        , Observation (CountryId "AUT") (IndicatorId "SP.POP.TOTL") (Year 2021) (Value 8955797)
-        ]
+        @?= [ Observation
+                (CountryId "AUT")
+                (IndicatorRef WorldBank (IndicatorId "SP.POP.TOTL"))
+                (Year 2020)
+                (Value 8916864)
+            , Observation
+                (CountryId "AUT")
+                (IndicatorRef WorldBank (IndicatorId "SP.POP.TOTL"))
+                (Year 2021)
+                (Value 8955797)
+            ]
 
 testCountryMeta :: Assertion
-testCountryMeta = do 
+testCountryMeta = do
     conn <- open ":memory:"
 
     createSchema conn
@@ -65,10 +81,8 @@ testCountryMeta = do
 
     closeDB conn
 
-
 testIndicatorMeta :: Assertion
 testIndicatorMeta = do
-
     conn <- open ":memory:"
 
     createSchema conn
@@ -87,32 +101,52 @@ testIndicatorMeta = do
     let actual =
             headNote "werqw221q" stored
 
+    source actual @?= WorldBank
+
     indicatorId actual @?= indicatorId indicator
 
     indicatorName actual @?= indicatorName indicator
 
     sourceOrganization actual @?= sourceOrganization indicator
 
+    aggregation actual @?= Sum
+
     assertBool
         "indicator is net migration"
         (indicatorName actual == "Net migration")
-        
+
     closeDB conn
 
+testSourceQualifiedLookup :: Assertion
+testSourceQualifiedLookup = do
+    conn <- open ":memory:"
+    createSchema conn
+    let worldBankRef = IndicatorRef WorldBank (IndicatorId "SHARED.CODE")
+        energyRef = IndicatorRef EnergyInstitute (IndicatorId "SHARED.CODE")
+    insertObservations
+        conn
+        [ Observation (CountryId "AUT") worldBankRef (Year 2024) (Value 1)
+        , Observation (CountryId "AUT") energyRef (Year 2024) (Value 2)
+        ]
+    worldBankValues <- lookupTable conn worldBankRef (Year 2024)
+    energyValues <- lookupTable conn energyRef (Year 2024)
+    worldBankValues @?= [TerryValue (CountryId "AUT") (Just 1)]
+    energyValues @?= [TerryValue (CountryId "AUT") (Just 2)]
+    closeDB conn
 
 {-
 ---  old tests
 
-test = do 
+test = do
     -- bytes <- BL.readFile  "/home/frank/Desktop/buecher/nextOrder/WorldBankData/population/f27274b4-7384-4c6e-b81d-7ddf2ac9bb9a_Data.csv"
     bytes <- BL.readFile "/home/frank/Desktop/buecher/nextOrder/WorldBankData/surfaceArea/API_AG.SRF.TOTL.K2_DS2_en_csv_v2_4649.csv"
     let rows = decodeCSV bytes
     -- print (length rows)
-    -- print (headerRow rows)   
-    let hdr = headerRow rows 
+    -- print (headerRow rows)
+    let hdr = headerRow rows
     print (V.toList hdr)
     -- mapM_ print (zip [0 :: Int ..] (V.toList hdr))
-    
+
     print (countryCodeColumn hdr)
     print (indicatorNameColumn hdr)
     print (indicatorCodeColumn hdr)

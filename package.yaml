@@ -37,22 +37,22 @@ executables:
     main: Main.hs
     source-dirs: app/makedb
     dependencies: Regions4Countries 
-  show-indicator:
-    main: Main.hs
-    source-dirs: app/show-indicator
-    dependencies:
-      - Regions4Countries
-      - sqlite-simple
-      - text
-      - uniformBase
-  exp:
-    main: AverageExp.hs
-    source-dirs: app/Exp
-    dependencies:
-      - Regions4Countries
-      - sqlite-simple
-      - text
-      - uniformBase
+  # show-indicator:
+  #   main: Main.hs
+  #   source-dirs: app/show-indicator
+  #   dependencies:
+  #     - Regions4Countries
+  #     - sqlite-simple
+  #     - text
+  #     - uniformBase
+  # exp:
+  #   main: AverageExp.hs
+  #   source-dirs: app/Exp
+  #   dependencies:
+  #     - Regions4Countries
+  #     - sqlite-simple
+  #     - text
+  #     - uniformBase
 
   study: 
     main: Study.hs

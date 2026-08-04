@@ -70,78 +70,12 @@ library
     , zip-archive
   default-language: Haskell2010
 
-executable exp
-  main-is: AverageExp.hs
-  other-modules:
-      Paths_Regions4Countries
-  hs-source-dirs:
-      app/Exp
-  default-extensions:
-      OverloadedStrings
-      MultiParamTypeClasses
-      ScopedTypeVariables
-      DeriveGeneric
-      DeriveAnyClass
-      FlexibleInstances
-      FlexibleContexts
-      InstanceSigs
-  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-missing-fields -Wno-name-shadowing -Wno-incomplete-record-updates
-  build-depends:
-      Regions4Countries
-    , base ==4.*
-    , bytestring
-    , cassava
-    , containers
-    , directory
-    , filepath
-    , scientific
-    , sqlite-simple
-    , statistics
-    , text
-    , uniformBase
-    , vector
-    , zip-archive
-  default-language: Haskell2010
-
 executable makedb
   main-is: Main.hs
   other-modules:
       Paths_Regions4Countries
   hs-source-dirs:
       app/makedb
-  default-extensions:
-      OverloadedStrings
-      MultiParamTypeClasses
-      ScopedTypeVariables
-      DeriveGeneric
-      DeriveAnyClass
-      FlexibleInstances
-      FlexibleContexts
-      InstanceSigs
-  ghc-options: -Wall -fno-warn-unused-binds -fno-warn-deprecations -fno-warn-unused-do-bind -fno-warn-unused-imports -fno-warn-missing-signatures -fno-warn-orphans -fno-warn-type-defaults -fno-warn-unused-matches -fno-warn-warnings-deprecations -fno-warn-missing-methods -fno-warn-missing-home-modules -fno-warn-duplicate-exports -fno-warn-incomplete-patterns -Wno-missing-fields -Wno-name-shadowing -Wno-incomplete-record-updates
-  build-depends:
-      Regions4Countries
-    , base ==4.*
-    , bytestring
-    , cassava
-    , containers
-    , directory
-    , filepath
-    , scientific
-    , sqlite-simple
-    , statistics
-    , text
-    , uniformBase
-    , vector
-    , zip-archive
-  default-language: Haskell2010
-
-executable show-indicator
-  main-is: Main.hs
-  other-modules:
-      Paths_Regions4Countries
-  hs-source-dirs:
-      app/show-indicator
   default-extensions:
       OverloadedStrings
       MultiParamTypeClasses

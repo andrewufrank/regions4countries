@@ -14,7 +14,7 @@ import System.FilePath
     ( takeExtension
     , (</>)
     )
-import Study.Config
+import Eins.Config
 
 import R4C.Import.Orchestrator
 

@@ -10,7 +10,7 @@ module Eins.Config  where
 
 databaseFolder = "/home/frank/afWorldDB/"
 
-databaseNmae = "r4cdb4a" 
+databaseNmae = "r4cdb6" 
 
 dbPath = databaseFolder ++ databaseNmae ++ ".sqlite"
 

@@ -1,43 +1,42 @@
 ------------------------------------------------------------------------------
 --
 -- Module      :   WorldBank.hs
--- read a csv file from the world bank and convert 
+-- read a csv file from the world bank and convert
 -----------------------------------------------------------------------------
 
-module R4C.Import.WorldBank  where 
+module R4C.Import.WorldBank where
 
-import UniformBase 
-import R4C.Model 
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as BC
 import qualified Data.Csv as Csv
-import qualified Data.Vector as V
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as TextEncoding
+import qualified Data.Vector as V
+import R4C.Model
+import UniformBase
 
-import Data.Text (Text)
-import Data.Maybe (mapMaybe)
-import Text.Read (readMaybe)
-import Data.Char (isDigit)
-import Data.Scientific (Scientific)
 import qualified Codec.Archive.Zip as Zip
 import qualified Data.ByteString.Lazy as BL
-import Data.List 
+import Data.Char (isDigit)
+import Data.List
+import Data.Maybe (mapMaybe)
+import Data.Scientific (Scientific)
+import Data.Text (Text)
+import Text.Read (readMaybe)
 
-data WorldBankArchive =
-    WorldBankArchive
-        { archiveIndicator    :: Indicator
-        , archiveCountries    :: [Country]
-        , archiveObservations :: [Observation]
-        }
+data WorldBankArchive
+    = WorldBankArchive
+    { archiveIndicator :: Indicator
+    , archiveCountries :: [Country]
+    , archiveObservations :: [Observation]
+    }
     deriving (Eq, Show)
 
-readArchive
-    :: FilePath
-    -> IO WorldBankArchive
+readArchive ::
+    FilePath ->
+    IO WorldBankArchive
 -- ^ read a zipped archive for a worldbank indicator
 readArchive file = do
-
     archive <-
         Zip.toArchive <$> BL.readFile file
 
@@ -66,16 +65,15 @@ readArchive file = do
             , archiveObservations = observations
             }
 
-findEntry
-    :: String
-    -> Zip.Archive
-    -> IO BL.ByteString
--- ^ find an archive by prefix of the file 
+findEntry ::
+    String ->
+    Zip.Archive ->
+    IO BL.ByteString
+-- ^ find an archive by prefix of the file
 findEntry prefix archive =
     case find matches (Zip.zEntries archive) of
         Nothing ->
             error ("Archive does not contain " ++ prefix)
-
         Just entry ->
             pure (Zip.fromEntry entry)
   where
@@ -83,33 +81,32 @@ findEntry prefix archive =
         prefix `isPrefixOf` Zip.eRelativePath entry
 
 -------------------------------------------------------------
-readIndicatorFile
-    :: FilePath
-    -> IO ([Observation])
-
+readIndicatorFile ::
+    FilePath ->
+    IO ([Observation])
 readIndicatorFile file = do
     bytes <- BL.readFile file
     pure (parseWBindicator bytes)
 
-readIndicatorMetadataFile
-    :: FilePath
-    -> IO Indicator
+readIndicatorMetadataFile ::
+    FilePath ->
+    IO Indicator
 readIndicatorMetadataFile file = do
     bytes <- BL.readFile file
     pure (parseWBindicatorMetadata bytes)
 
-readCountryMetadataFile
-    :: FilePath
-    -> IO [Country]
+readCountryMetadataFile ::
+    FilePath ->
+    IO [Country]
 readCountryMetadataFile file = do
     bytes <- BL.readFile file
     pure (parseWBcountries bytes)
 
+parseWBindicator ::
+    BL.ByteString ->
+    ([Observation])
 
-parseWBindicator
-    :: BL.ByteString
-    -> ([Observation])
--- | parse a WorldBank Indicator csv file 
+-- | parse a WorldBank Indicator csv file
 parseWBindicator bytes =
     case decodeCSV . dropPreamble $ bytes of
         [] ->
@@ -132,13 +129,11 @@ parseWBindicator bytes =
                             (parseCountry countryCol years indicator)
                             dataRows
 
-
 parseWBcountries :: BL.ByteString -> [Country]
 parseWBcountries bytes =
     case decodeCSV bytes of
         [] ->
             error "CSV file is empty"
-
         header : dataRows ->
             map parseCountryRow dataRows
           where
@@ -171,40 +166,34 @@ parseWBcountries bytes =
                         cell row specialNotesCol
                     }
 
-parseWBindicatorMetadata
-    :: BL.ByteString
-    -> Indicator
+parseWBindicatorMetadata ::
+    BL.ByteString ->
+    Indicator
 parseWBindicatorMetadata bytes =
     case decodeCSV (stripBom bytes) of
         [] ->
             error "Empty indicator metadata file"
-
         [_] ->
             error "Indicator metadata contains no data row"
-
         header : row : _ ->
             parseIndicatorMetadataRow header row
 
-parseIndicatorMetadataRow
-    :: Header
-    -> Row
-    -> Indicator
+parseIndicatorMetadataRow ::
+    Header ->
+    Row ->
+    Indicator
 parseIndicatorMetadataRow hdr row =
     Indicator
-        { indicatorId =
+        { source = WorldBank
+        , indicatorId =
             IndicatorId (cell row codeCol)
-
         , indicatorName =
             cell row nameCol
-
         , sourceNote =
             cell row noteCol
-
         , sourceOrganization =
             cell row orgCol
-
-        -- , aggregation =
-            -- Sum
+        , aggregation = Sum
         }
   where
     codeCol =
@@ -252,7 +241,7 @@ parseIndicatorMetadataRow hdr row =
 --                 cell row orgCol
 --             }
 
-type Row    = V.Vector Text
+type Row = V.Vector Text
 type Header = Row
 
 decodeCSV :: BL.ByteString -> [Row]
@@ -269,42 +258,47 @@ decodeCSV bytes =
 dropPreamble :: BL.ByteString -> BL.ByteString
 dropPreamble =
     BC.unlines
-    . dropWhile (not . isHeader)
-    . BC.lines
+        . dropWhile (not . isHeader)
+        . BC.lines
   where
     isHeader line =
         let txt = TextEncoding.decodeUtf8 (BL.toStrict line)
-        in  "Country Name" `Text.isInfixOf` txt
-         && "Country Code" `Text.isInfixOf` txt
+         in "Country Name" `Text.isInfixOf` txt
+                && "Country Code" `Text.isInfixOf` txt
 
 parseIndicator :: Header -> Row -> Indicator
 parseIndicator hdr row =
     Indicator
-        { indicatorId =
+        { source = WorldBank
+        , indicatorId =
             IndicatorId (cell row (indicatorCodeColumn hdr))
         , indicatorName =
             cell row (indicatorNameColumn hdr)
+        , sourceNote = ""
+        , sourceOrganization = "World Bank"
+        , aggregation = Sum
         }
 
 findColumnAny :: Header -> [Text] -> Int
 findColumnAny hdr [] =
     error "None of the column names found."
-
-findColumnAny hdr (n:ns) =
+findColumnAny hdr (n : ns) =
     case V.findIndex (== n) hdr of
-        Just i  -> i
+        Just i -> i
         Nothing -> findColumnAny hdr ns
 
 indicatorCodeColumn :: Header -> Int
 indicatorCodeColumn hdr =
-    findColumnAny hdr
+    findColumnAny
+        hdr
         [ "Series Code"
         , "Indicator Code"
         ]
 
 indicatorNameColumn :: Header -> Int
 indicatorNameColumn hdr =
-    findColumnAny hdr
+    findColumnAny
+        hdr
         [ "Series Name"
         , "Indicator Name"
         ]
@@ -332,38 +326,37 @@ specialNotesColumn hdr =
 findColumn :: Header -> Text -> Int
 findColumn hdr name =
     case V.findIndex (== name) hdr of
-        Just i  -> i
+        Just i -> i
         Nothing -> error ("Column not found: " ++ Text.unpack name)
 
 ---- end of find column header
 
-yearColumns
-    :: Header
-    -> [(Int,Year)]
+yearColumns ::
+    Header ->
+    [(Int, Year)]
 yearColumns hdr =
-    mapMaybe yearColumn (zip [0..] (V.toList hdr))
+    mapMaybe yearColumn (zip [0 ..] (V.toList hdr))
 
 yearColumn :: (Int, Text) -> Maybe (Int, Year)
 yearColumn (i, txt) =
     case parseYear txt of
-        Just y  -> Just (i,y)
+        Just y -> Just (i, y)
         Nothing -> Nothing
 
 parseYear :: Text -> Maybe Year
 parseYear txt =
     if length first4 == 4 && all isDigit first4
-    then  Year <$> readMaybe first4
-    else Nothing
+        then Year <$> readMaybe first4
+        else Nothing
   where
     first4 = take 4 (Text.unpack txt)
 
-parseCountry
-    :: Int  -- countryCol
-    -> [(Int, Year)]
-    -> Indicator
-    -> Row
-    -> [Observation]
-
+parseCountry ::
+    Int -> -- countryCol
+    [(Int, Year)] ->
+    Indicator ->
+    Row ->
+    [Observation]
 parseCountry countryCol years indicator row =
     mapMaybe observation years
   where
@@ -373,35 +366,36 @@ parseCountry countryCol years indicator row =
     observation (col, year) = do
         value <- parseValue (cell row col)
 
-        pure Observation
-            { obsCountry   = country
-            , obsIndicator = indicatorId indicator
-            , obsYear      = year
-            , obsValue     = value
-            }
+        pure
+            Observation
+                { obsCountry = country
+                , obsIndicator = indicatorRef indicator
+                , obsYear = year
+                , obsValue = value
+                }
 
-parseValue
-    :: Text
-    -> Maybe Value
-
+parseValue ::
+    Text ->
+    Maybe Value
 parseValue t
-    | Text.null t  = Nothing
+    | Text.null t = Nothing
     | otherwise = Value <$> readMaybe (Text.unpack t)
 
 -- HELPER
 
-cell :: Row
-    -> Int
-    -> Text
--- get a cell from a row 
+cell ::
+    Row ->
+    Int ->
+    Text
+-- get a cell from a row
 cell row i = row V.! i
 
 stripBom :: BL.ByteString -> BL.ByteString
 stripBom bs
     | BL.isPrefixOf bom bs = BL.drop 3 bs
-    | otherwise            = bs
+    | otherwise = bs
   where
-    bom = BL.pack [0xEF,0xBB,0xBF]
+    bom = BL.pack [0xEF, 0xBB, 0xBF]
 
 -- headerRow :: [Row] -> Header
 -- headerRow (hdr : _) = hdr
@@ -411,4 +405,3 @@ stripBom bs
 -- countryRows :: [Row] -> [Row]
 -- countryRows (_hdr : rows) = rows
 -- countryRows [] = []
-
