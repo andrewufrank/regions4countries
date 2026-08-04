@@ -107,8 +107,10 @@ executable makedb
 executable study
   main-is: Study.hs
   other-modules:
+      StudyTable
       Tab1
       Tab2
+      Tab3
       Paths_Regions4Countries
   hs-source-dirs:
       app/Study

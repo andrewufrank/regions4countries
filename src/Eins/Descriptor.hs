@@ -26,13 +26,20 @@ energyInstituteDataset ::
 energyInstituteDataset = sourcedDataset EnergyInstitute
 
 oilConsumption =
-    energyInstituteDataset "oilcons_mt" "Ölverbrauch" "Mt" Sum
+    energyInstituteDataset "oilcons_mt" "Öl Konsum" "Mt" Sum
 oilProduction =
-    energyInstituteDataset "oilprod_mt" "Ölproduktion" "Mt" Sum
+    energyInstituteDataset "oilprod_mt" "Öl Prod." "Mt" Sum
 gasConsumption =
-    energyInstituteDataset "gascons_bcm" "Gasverbrauch" "bcm" Sum
+    energyInstituteDataset "gascons_bcm" "Gas Konsum" "bcm" Sum
 gasProduction =
-    energyInstituteDataset "gasprod_bcm" "Gasproduktion" "bcm" Sum
+    energyInstituteDataset "gasprod_bcm" "Gas Prod." "bcm" Sum
+
+-- conversion factors
+
+bmt2EJ :: Double
+bmt2EJ = 41.87
+bcm2EJ :: Double
+bcm2EJ = 0.037
 
 population = dataset "SP.POP.TOTL" "Bevölkerung" "P" Sum
 migrationNet = dataset "SM.POP.NETM" "Netto Migration" "P/y" Sum

@@ -24,6 +24,7 @@ import R4C.Model
 import R4C.Pak
 import R4C.Territory
 import R4C.TerryTable
+import StudyTable
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((</>))
 import UniformBase hiding (uncurry, (</>))
@@ -32,19 +33,21 @@ xcountries = map CountryId ["FIN", "AUT", "BRA", "USA", "RUS"]
 
 getData21 :: IO ()
 -- fig21 cereal production and veg. consumption
--- fig23 
+-- fig23
 getData21 = do
     conn <- open dbPath
     pop3 <- lookupCountryPak conn (population) (Year 2024)
     cerealProd3 <- lookupCountryPak conn cerealProduction (Year 2023) -- 2024 not all values
     -- AG.PRD.CREL.MT
     -- for tab 23
-    arablePC3 <- setPakUnitScale "a/P" . scalePak 100 <$> lookupCountryPak conn arableLandPC (Year 2023)
+    arablePC3 <-
+        setPakUnitScale "a/P" . scalePak 100
+            <$> lookupCountryPak conn arableLandPC (Year 2023)
     fertConsumpha3 <- lookupCountryPak conn ferilizerConsum (Year 2023)
     close conn
 
-    let c3 = [pop3, cerealProd3, arablePC3, fertConsumpha3 ]
--- test data availability
+    let c3 = [pop3, cerealProd3, arablePC3, fertConsumpha3]
+        -- test data availability
         mdCountry = markdownPakTable allCodeNames xcountries c3 -- less1m mdC
         testdata = markdownPakTable allCodeNames xcountries c3 -- less1m mdC
     putIOwords ["test data availability\n", s2t testdata]
@@ -53,53 +56,43 @@ getData21 = do
         cerealDomUse3 = (scalePak 2.5 cerealFood3){pDataSet = cerealDomesticUse}
         potExport3 =
             (combinePaks Subtract cerealProd3 cerealDomUse3)
-                -- { pDataSet = potentialCerealExport
-                -- }
-    -- for ab 23 
-    let arableHA3 =  setPakShortName "Verbrauch gesamt" $ (combinePaks Multiply arablePC3 pop3)
-                -- {pDataSet = arableLandTotal}
-        fertilizerConsumTot3 = setPakShortName "pot. Export" $
-            (combinePaks Multiply arableHA3 fertConsumpha3)
-                -- { pDataSet = fertilizerConsumptionTotal
-                -- }
+    -- { pDataSet = potentialCerealExport
+    -- }
+    -- for ab 23
+    let arableHA3 =
+            setPakShortName "Verbrauch gesamt" $
+                (combinePaks Multiply arablePC3 pop3)
+        -- {pDataSet = arableLandTotal}
+        fertilizerConsumTot3 =
+            setPakShortName "pot. Export" $
+                (combinePaks Multiply arableHA3 fertConsumpha3)
+    -- { pDataSet = fertilizerConsumptionTotal
+    -- }
 
-    let c21 = [cerealFood3, cerealDomUse3, potExport3 ]
+    let c21 = [cerealFood3, cerealDomUse3, potExport3]
         c23 = [arableHA3, fertilizerConsumTot3]
 
-
-    -- construct tables 
+        -- construct tables
         tab21paks = [cerealProd3, cerealFood3, cerealDomUse3, potExport3]
-        tab23paks = c3 ++ c23 
-    --- test country tables 
-    let c3' =  [c3, c21, c23, tab21paks, tab23paks] :: [[CountryPak3]]
-    let tabNames = ["c3", "c21", "c23", "tab21", "tab23"]  
-        ctables = map  makeCountryTables $ zip tabNames c3'
-    putIOwords ["the country tables\n", unlines'  ctables]
+        tab23paks = c3 ++ c23
+    --- test country tables
+    let c3' = [c3, c21, c23, tab21paks, tab23paks] :: [[CountryPak3]]
+    let tabNames = ["c3", "c21", "c23", "tab21", "tab23"]
+        ctables = map (makeCountryTables xcountries) $ zip tabNames c3'
+    putIOwords ["the country tables\n", unlines' ctables]
 
-    -- the region tables 
-    let regionTables = map makeRegionTables $ zip tabNames c3' 
-    putIOwords ["the region tables\n", unlines'  regionTables]
+    -- the region tables
+    let regionTables = map makeRegionTables $ zip tabNames c3'
+    putIOwords ["the region tables\n", unlines' regionTables]
 
-    -- let regionPaks =
-    --         countryToRegionPaks regionMembers2 [cerealProd3, cerealFood3] ::
-    --             [RegionPak3]
-    --     mdCols = map wrapMdCol1 regionPaks
+-- let regionPaks =
+--         countryToRegionPaks regionMembers2 [cerealProd3, cerealFood3] ::
+--             [RegionPak3]
+--     mdCols = map wrapMdCol1 regionPaks
 
-    -- let md = markdownTable regionNames2 regionOrder mdCols
-    -- putStrLn md
-    -- writeTab2Table "tab21" md
-
--- writeTab1Table "tab11" mdRegion
-makeCountryTables :: (Text ,  [CountryPak3]) -> Text
-makeCountryTables (name, regs) = "\n" <> name <> "\n" 
-            <> s2t  (markdownPakTable allCodeNames xcountries regs)
-
-
--- makeRegionTabs :: [Pak CountryId (WObs Double)] -> String
-makeRegionTables :: (Text ,  [CountryPak3]) -> Text
-makeRegionTables (name, regs) = "\n" <> name <> "\n" <> s2t  (markdownPakTable regionNames2 regionOrder2 
-            $ countryToRegionPaks regionMembers2 regs)
-
+-- let md = markdownTable regionNames2 regionOrder mdCols
+-- putStrLn md
+-- writeTab2Table "tab21" md
 
 getData22 :: IO ()
 
@@ -175,9 +168,10 @@ getData23 = do
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames2 regionOrder mdCols
     putStrLn md
-    writeTab2Table "tab23" md
 
-writeTab2Table :: FilePath -> String -> IO ()
-writeTab2Table filename contents = do
-    createDirectoryIfMissing True tableOutputDirectory
-    writeFile (tableOutputDirectory </> filename) contents
+-- writeTab2Table "tab23" md
+
+-- writeTab2Table :: FilePath -> String -> IO ()
+-- writeTab2Table filename contents = do
+--     createDirectoryIfMissing True tableOutputDirectory
+--     writeFile (tableOutputDirectory </> filename) contents

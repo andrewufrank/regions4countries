@@ -26,6 +26,13 @@ instance FromNamedRecord EnergyRow where
             <*> row .: "Var"
             <*> row .: "Value"
 
+-- perhaps add 
+-- |tes_ej | Total energy supply | EJ |
+-- | tes_gj_pc | Total energy supply per capita | GJ/person |
+-- | oil_tes_ej | Oil | EJ |
+-- | gas_tes_ej | Natural gas | EJ |
+-- | coal_tes_ej | Coal | EJ |
+
 energyInstituteIndicators :: [Indicator]
 energyInstituteIndicators =
     [ indicator "oilcons_mt" "Oil consumption"
@@ -75,3 +82,4 @@ ordinaryCountryCode code =
     T.length code == 3
         && T.all (`elem` ['A' .. 'Z']) code
         && code `notElem` ["ROW", "WLD", "SUN"]
+        -- collect only countries with 3 char country codes
