@@ -31,6 +31,7 @@ library
       R4C.Export.Markdown
       R4C.Export.Table
       R4C.Import.Database
+      R4C.Import.EnergyInstitute
       R4C.Import.Instances
       R4C.Import.Orchestrator
       R4C.Import.Query

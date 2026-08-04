@@ -1,0 +1,146 @@
+# Energy Institute dataset codes
+
+Source: Statistical Review of World Energy, narrow-format CSV.
+
+## Total energy and fuels
+
+| Code | Description | Unit |
+|---|---|---|
+| tes_ej | Total energy supply | EJ |
+| tes_gj_pc | Total energy supply per capita | GJ/person |
+| oil_tes_ej | Oil | EJ |
+| gas_tes_ej | Natural gas | EJ |
+| coal_tes_ej | Coal | EJ |
+| nuclear_tes_ej | Nuclear energy | EJ |
+| hydro_tes_ej | Hydro energy | EJ |
+| renewables_tes_ej | Renewable energy | EJ |
+| ren_power_tes_ej | Renewable power | EJ |
+| solar_tes_ej | Solar energy | EJ |
+| wind_tes_ej | Wind energy | EJ |
+| biogeo_tes_ej | Biomass/geothermal energy | EJ |
+| biofuels_tes_ej | Biofuels | EJ |
+| biofuels_tes_pj | Biofuels | PJ |
+| biodiesel_tes_pj | Biodiesel | PJ |
+| ethanol_tes_pj | Ethanol | PJ |
+
+## Oil
+
+| Code | Description | Unit |
+|---|---|---|
+| oilcons_kbd | Oil consumption | thousand barrels/day |
+| oilcons_mt | Oil consumption | million tonnes |
+| oilprod_kbd | Oil production | thousand barrels/day |
+| oilprod_mt | Oil production | million tonnes |
+| oilprod_crudecond_kbd | Crude oil and condensate production | thousand barrels/day |
+| oilprod_ngl_kbd | Natural-gas-liquids production | thousand barrels/day |
+| liqcons_kbd | Liquid-fuel consumption | thousand barrels/day |
+| diesel_gasoil_cons_kbd | Diesel/gasoil consumption | thousand barrels/day |
+| fuel_oil_cons_kbd | Fuel-oil consumption | thousand barrels/day |
+| gasoline_cons_kbd | Gasoline consumption | thousand barrels/day |
+| kerosene_cons_kbd | Kerosene consumption | thousand barrels/day |
+| light_dist_cons_kbd | Light-distillate consumption | thousand barrels/day |
+| middle_dist_cons_kbd | Middle-distillate consumption | thousand barrels/day |
+| naphtha_cons_kbd | Naphtha consumption | thousand barrels/day |
+| lpg_cons_kbd | LPG consumption | thousand barrels/day |
+| other_oil_cons_kbd | Other oil-product consumption | thousand barrels/day |
+| refcap_kbd | Refinery capacity | thousand barrels/day |
+| refthru_kbd | Refinery throughput | thousand barrels/day |
+| refcaputil_pct | Refinery capacity utilization | % |
+
+## Natural gas
+
+| Code | Description | Unit |
+|---|---|---|
+| gascons_bcm | Gas consumption | billion cubic metres |
+| gascons_bcfd | Gas consumption | billion cubic feet/day |
+| gasprod_bcm | Gas production | billion cubic metres |
+| gasprod_bcfd | Gas production | billion cubic feet/day |
+| gasprod_ej | Gas production | EJ |
+| gasflared_bcm | Gas flared | billion cubic metres |
+| gasflared_mtco2 | Emissions from gas flaring | MtCO2 |
+
+## Coal
+
+| Code | Description | Unit |
+|---|---|---|
+| coalprod_ej | Coal production | EJ |
+| coalprod_mt | Coal production | million tonnes |
+
+## Electricity
+
+| Code | Description | Unit |
+|---|---|---|
+| elect_twh | Electricity generation | TWh |
+| electbyfuel_total | Total generation by fuel data | TWh |
+| electbyfuel_coal | Coal generation | TWh |
+| electbyfuel_gas | Gas generation | TWh |
+| electbyfuel_hydro | Hydro generation | TWh |
+| electbyfuel_nuclear | Nuclear generation | TWh |
+| electbyfuel_oil | Oil generation | TWh |
+| electbyfuel_other | Other generation | TWh |
+| electbyfuel_ren_power | Renewable generation | TWh |
+
+## Renewable electricity
+
+| Code | Description | Unit |
+|---|---|---|
+| hydro_twh | Hydro generation | TWh |
+| hydro_twh_net | Hydro net generation | TWh |
+| nuclear_twh | Nuclear generation | TWh |
+| nuclear_twh_net | Nuclear net generation | TWh |
+| ren_power_twh | Renewable generation | TWh |
+| ren_power_twh_net | Renewable net generation | TWh |
+| solar_twh | Solar generation | TWh |
+| solar_twh_net | Solar net generation | TWh |
+| wind_twh | Wind generation | TWh |
+| wind_twh_net | Wind net generation | TWh |
+| biogeo_twh | Biomass/geothermal generation | TWh |
+| biogeo_twh_net | Biomass/geothermal net generation | TWh |
+
+## Biofuels
+
+| Code | Description | Unit |
+|---|---|---|
+| biofuels_cons_kbd | Biofuel consumption | thousand barrels/day |
+| biofuels_cons_kboed | Biofuel consumption | thousand barrels oil-equivalent/day |
+| biofuels_prod_kbd | Biofuel production | thousand barrels/day |
+| biofuels_prod_kboed | Biofuel production | thousand barrels oil-equivalent/day |
+| biofuels_prod_pj | Biofuel production | PJ |
+| biodiesel_cons_kboed | Biodiesel consumption | thousand barrels oil-equivalent/day |
+| biodiesel_prod_kboed | Biodiesel production | thousand barrels oil-equivalent/day |
+| biodiesel_prod_pj | Biodiesel production | PJ |
+| ethanol_cons_kboed | Ethanol consumption | thousand barrels oil-equivalent/day |
+| ethanol_prod_kboed | Ethanol production | thousand barrels oil-equivalent/day |
+| ethanol_prod_pj | Ethanol production | PJ |
+
+## Emissions
+
+| Code | Description | Unit |
+|---|---|---|
+| co2_combust_mtco2 | Combustion emissions | MtCO2 |
+| co2_combust_pc | Combustion emissions per person | tonnes CO2/person |
+| co2_combust_per_tes_ej | Combustion emissions per energy supply | MtCO2/EJ |
+| co2_mtco2 | Total CO2 emissions | MtCO2 |
+| methane_process_mtco2 | Process methane emissions in CO2 equivalent | MtCO2e |
+
+## Minerals
+
+| Code | Description | Unit |
+|---|---|---|
+| cobalt_kt | Cobalt production | thousand tonnes |
+| cobaltres_kt | Cobalt reserves | thousand tonnes |
+| graphite_kt | Graphite production | thousand tonnes |
+| graphiteres_kt | Graphite reserves | thousand tonnes |
+| lithium_kt | Lithium production | thousand tonnes |
+| lithiumres_kt | Lithium reserves | thousand tonnes |
+| rareearths_kt | Rare-earth production | thousand tonnes |
+| rareearthsres_kt | Rare-earth reserves | thousand tonnes |
+
+## Population
+
+| Code | Description | Unit |
+|---|---|---|
+| pop | Population | persons |
+
+Most energy series cover 1965-2025. Production and mineral series may begin
+later, and the reserve datasets contain only 2025 observations.

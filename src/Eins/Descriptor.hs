@@ -25,6 +25,15 @@ energyInstituteDataset ::
     Text -> Text -> Text -> Aggregation -> Dataset
 energyInstituteDataset = sourcedDataset EnergyInstitute
 
+oilConsumption =
+    energyInstituteDataset "oilcons_mt" "Ölverbrauch" "Mt" Sum
+oilProduction =
+    energyInstituteDataset "oilprod_mt" "Ölproduktion" "Mt" Sum
+gasConsumption =
+    energyInstituteDataset "gascons_bcm" "Gasverbrauch" "bcm" Sum
+gasProduction =
+    energyInstituteDataset "gasprod_bcm" "Gasproduktion" "bcm" Sum
+
 population = dataset "SP.POP.TOTL" "Bevölkerung" "P" Sum
 migrationNet = dataset "SM.POP.NETM" "Netto Migration" "P/y" Sum
 surfaceArea = dataset "AG.SRF.TOTL.K2" "Flaeche" "km\178" Sum
