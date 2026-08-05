@@ -16,14 +16,9 @@ where
 import UniformBase
 
 import qualified Data.Scientific as Sc
--- import Database.SQLite.Simple.FromField
--- import Database.SQLite.Simple.FromRow
--- import Database.SQLite.Simple.ToField
--- import Database.SQLite.Simple.ToRow
 
--- import Database.SQLite.Simple
 import qualified Data.Text as Text
-import Text.Read (readMaybe)
+-- import Text.Read (readMaybe)
 
 -- | world bank indicator code, eg SP.POP.TOTL
 newtype IndicatorId
@@ -45,9 +40,9 @@ data IndicatorRef = IndicatorRef
 --     = Persons
 --     | Percent
 --     | USD
---     | Years
+--     | Year
 --     | SquareKm
---     | Tonnes
+--     | Ton  -- meric ton
 
 data Aggregation
     = Sum
@@ -129,10 +124,10 @@ data Observation = Observation
 --     deriving (Eq, Ord, Show)
 
 -- type RegionTableX a = [RegionValueX a]
-type RegionTableX a = [RegionValue]
+-- type RegionTableX a = [RegionValue]
 
 -- type RegionTable = RegionTableX Double
-type RegionValueX = TerryValue RegionId Double
+-- type RegionValueX = TerryValue RegionId Double
 
 -- data RegionValueX a = RegionValue
 --     { rvRegion :: RegionId
@@ -187,8 +182,6 @@ data Country = Country
     }
     deriving (Eq, Ord, Show)
 
-type CountryName = TerryName CountryId
-
 newtype RegionId = RegionId Text
     deriving (Eq, Ord, Show)
 
@@ -211,20 +204,20 @@ countriesInRegion memberships region =
 newtype BlocId = BlocId Text
     deriving (Eq, Ord, Show) 
 
-data Bloc = Bloc
-    { blocId :: BlocId
-    , blocName :: Text
-    }
-    deriving (Eq, Ord, Show)
+-- data Bloc = Bloc
+--     { blocId :: BlocId
+--     , blocName :: Text
+--     }
+--     deriving (Eq, Ord, Show)
 
 type BlocMembers = [(BlocId, [RegionId])]
 
-countriesInBloc :: BlocMembers -> BlocId -> [RegionId]
--- get all countries in a Bloc (could be a map but list is short)
-countriesInBloc memberships bloc =
-    case lookup bloc memberships of
-        Just cs -> cs
-        Nothing -> []
+-- countriesInBloc :: BlocMembers -> BlocId -> [RegionId]
+-- -- get all countries in a Bloc (could be a map but list is short)
+-- countriesInBloc memberships bloc =
+--     case lookup bloc memberships of
+--         Just cs -> cs
+--         Nothing -> []
 
 --------------------
 
@@ -234,8 +227,6 @@ data Pak t v = Pak
     }
     deriving (Eq, Ord, Show)
 
-type RegionName = TerryName RegionId
-
 type CountryValue = TerryValue CountryId Double
 type CountryTable = TerryTable CountryId (Double)
 type CountryPak3 = Pak CountryId (WObs Double)
@@ -243,19 +234,10 @@ type RegionPak3 = Pak RegionId (WObs Double)
 
 -- Retaining weights allows regions to be aggregated again.
 
-type RegionValue = TerryValue RegionId Double -- RegionValueX Double
-type RegionTable = Col RegionId Double -- TerryTable RegionId ( Double) -- [RegionValue]
--- depreciate
-
-type RegionTable1 = TerryTable RegionId Double
-
--- type RegionTable2 = [(RegionId, CountryTable)] -- not used except territry
+type RegionValue = TerryValue RegionId Double 
 type RegionTable3 = (Dataset, [(RegionId, CountryTable)]) -- new format
 
 type TerryTable t v = [TerryValue t v]
-
-type CountryPairs = [(CountryValue, CountryValue)]
-type RegionPairs = [(RegionValue, RegionValue)]
 
 type TerryPairs t v = [(TerryValue t v, TerryValue t v)]
 

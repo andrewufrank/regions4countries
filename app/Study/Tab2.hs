@@ -128,7 +128,6 @@ getData22 = do
     -- let md = markdownTable regionsList mdCols
     let md = markdownTable regionNames2 regionOrder mdCols
     putStrLn md
-    writeTab2Table "tab22" md
 
 -- duengerverbrauch und produktion
 getData23 = do
